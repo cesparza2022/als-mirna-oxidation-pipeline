@@ -28,7 +28,7 @@
               "1.1"
             ],
             "details": "Run git init, create .gitignore with entries for renv/library, .Rhistory, and other transient files. Draft README with project overview and directory descriptions.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Confirm git repository is initialized, .gitignore is present, and README is committed in the initial commit."
           },
           {
@@ -40,7 +40,7 @@
               "1.2"
             ],
             "details": "Run renv::init(), set minimum R version in renv.lock, and install required packages. Lock package versions in renv.lock for reproducibility.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Check that renv.lock is generated and the environment can be restored using renv::restore()."
           },
           {
@@ -52,7 +52,7 @@
               "1.2"
             ],
             "details": "Draft config.yaml with placeholder keys for project settings. Draft data_schema.json with example schema structure for expected data columns and types.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify both template files exist, are valid YAML/JSON, and contain placeholder content."
           },
           {
@@ -64,7 +64,7 @@
               "1.4"
             ],
             "details": "Run renv::restore() to ensure reproducibility. Check git status and log to confirm all essential files are committed.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Successfully restore the environment and confirm the initial commit includes all required files and directories."
           }
         ]
@@ -1698,7 +1698,7 @@
     ],
     "metadata": {
       "created": "2025-09-19T15:23:19.058Z",
-      "updated": "2025-09-21T22:41:07.453Z",
+      "updated": "2025-09-21T23:01:11.233Z",
       "description": "Tasks for master context"
     }
   }
