@@ -13,6 +13,7 @@
 configfile: "config/config.yaml"
 
 # Include step-specific rule files
+include: "rules/output_structure.smk"  # Auto-create output directories
 include: "rules/step1.smk"
 include: "rules/step1_5.smk"  # VAF Quality Control
 include: "rules/step2.smk"    # Statistical Comparisons (ALS vs Control)
@@ -27,6 +28,7 @@ include: "rules/validation.smk"  # Output validation and final checks
 
 rule all:
     input:
+        rules.create_output_structure.output,  # Ensure output directories exist
         rules.all_step1.output,
         rules.all_step1_5.output,  # VAF Quality Control
         rules.all_step2.output,    # Statistical Comparisons
