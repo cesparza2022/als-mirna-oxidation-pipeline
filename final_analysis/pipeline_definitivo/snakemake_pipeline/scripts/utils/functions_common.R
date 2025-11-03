@@ -66,6 +66,24 @@ COLOR_GT <- "#D62728"  # Red for G>T (oxidation)
 COLOR_CONTROL <- "grey60"
 COLOR_ALS <- "#D62728"
 
+# Load professional theme if available
+if (file.exists("scripts/utils/theme_professional.R")) {
+  source("scripts/utils/theme_professional.R", local = TRUE)
+} else if (file.exists(file.path(dirname(getwd()), "scripts/utils/theme_professional.R"))) {
+  source(file.path(dirname(getwd()), "scripts/utils/theme_professional.R"), local = TRUE)
+} else {
+  # Fallback theme
+  theme_professional <- theme_minimal(base_size = 11) +
+    theme(
+      plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(size = 10, color = "grey40", hjust = 0.5),
+      axis.title = element_text(size = 11, face = "bold"),
+      axis.text = element_text(size = 10, color = "grey30"),
+      panel.grid.major = element_line(color = "grey90", linewidth = 0.5),
+      panel.grid.minor = element_line(color = "grey95", linewidth = 0.25)
+    )
+}
+
 # ============================================================================
 # DATA LOADING FUNCTIONS
 # ============================================================================

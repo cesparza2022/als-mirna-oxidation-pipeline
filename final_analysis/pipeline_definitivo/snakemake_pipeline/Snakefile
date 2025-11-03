@@ -17,6 +17,8 @@ include: "rules/output_structure.smk"  # Auto-create output directories
 include: "rules/step1.smk"
 include: "rules/step1_5.smk"  # VAF Quality Control
 include: "rules/step2.smk"    # Statistical Comparisons (ALS vs Control)
+include: "rules/step3.smk"    # NEW: Functional Analysis (targets, pathways)
+include: "rules/step4.smk"    # NEW: Biomarker Analysis (ROC, signatures)
 include: "rules/viewers.smk"  # HTML viewers
 include: "rules/pipeline_info.smk"  # FASE 2: Pipeline metadata generation
 include: "rules/summary.smk"  # FASE 3: Consolidated summary reports
@@ -32,6 +34,8 @@ rule all:
         rules.all_step1.output,
         rules.all_step1_5.output,  # VAF Quality Control
         rules.all_step2.output,    # Statistical Comparisons
+        rules.all_step3.output,    # NEW: Functional Analysis
+        rules.all_step4.output,    # NEW: Biomarker Analysis
         rules.generate_step1_viewer.output,  # HTML viewer Step 1
         rules.generate_step1_5_viewer.output,  # HTML viewer Step 1.5
         rules.generate_step2_viewer.output,  # HTML viewer Step 2
