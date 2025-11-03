@@ -81,7 +81,10 @@ rule step3_complex_functional_viz:
         target_comparison = OUTPUT_TABLES_FUNCTIONAL + "/S3_target_comparison.csv",
         functions = FUNCTIONS_COMMON
     output:
-        figure = OUTPUT_FIGURES + "/step3_complex_functional_analysis.png"
+        figure_a = OUTPUT_FIGURES + "/step3_panelA_pathway_enrichment.png",
+        figure_b = OUTPUT_FIGURES + "/step3_panelB_als_genes_impact.png",
+        figure_c = OUTPUT_FIGURES + "/step3_panelC_target_comparison.png",
+        figure_d = OUTPUT_FIGURES + "/step3_panelD_position_impact.png"
     params:
         functions = FUNCTIONS_COMMON
     log:
@@ -104,5 +107,8 @@ rule all_step3:
         OUTPUT_TABLES_FUNCTIONAL + "/S3_als_pathways.csv",
         # Figures
         OUTPUT_FIGURES + "/step3_pathway_enrichment_heatmap.png",
-        OUTPUT_FIGURES + "/step3_complex_functional_analysis.png"
+        OUTPUT_FIGURES + "/step3_panelA_pathway_enrichment.png",
+        OUTPUT_FIGURES + "/step3_panelB_als_genes_impact.png",
+        OUTPUT_FIGURES + "/step3_panelC_target_comparison.png",
+        OUTPUT_FIGURES + "/step3_panelD_position_impact.png"
 

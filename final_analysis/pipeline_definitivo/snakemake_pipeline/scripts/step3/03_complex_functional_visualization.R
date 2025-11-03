@@ -2,17 +2,17 @@
 # ============================================================================
 # STEP 3.3: Complex Functional Visualization
 # ============================================================================
-# Purpose: Create comprehensive multi-panel figure showing functional impact
+# Purpose: Create separate comprehensive figures showing functional impact
 # 
-# This figure combines:
-# 1. Pathway enrichment barplot (top enriched pathways)
-# 2. ALS-relevant genes network-style visualization
-# 3. Target comparison (canonical vs oxidized)
-# 4. Position-specific functional impact
+# This script generates 4 separate figures:
+# 1. Panel A: Top Enriched Pathways (barplot)
+# 2. Panel B: ALS-Relevant Genes Impact (bubble plot)
+# 3. Panel C: Target Comparison (grouped barplot)
+# 4. Panel D: Position-Specific Functional Impact (barplot)
 #
 # Snakemake parameters:
 #   input: Multiple enrichment and target analysis results
-#   output: Complex multi-panel figure
+#   output: 4 separate figure files
 # ============================================================================
 
 suppressPackageStartupMessages({
@@ -45,17 +45,20 @@ input_go <- snakemake@input[["go_enrichment"]]
 input_kegg <- snakemake@input[["kegg_enrichment"]]
 input_als_genes <- snakemake@input[["als_genes"]]
 input_target_comp <- snakemake@input[["target_comparison"]]
-output_figure <- snakemake@output[["figure"]]
+output_figure_a <- snakemake@output[["figure_a"]]
+output_figure_b <- snakemake@output[["figure_b"]]
+output_figure_c <- snakemake@output[["figure_c"]]
+output_figure_d <- snakemake@output[["figure_d"]]
 
 config <- snakemake@config
 color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
 color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
-fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 14
-fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 12
+fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
 fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
 
-log_info(paste("Output figure:", output_figure))
-ensure_output_dir(dirname(output_figure))
+log_info(paste("Output figures:", output_figure_a, output_figure_b, output_figure_c, output_figure_d))
+ensure_output_dir(dirname(output_figure_a))
 
 # ============================================================================
 # LOAD DATA
@@ -69,24 +72,37 @@ kegg_data <- read_csv(input_kegg, show_col_types = FALSE)
 als_genes_data <- read_csv(input_als_genes, show_col_types = FALSE)
 target_comp <- read_csv(input_target_comp, show_col_types = FALSE)
 
+log_info(paste("Loaded target data:", nrow(target_data), "miRNA-target pairs"))
+log_info(paste("Loaded GO enrichment:", nrow(go_data), "GO terms"))
+log_info(paste("Loaded KEGG enrichment:", nrow(kegg_data), "KEGG pathways"))
+log_info(paste("Loaded ALS genes data:", nrow(als_genes_data), "miRNA-ALS gene pairs"))
+
 # ============================================================================
 # PANEL A: Top Enriched Pathways (Barplot)
 # ============================================================================
 
-log_subsection("Creating Panel A: Pathway Enrichment")
+log_subsection("Creating Panel A: Pathway Enrichment (separate figure)")
 
 top_pathways <- bind_rows(
-  go_data %>% mutate(Type = "GO Biological Process") %>% head(10),
-  kegg_data %>% mutate(Type = "KEGG Pathway") %>% head(10)
+  go_data %>% 
+    mutate(Type = "GO Biological Process", Pathway_Label = Description) %>% 
+    head(10),
+  kegg_data %>% 
+    mutate(Type = "KEGG Pathway", Pathway_Label = Pathway_Name) %>% 
+    head(10)
 ) %>%
   arrange(p.adjust) %>%
   head(15) %>%
   mutate(
-    Pathway_Label = ifelse(nchar(Description) > 40, 
-                          paste0(str_sub(Description, 1, 37), "..."),
-                          Description),
-    Pathway_Label = ifelse(is.na(Pathway_Label), Pathway_Name, Pathway_Label)
+    Pathway_Label = ifelse(nchar(Pathway_Label) > 50, 
+                          paste0(str_sub(Pathway_Label, 1, 47), "..."),
+                          Pathway_Label)
   )
+
+# Get statistics for caption
+n_significant_go <- sum(go_data$p.adjust < 0.05, na.rm = TRUE)
+n_significant_kegg <- sum(kegg_data$p.adjust < 0.05, na.rm = TRUE)
+top_richfactor <- round(max(top_pathways$RichFactor, na.rm = TRUE), 2)
 
 panel_a <- ggplot(top_pathways, aes(x = reorder(Pathway_Label, -log10(p.adjust)), 
                                      y = -log10(p.adjust), fill = RichFactor)) +
@@ -95,23 +111,30 @@ panel_a <- ggplot(top_pathways, aes(x = reorder(Pathway_Label, -log10(p.adjust))
   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   coord_flip() +
   labs(
-    title = "A. Top Enriched Pathways",
-    subtitle = "Targets of oxidized miRNAs | GO Biological Process & KEGG Pathways",
+    title = "Top Enriched Pathways: Targets of Oxidized miRNAs",
+    subtitle = paste("GO Biological Process & KEGG Pathways | Top 15 by significance |",
+                     n_significant_go, "GO terms,", n_significant_kegg, "KEGG pathways significant (p.adj < 0.05)"),
     x = "",
-    y = "-Log10 Adjusted p-value"
+    y = "-Log10 Adjusted p-value",
+    caption = paste("Max RichFactor =", top_richfactor, "| Analysis based on targets of",
+                   nrow(target_data), "oxidized miRNAs in seed region")
   ) +
   theme_professional +
   theme(
     legend.position = "right",
-    plot.title = element_text(size = 12, face = "bold", hjust = 0),
-    plot.subtitle = element_text(size = 9, color = "grey50", hjust = 0)
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11, color = "grey50")
   )
+
+ggsave(output_figure_a, panel_a, 
+       width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+log_success(paste("Panel A saved:", output_figure_a))
 
 # ============================================================================
 # PANEL B: ALS-Relevant Genes Impact
 # ============================================================================
 
-log_subsection("Creating Panel B: ALS-Relevant Genes")
+log_subsection("Creating Panel B: ALS-Relevant Genes Impact (separate figure)")
 
 als_summary <- als_genes_data %>%
   group_by(miRNA_name) %>%
@@ -119,39 +142,52 @@ als_summary <- als_genes_data %>%
     total_impact = sum(abs(functional_impact_score), na.rm = TRUE),
     n_als_genes = sum(als_genes_count, na.rm = TRUE),
     avg_position = mean(position, na.rm = TRUE),
+    n_mutations = n(),
     .groups = "drop"
   ) %>%
   arrange(desc(total_impact)) %>%
-  head(15)
+  head(20)  # Top 20 for better visibility
+
+# Get statistics
+total_als_genes_affected <- sum(als_summary$n_als_genes, na.rm = TRUE)
+top_mirna <- als_summary$miRNA_name[1]
+top_impact <- round(max(als_summary$total_impact, na.rm = TRUE), 2)
 
 panel_b <- ggplot(als_summary, aes(x = reorder(miRNA_name, total_impact), 
                                    y = total_impact, 
                                    size = n_als_genes,
                                    color = avg_position)) +
-  geom_point(alpha = 0.8) +
+  geom_point(alpha = 0.8, stroke = 1.5) +
   scale_color_gradient(low = "#2E86AB", high = color_gt, 
                       name = "Avg\nPosition", guide = "legend") +
-  scale_size_continuous(range = c(3, 10), name = "ALS\nGenes") +
+  scale_size_continuous(range = c(4, 12), name = "ALS\nGenes") +
   scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.1))) +
   coord_flip() +
   labs(
-    title = "B. Impact on ALS-Relevant Genes",
-    subtitle = "Functional impact score of oxidized miRNAs on ALS genes",
+    title = "Impact on ALS-Relevant Genes",
+    subtitle = paste("Functional impact score of oxidized miRNAs on ALS genes |",
+                     "Top 20 miRNAs | Total", total_als_genes_affected, "ALS gene interactions"),
     x = "miRNA",
-    y = "Functional Impact Score"
+    y = "Functional Impact Score",
+    caption = paste("Top miRNA:", top_mirna, "(Impact =", top_impact, ") |",
+                   "Position color: lower = more critical seed positions (2-8)")
   ) +
   theme_professional +
   theme(
     legend.position = "right",
-    plot.title = element_text(size = 12, face = "bold", hjust = 0),
-    plot.subtitle = element_text(size = 9, color = "grey50", hjust = 0)
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11, color = "grey50")
   )
+
+ggsave(output_figure_b, panel_b, 
+       width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+log_success(paste("Panel B saved:", output_figure_b))
 
 # ============================================================================
 # PANEL C: Target Comparison (Canonical vs Oxidized)
 # ============================================================================
 
-log_subsection("Creating Panel C: Target Comparison")
+log_subsection("Creating Panel C: Target Comparison (separate figure)")
 
 target_comp_long <- target_comp %>%
   select(miRNA_name, canonical_targets_estimate, oxidized_targets_estimate) %>%
@@ -163,7 +199,13 @@ target_comp_long <- target_comp %>%
       TRUE ~ "Oxidized (G>T)"
     )
   ) %>%
-  head(30)  # Top 15 miRNAs
+  arrange(desc(n_targets)) %>%
+  head(30)  # Top 15 miRNAs (2 bars each = 30 rows)
+
+# Get statistics
+avg_canonical <- round(mean(target_comp$canonical_targets_estimate, na.rm = TRUE), 1)
+avg_oxidized <- round(mean(target_comp$oxidized_targets_estimate, na.rm = TRUE), 1)
+avg_loss <- round(avg_canonical - avg_oxidized, 1)
 
 panel_c <- ggplot(target_comp_long, aes(x = reorder(miRNA_name, n_targets), 
                                         y = n_targets, fill = Target_Type)) +
@@ -174,35 +216,50 @@ panel_c <- ggplot(target_comp_long, aes(x = reorder(miRNA_name, n_targets),
   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   coord_flip() +
   labs(
-    title = "C. Target Prediction Comparison",
-    subtitle = "Estimated number of targets: Canonical vs Oxidized miRNAs",
+    title = "Target Prediction Comparison: Canonical vs Oxidized miRNAs",
+    subtitle = paste("Estimated number of targets | Top 15 miRNAs |",
+                     "Avg canonical:", avg_canonical, "| Avg oxidized:", avg_oxidized, 
+                     "| Avg loss:", avg_loss, "targets"),
     x = "miRNA",
-    y = "Number of Predicted Targets"
+    y = "Number of Predicted Targets",
+    caption = paste("Analysis based on", nrow(target_comp), 
+                   "miRNAs with G>T mutations in seed region")
   ) +
   theme_professional +
   theme(
     legend.position = "right",
-    plot.title = element_text(size = 12, face = "bold", hjust = 0),
-    plot.subtitle = element_text(size = 9, color = "grey50", hjust = 0)
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11, color = "grey50")
   )
+
+ggsave(output_figure_c, panel_c, 
+       width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+log_success(paste("Panel C saved:", output_figure_c))
 
 # ============================================================================
 # PANEL D: Position-Specific Functional Impact
 # ============================================================================
 
-log_subsection("Creating Panel D: Position-Specific Impact")
+log_subsection("Creating Panel D: Position-Specific Impact (separate figure)")
 
 position_impact <- target_data %>%
   group_by(position) %>%
   summarise(
     n_mutations = n(),
+    n_unique_mirnas = n_distinct(miRNA_name),
     avg_impact = mean(functional_impact_score, na.rm = TRUE),
     total_impact = sum(functional_impact_score, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   mutate(
     in_seed = position >= 2 & position <= 8
-  )
+  ) %>%
+  arrange(position)
+
+# Get statistics
+seed_impact <- position_impact %>% filter(in_seed) %>% summarise(total = sum(total_impact)) %>% pull(total)
+nonseed_impact <- position_impact %>% filter(!in_seed) %>% summarise(total = sum(total_impact)) %>% pull(total)
+seed_ratio <- round(seed_impact / nonseed_impact, 2) if nonseed_impact > 0 else Inf
 
 panel_d <- ggplot(position_impact, aes(x = position, y = total_impact)) +
   annotate("rect", xmin = 2 - 0.5, xmax = 8 + 0.5, 
@@ -210,50 +267,33 @@ panel_d <- ggplot(position_impact, aes(x = position, y = total_impact)) +
            fill = "#e3f2fd", alpha = 0.5) +
   annotate("text", x = 5, 
            y = max(position_impact$total_impact) * 0.95, 
-           label = "SEED REGION", color = "gray40", size = 3.5, fontface = "bold") +
+           label = "SEED REGION\n(positions 2-8)", 
+           color = "gray40", size = 4, fontface = "bold") +
   geom_bar(stat = "identity", fill = color_gt, alpha = 0.85, width = 0.7) +
   geom_point(aes(size = n_mutations), color = "white", fill = color_gt, 
             shape = 21, stroke = 1.5) +
-  scale_size_continuous(range = c(2, 8), name = "Mutations") +
+  scale_size_continuous(range = c(3, 10), name = "Mutations") +
   scale_x_continuous(breaks = seq(1, 23, by = 2)) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   labs(
-    title = "D. Position-Specific Functional Impact",
-    subtitle = "Cumulative functional impact by position in seed region",
+    title = "Position-Specific Functional Impact",
+    subtitle = paste("Cumulative functional impact by position |",
+                     "Seed region (2-8) has", seed_ratio, "x more impact than non-seed |",
+                     sum(position_impact$in_seed), "positions in seed region"),
     x = "Position in miRNA",
-    y = "Total Functional Impact Score"
+    y = "Total Functional Impact Score",
+    caption = paste("Analysis based on", nrow(target_data), 
+                   "G>T mutations | Point size = number of mutations per position")
   ) +
   theme_professional +
   theme(
     legend.position = "right",
-    plot.title = element_text(size = 12, face = "bold", hjust = 0),
-    plot.subtitle = element_text(size = 9, color = "grey50", hjust = 0)
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11, color = "grey50")
   )
 
-# ============================================================================
-# COMBINE PANELS
-# ============================================================================
+ggsave(output_figure_d, panel_d, 
+       width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+log_success(paste("Panel D saved:", output_figure_d))
 
-log_subsection("Combining panels into final figure")
-
-# Arrange panels
-combined_figure <- (panel_a | panel_b) / (panel_c | panel_d) +
-  plot_annotation(
-    title = "Functional Impact Analysis: Oxidized miRNAs in ALS",
-    subtitle = "Comprehensive analysis of targets, pathways, and ALS-relevant genes affected by G>T mutations in seed region",
-    caption = paste("Analysis based on", nrow(target_data), "significant G>T mutations in seed region (positions 2-8)"),
-    theme = theme(
-      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(size = 11, color = "grey40", hjust = 0.5, margin = margin(b = 10)),
-      plot.caption = element_text(size = 9, color = "grey60", hjust = 1)
-    )
-  )
-
-# Save figure
-ggsave(output_figure, combined_figure, 
-       width = fig_width, height = fig_height, dpi = fig_dpi, 
-       bg = "white")
-
-log_success(paste("Complex functional visualization saved:", output_figure))
-log_success("Step 3.3 completed successfully")
-
+log_success("Step 3.3 completed successfully - All 4 figures generated separately")
