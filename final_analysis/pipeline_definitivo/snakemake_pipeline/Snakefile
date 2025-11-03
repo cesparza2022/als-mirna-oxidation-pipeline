@@ -17,6 +17,8 @@ include: "rules/step1.smk"
 include: "rules/step1_5.smk"  # VAF Quality Control
 include: "rules/step2.smk"    # Statistical Comparisons (ALS vs Control)
 include: "rules/viewers.smk"  # HTML viewers
+include: "rules/pipeline_info.smk"  # FASE 2: Pipeline metadata generation
+include: "rules/summary.smk"  # FASE 3: Consolidated summary reports
 
 # ============================================================================
 # DEFAULT TARGET (when running just 'snakemake')
@@ -29,4 +31,8 @@ rule all:
         rules.all_step2.output,    # Statistical Comparisons
         rules.generate_step1_viewer.output,  # HTML viewer Step 1
         rules.generate_step1_5_viewer.output,  # HTML viewer Step 1.5
-        rules.generate_step2_viewer.output  # HTML viewer Step 2
+        rules.generate_step2_viewer.output,  # HTML viewer Step 2
+        rules.generate_pipeline_info.output,  # FASE 2: Pipeline metadata
+        rules.generate_summary_report.output  # FASE 3: Summary reports
+
+
