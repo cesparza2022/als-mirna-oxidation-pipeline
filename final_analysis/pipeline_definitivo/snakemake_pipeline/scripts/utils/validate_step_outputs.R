@@ -80,7 +80,8 @@ if (file.exists(validate_outputs_script)) {
   }
 }
 
-# Get command line arguments
+# Get command line arguments (must be after sourcing functions)
+# Note: We need to get args AFTER sourcing validate_outputs.R because it might exit
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) < 2) {
@@ -89,8 +90,16 @@ if (length(args) < 2) {
 }
 
 step_name <- args[1]
-output_dir <- args[2]
+output_dir <- normalizePath(args[2], mustWork = FALSE)
 expected_files_file <- if (length(args) > 2) args[3] else NULL
+
+# Normalize output directory path
+if (!dir.exists(output_dir)) {
+  # Try as relative path
+  if (dir.exists(file.path(getwd(), output_dir))) {
+    output_dir <- normalizePath(file.path(getwd(), output_dir))
+  }
+}
 
 cat("\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
