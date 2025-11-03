@@ -51,8 +51,13 @@ rule validate_step1_outputs:
     shell:
         """
         mkdir -p {OUTPUT_VALIDATION}
-        Rscript {params.script} {params.step_name} {params.output_dir} > {output} 2>&1
-        echo "Step 1 validation completed at $(date)" >> {output}
+        if Rscript {params.script} "{params.step_name}" "{params.output_dir}" > {output} 2>&1; then
+            echo "Step 1 validation completed at $(date)" >> {output}
+        else
+            echo "Step 1 validation FAILED at $(date)" >> {output}
+            cat {output}
+            exit 1
+        fi
         """
 
 # ============================================================================
@@ -92,8 +97,13 @@ rule validate_step1_5_outputs:
             fi
         done
         # Validate step outputs
-        Rscript {params.script} {params.step_name} {params.output_dir} > {output} 2>&1
-        echo "Step 1.5 validation completed at $(date)" >> {output}
+        if Rscript {params.script} "{params.step_name}" "{params.output_dir}" > {output} 2>&1; then
+            echo "Step 1.5 validation completed at $(date)" >> {output}
+        else
+            echo "Step 1.5 validation FAILED at $(date)" >> {output}
+            cat {output}
+            exit 1
+        fi
         """
 
 # ============================================================================
@@ -138,8 +148,13 @@ rule validate_step2_outputs:
             fi
         done
         # Validate step outputs
-        Rscript {params.script} {params.step_name} {params.output_dir} > {output} 2>&1
-        echo "Step 2 validation completed at $(date)" >> {output}
+        if Rscript {params.script} "{params.step_name}" "{params.output_dir}" > {output} 2>&1; then
+            echo "Step 2 validation completed at $(date)" >> {output}
+        else
+            echo "Step 2 validation FAILED at $(date)" >> {output}
+            cat {output}
+            exit 1
+        fi
         """
 
 # ============================================================================
