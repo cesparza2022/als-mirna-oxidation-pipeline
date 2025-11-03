@@ -1,8 +1,9 @@
 # 📦 Commits Creados para GitHub
 
 **Fecha:** 2025-11-02  
-**Repositorio:** `/Users/cesaresparza/New_Desktop/UCSD/8OG/final_analysis/pipeline_definitivo`  
-**Branch:** `main`
+**Repositorio:** `/Users/cesaresparza/New_Desktop/UCSD/8OG/final_analysis`  
+**Branch:** `main`  
+**Ubicación de cambios:** `pipeline_definitivo/snakemake_pipeline/`
 
 ---
 
