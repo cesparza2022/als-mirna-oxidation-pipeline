@@ -191,8 +191,12 @@ validate_directory <- function(path) {
 
 # Main validation - only run if called directly (not sourced)
 # Check if this script is being sourced or run directly
-is_sourced <- !identical(sys.frame(1)$ofile, NULL)
-if (!is_sourced) {
+# When sourced, sys.frame(1)$ofile will be NULL or the calling script
+# When run directly, we need to check commandArgs
+cmd_args_full <- commandArgs(trailingOnly = FALSE)
+is_direct_run <- any(grepl("^--file=", cmd_args_full)) && length(commandArgs(trailingOnly = TRUE)) >= 1
+
+if (is_direct_run) {
   # This script is being run directly, perform validation
   cat("\n")
   cat("═══════════════════════════════════════════════════════════════════\n")
