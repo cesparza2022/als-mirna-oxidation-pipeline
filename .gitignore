@@ -1,77 +1,58 @@
-# R Environment
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-renv/library/
-renv/staging/
-
-# R Package Building
-*.tar.gz
-*.Rcheck/
-
-# RStudio
-.Rproj.user/
-
-# OS specific
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Snakemake outputs
+outputs/
+.snakemake/
 
 # Logs
 *.log
 logs/
 
+# HTML viewers (generados automáticamente)
+viewers/*.html
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# R cache
+.Rhistory
+.RData
+.Rproj.user/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
 # Temporary files
 *.tmp
 *.temp
-*~
 
-# Data files (uncomment if you don't want to track large data files)
-# *.csv
-# *.xlsx
-# *.tsv
-# *.fasta
-# *.sam
-# *.pdf
-
-# Output directories (uncomment if you don't want to track outputs)
-# fig/
-# tables/
-# runs/
-
-# Environment variables
+# Conda environments (si se crean localmente)
 .env
-.env.local
-.env.*.local
+.conda/
 
-# Editor directories and files
+# Configuration with user-specific paths (use config.yaml.example instead)
+config/config.yaml
+
+# Data files (too large for git)
+*.csv
+*.txt
+!example_data/*.csv  # Keep example data small
+
+# Large output files
+*.png
+*.pdf
+*.html
+
+# IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
+*.Rproj
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Node.js (if any)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Backup files
+*.bak
+*.backup
+*_old.*

@@ -1,0 +1,31 @@
+# ============================================================================
+# SNAKEMAKE PIPELINE: ALS miRNA Oxidation Analysis
+# ============================================================================
+# Main orchestrator for the complete analysis pipeline
+#
+# Usage:
+#   snakemake -j 1              # Run all
+#   snakemake -j 1 all_step1    # Run only Step 1
+#   snakemake -n                # Dry-run (see what would run)
+# ============================================================================
+
+# Load configuration
+configfile: "config/config.yaml"
+
+# Include step-specific rule files
+include: "rules/step1.smk"
+include: "rules/step1_5.smk"  # VAF Quality Control
+include: "rules/viewers.smk"  # HTML viewers
+# include: "rules/step2.smk"    # Will be added in FASE 3
+
+# ============================================================================
+# DEFAULT TARGET (when running just 'snakemake')
+# ============================================================================
+
+rule all:
+    input:
+        rules.all_step1.output,
+        rules.all_step1_5.output,  # VAF Quality Control
+        rules.generate_step1_viewer.output,  # HTML viewer Step 1
+        rules.generate_step1_5_viewer.output  # HTML viewer Step 1.5
+        # rules.all_step2.output    # Will be added in FASE 3
