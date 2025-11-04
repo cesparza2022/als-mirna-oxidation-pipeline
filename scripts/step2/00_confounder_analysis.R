@@ -353,7 +353,8 @@ if (!is.null(group_balance$age) || !is.null(group_balance$sex)) {
 # VISUALIZATION: GROUP BALANCE
 # ============================================================================
 
-if (!is.null(output_balance_plot) && (!is.null(group_balance$age) || !is.null(group_balance$sex))) {
+# Always generate a figure, even if no confounder data
+if (!is.null(output_balance_plot)) {
   
   log_subsection("Generating group balance visualization")
   
@@ -446,6 +447,31 @@ if (!is.null(output_balance_plot) && (!is.null(group_balance$age) || !is.null(gr
     ggsave(output_balance_plot, p_combined,
            width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
     log_success(paste("Balance plot saved:", output_balance_plot))
+  } else {
+    # Create a minimal figure when no confounder data available
+    log_info("No confounder data available - creating minimal visualization")
+    
+    # Create a simple text plot indicating no data
+    p_minimal <- ggplot() +
+      annotate("text", x = 0.5, y = 0.5, 
+               label = "No confounder data available\n(age, sex metadata not provided)",
+               size = 6, hjust = 0.5) +
+      labs(title = "Group Balance Assessment",
+           subtitle = "Confounder data not available") +
+      theme_void() +
+      theme(
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(size = 12, hjust = 0.5)
+      )
+    
+    config <- snakemake@config
+    fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+    fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
+    fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
+    
+    ggsave(output_balance_plot, p_minimal,
+           width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+    log_success(paste("Balance plot saved (minimal):", output_balance_plot))
   }
 }
 

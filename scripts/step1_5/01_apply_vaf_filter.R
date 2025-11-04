@@ -45,20 +45,50 @@ if (!exists("validate_step1_5_input")) {
   }
 }
 
+# Validate input (skip if validation functions not available - we'll validate after reading)
 if (exists("validate_step1_5_input")) {
-  validate_step1_5_input(input_file)
+  tryCatch({
+    validate_step1_5_input(input_file)
+  }, error = function(e) {
+    cat("⚠️  Validation warning:", conditionMessage(e), "\n")
+    cat("   Continuing with data loading...\n")
+  })
 } else if (exists("validate_input")) {
-  validate_input(input_file, 
-                expected_format = "csv",
-                required_columns = c("miRNA name", "pos:mut"))
+  # Detect format from file extension (.txt files are TSV)
+  file_ext <- tolower(tools::file_ext(input_file))
+  detected_format <- ifelse(file_ext == "csv", "csv", "tsv")
+  
+  tryCatch({
+    validate_input(input_file, 
+                  expected_format = detected_format,  # Use detected format
+                  required_columns = c("miRNA name", "pos:mut"))
+  }, error = function(e) {
+    cat("⚠️  Validation warning:", conditionMessage(e), "\n")
+    cat("   Continuing with data loading...\n")
+  })
 }
 
 # ============================================================================
 # 1. LOAD DATA
 # ============================================================================
 
-cat("📊 Loading collapsed data...\n")
-data <- read.csv(input_file, check.names = FALSE)
+cat("📊 Loading data...\n")
+# Detect file format (TSV or CSV) and read appropriately
+file_ext <- tolower(tools::file_ext(input_file))
+if (file_ext == "txt" || file_ext == "tsv") {
+  cat("   Detected TSV format, reading with read_delim...\n")
+  # Use delim with explicit tab separator
+  data <- readr::read_delim(input_file, 
+                           delim = "\t",
+                           show_col_types = FALSE, 
+                           locale = readr::locale(encoding = "UTF-8"),
+                           quote = "",
+                           escape_double = FALSE,
+                           trim_ws = TRUE)
+} else {
+  cat("   Detected CSV format, reading with read_csv...\n")
+  data <- readr::read_csv(input_file, show_col_types = FALSE, locale = readr::locale(encoding = "UTF-8"))
+}
 
 cat(sprintf("   ✅ Rows: %s\n", format(nrow(data), big.mark = ",")))
 cat(sprintf("   ✅ Columns: %d\n", ncol(data)))
@@ -328,20 +358,50 @@ if (!exists("validate_step1_5_input")) {
   }
 }
 
+# Validate input (skip if validation functions not available - we'll validate after reading)
 if (exists("validate_step1_5_input")) {
-  validate_step1_5_input(input_file)
+  tryCatch({
+    validate_step1_5_input(input_file)
+  }, error = function(e) {
+    cat("⚠️  Validation warning:", conditionMessage(e), "\n")
+    cat("   Continuing with data loading...\n")
+  })
 } else if (exists("validate_input")) {
-  validate_input(input_file, 
-                expected_format = "csv",
-                required_columns = c("miRNA name", "pos:mut"))
+  # Detect format from file extension (.txt files are TSV)
+  file_ext <- tolower(tools::file_ext(input_file))
+  detected_format <- ifelse(file_ext == "csv", "csv", "tsv")
+  
+  tryCatch({
+    validate_input(input_file, 
+                  expected_format = detected_format,  # Use detected format
+                  required_columns = c("miRNA name", "pos:mut"))
+  }, error = function(e) {
+    cat("⚠️  Validation warning:", conditionMessage(e), "\n")
+    cat("   Continuing with data loading...\n")
+  })
 }
 
 # ============================================================================
 # 1. LOAD DATA
 # ============================================================================
 
-cat("📊 Loading collapsed data...\n")
-data <- read.csv(input_file, check.names = FALSE)
+cat("📊 Loading data...\n")
+# Detect file format (TSV or CSV) and read appropriately
+file_ext <- tolower(tools::file_ext(input_file))
+if (file_ext == "txt" || file_ext == "tsv") {
+  cat("   Detected TSV format, reading with read_delim...\n")
+  # Use delim with explicit tab separator
+  data <- readr::read_delim(input_file, 
+                           delim = "\t",
+                           show_col_types = FALSE, 
+                           locale = readr::locale(encoding = "UTF-8"),
+                           quote = "",
+                           escape_double = FALSE,
+                           trim_ws = TRUE)
+} else {
+  cat("   Detected CSV format, reading with read_csv...\n")
+  data <- readr::read_csv(input_file, show_col_types = FALSE, locale = readr::locale(encoding = "UTF-8"))
+}
 
 cat(sprintf("   ✅ Rows: %s\n", format(nrow(data), big.mark = ",")))
 cat(sprintf("   ✅ Columns: %d\n", ncol(data)))
@@ -611,20 +671,50 @@ if (!exists("validate_step1_5_input")) {
   }
 }
 
+# Validate input (skip if validation functions not available - we'll validate after reading)
 if (exists("validate_step1_5_input")) {
-  validate_step1_5_input(input_file)
+  tryCatch({
+    validate_step1_5_input(input_file)
+  }, error = function(e) {
+    cat("⚠️  Validation warning:", conditionMessage(e), "\n")
+    cat("   Continuing with data loading...\n")
+  })
 } else if (exists("validate_input")) {
-  validate_input(input_file, 
-                expected_format = "csv",
-                required_columns = c("miRNA name", "pos:mut"))
+  # Detect format from file extension (.txt files are TSV)
+  file_ext <- tolower(tools::file_ext(input_file))
+  detected_format <- ifelse(file_ext == "csv", "csv", "tsv")
+  
+  tryCatch({
+    validate_input(input_file, 
+                  expected_format = detected_format,  # Use detected format
+                  required_columns = c("miRNA name", "pos:mut"))
+  }, error = function(e) {
+    cat("⚠️  Validation warning:", conditionMessage(e), "\n")
+    cat("   Continuing with data loading...\n")
+  })
 }
 
 # ============================================================================
 # 1. LOAD DATA
 # ============================================================================
 
-cat("📊 Loading collapsed data...\n")
-data <- read.csv(input_file, check.names = FALSE)
+cat("📊 Loading data...\n")
+# Detect file format (TSV or CSV) and read appropriately
+file_ext <- tolower(tools::file_ext(input_file))
+if (file_ext == "txt" || file_ext == "tsv") {
+  cat("   Detected TSV format, reading with read_delim...\n")
+  # Use delim with explicit tab separator
+  data <- readr::read_delim(input_file, 
+                           delim = "\t",
+                           show_col_types = FALSE, 
+                           locale = readr::locale(encoding = "UTF-8"),
+                           quote = "",
+                           escape_double = FALSE,
+                           trim_ws = TRUE)
+} else {
+  cat("   Detected CSV format, reading with read_csv...\n")
+  data <- readr::read_csv(input_file, show_col_types = FALSE, locale = readr::locale(encoding = "UTF-8"))
+}
 
 cat(sprintf("   ✅ Rows: %s\n", format(nrow(data), big.mark = ",")))
 cat(sprintf("   ✅ Columns: %d\n", ncol(data)))

@@ -268,10 +268,14 @@ validate_raw_data <- function(input_file) {
 
 #' Validate original data for Step 1.5 (needs SNV + total columns)
 validate_step1_5_input <- function(input_file) {
+  # Detect format from file extension (.txt files are TSV)
+  file_ext <- tolower(tools::file_ext(input_file))
+  detected_format <- ifelse(file_ext == "csv", "csv", "tsv")
+  
   # First, basic validation
   result <- validate_input(
     input_file = input_file,
-    expected_format = "csv",
+    expected_format = detected_format,  # Use detected format
     required_columns = c("miRNA name", "pos:mut"),
     validate_data_types = FALSE
   )
@@ -281,7 +285,12 @@ validate_step1_5_input <- function(input_file) {
   # Additional validation: Check for SNV and Total columns
   cat("\n📋 Validating Step 1.5 specific requirements...\n")
   
-  data_preview <- read_csv(input_file, n_max = 5, show_col_types = FALSE)
+  # Read with appropriate format
+  if (detected_format == "csv") {
+    data_preview <- read_csv(input_file, n_max = 5, show_col_types = FALSE)
+  } else {
+    data_preview <- read_tsv(input_file, n_max = 5, show_col_types = FALSE)
+  }
   
   snv_cols <- grep("^Magen.*_SNV$|^Magen.*SNV$", names(data_preview), value = TRUE)
   total_cols <- grep("\\(PM\\+1MM\\+2MM\\)$", names(data_preview), value = TRUE)
@@ -640,10 +649,14 @@ validate_raw_data <- function(input_file) {
 
 #' Validate original data for Step 1.5 (needs SNV + total columns)
 validate_step1_5_input <- function(input_file) {
+  # Detect format from file extension (.txt files are TSV)
+  file_ext <- tolower(tools::file_ext(input_file))
+  detected_format <- ifelse(file_ext == "csv", "csv", "tsv")
+  
   # First, basic validation
   result <- validate_input(
     input_file = input_file,
-    expected_format = "csv",
+    expected_format = detected_format,  # Use detected format
     required_columns = c("miRNA name", "pos:mut"),
     validate_data_types = FALSE
   )
@@ -653,7 +666,12 @@ validate_step1_5_input <- function(input_file) {
   # Additional validation: Check for SNV and Total columns
   cat("\n📋 Validating Step 1.5 specific requirements...\n")
   
-  data_preview <- read_csv(input_file, n_max = 5, show_col_types = FALSE)
+  # Read with appropriate format
+  if (detected_format == "csv") {
+    data_preview <- read_csv(input_file, n_max = 5, show_col_types = FALSE)
+  } else {
+    data_preview <- read_tsv(input_file, n_max = 5, show_col_types = FALSE)
+  }
   
   snv_cols <- grep("^Magen.*_SNV$|^Magen.*SNV$", names(data_preview), value = TRUE)
   total_cols <- grep("\\(PM\\+1MM\\+2MM\\)$", names(data_preview), value = TRUE)
@@ -1012,10 +1030,14 @@ validate_raw_data <- function(input_file) {
 
 #' Validate original data for Step 1.5 (needs SNV + total columns)
 validate_step1_5_input <- function(input_file) {
+  # Detect format from file extension (.txt files are TSV)
+  file_ext <- tolower(tools::file_ext(input_file))
+  detected_format <- ifelse(file_ext == "csv", "csv", "tsv")
+  
   # First, basic validation
   result <- validate_input(
     input_file = input_file,
-    expected_format = "csv",
+    expected_format = detected_format,  # Use detected format
     required_columns = c("miRNA name", "pos:mut"),
     validate_data_types = FALSE
   )
@@ -1025,7 +1047,12 @@ validate_step1_5_input <- function(input_file) {
   # Additional validation: Check for SNV and Total columns
   cat("\n📋 Validating Step 1.5 specific requirements...\n")
   
-  data_preview <- read_csv(input_file, n_max = 5, show_col_types = FALSE)
+  # Read with appropriate format
+  if (detected_format == "csv") {
+    data_preview <- read_csv(input_file, n_max = 5, show_col_types = FALSE)
+  } else {
+    data_preview <- read_tsv(input_file, n_max = 5, show_col_types = FALSE)
+  }
   
   snv_cols <- grep("^Magen.*_SNV$|^Magen.*SNV$", names(data_preview), value = TRUE)
   total_cols <- grep("\\(PM\\+1MM\\+2MM\\)$", names(data_preview), value = TRUE)

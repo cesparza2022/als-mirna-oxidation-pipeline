@@ -210,6 +210,168 @@ if (n_batches < 2) {
   )
   
   writeLines(report_text, output_report)
+  
+  # Still generate PCA plot even with insufficient batches (for visualization)
+  log_info("Generating PCA plot despite insufficient batches...")
+  
+  # Prepare data for PCA (even with 1 batch, we can still visualize)
+  metadata_cols <- c("miRNA_name", "pos.mut")
+  sample_cols <- names(data)[!names(data) %in% metadata_cols]
+  
+  # Create count matrix
+  count_matrix <- data %>%
+    select(all_of(c("miRNA_name", "pos.mut", sample_cols))) %>%
+    unite("SNV_id", miRNA_name, pos.mut, sep = "|", remove = FALSE) %>%
+    select(-miRNA_name, -pos.mut) %>%
+    column_to_rownames("SNV_id") %>%
+    as.matrix()
+  
+  # Filter SNVs with low variance
+  count_matrix <- count_matrix[rowSums(count_matrix > 0, na.rm = TRUE) >= 2, ]
+  
+  # Replace infinite/NaN values with 0
+  count_matrix[!is.finite(count_matrix)] <- 0
+  count_matrix[is.na(count_matrix)] <- 0
+  
+  count_matrix_log <- log2(count_matrix + 1)
+  
+  # Replace infinite/NaN values again after log transform
+  count_matrix_log[!is.finite(count_matrix_log)] <- 0
+  count_matrix_log[is.na(count_matrix_log)] <- 0
+  
+  # Perform PCA
+  pca_input <- t(count_matrix_log)
+  valid_samples <- intersect(rownames(pca_input), groups_df$sample_id)
+  pca_input <- pca_input[valid_samples, ]
+  
+  # Final check for infinite/NaN values
+  pca_input[!is.finite(pca_input)] <- 0
+  pca_input[is.na(pca_input)] <- 0
+  
+  # Remove columns with zero variance (would cause PCA to fail)
+  col_vars <- apply(pca_input, 2, var, na.rm = TRUE)
+  valid_cols <- which(col_vars > 0 & is.finite(col_vars))
+  if (length(valid_cols) < 2) {
+    log_warning("Insufficient variance in data for PCA. Creating minimal plot.")
+    # Create a minimal plot instead
+    p_pca_before <- ggplot() +
+      annotate("text", x = 0.5, y = 0.5, 
+               label = "Insufficient variance for PCA\n(too few variable features)",
+               size = 6, hjust = 0.5) +
+      labs(title = "PCA: Batch Effects (Before Correction)",
+           subtitle = "Insufficient variance in data") +
+      theme_void() +
+      theme(
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(size = 12, hjust = 0.5)
+      )
+    
+    config <- snakemake@config
+    fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+    fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
+    fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
+    
+    ggsave(output_pca_before, p_pca_before, 
+           width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+    log_success(paste("PCA plot saved (minimal):", output_pca_before))
+    
+    # Write corrected (or original) data
+    write_csv(data, output_batch_corrected)
+    log_success(paste("Data saved:", output_batch_corrected))
+    
+    log_success("Batch effect analysis completed (no correction needed)")
+    quit(status = 0)
+  }
+  
+  pca_input <- pca_input[, valid_cols]
+  
+  pca_result <- tryCatch({
+    prcomp(pca_input, center = TRUE, scale. = TRUE)
+  }, error = function(e) {
+    log_warning(paste("PCA failed:", conditionMessage(e)))
+    log_warning("Creating minimal plot instead")
+    # Create minimal plot
+    p_pca_before <- ggplot() +
+      annotate("text", x = 0.5, y = 0.5, 
+               label = paste("PCA failed:", conditionMessage(e)),
+               size = 5, hjust = 0.5) +
+      labs(title = "PCA: Batch Effects (Before Correction)",
+           subtitle = "PCA computation failed") +
+      theme_void() +
+      theme(
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(size = 12, hjust = 0.5)
+      )
+    
+    config <- snakemake@config
+    fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+    fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
+    fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
+    
+    ggsave(output_pca_before, p_pca_before, 
+           width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+    
+    write_csv(data, output_batch_corrected)
+    log_success("Batch effect analysis completed (with PCA error)")
+    quit(status = 0)
+  })
+  
+  # Extract PC scores
+  pca_scores <- as.data.frame(pca_result$x[, 1:min(10, ncol(pca_result$x))])
+  pca_scores$sample_id <- rownames(pca_scores)
+  pca_scores <- pca_scores %>%
+    left_join(groups_df, by = "sample_id") %>%
+    mutate(
+      batch = ifelse(is.na(batch), "unknown", batch),
+      group = ifelse(is.na(group), "unknown", group)
+    )
+  
+  # Variance explained
+  variance_explained <- summary(pca_result)$importance[2, 1:min(10, ncol(pca_result$x))]
+  pc1_var <- variance_explained[1] * 100
+  pc2_var <- variance_explained[2] * 100
+  
+  # Create PCA plot
+  unique_groups_pca <- unique(pca_scores$group)
+  unique_groups_pca <- unique_groups_pca[!is.na(unique_groups_pca)]
+  
+  if (length(unique_groups_pca) <= 2) {
+    group_shapes <- setNames(c(16, 17), unique_groups_pca)
+  } else {
+    group_shapes <- setNames(rep(16, length(unique_groups_pca)), unique_groups_pca)
+  }
+  
+  p_pca_before <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = batch, shape = group)) +
+    geom_point(size = 3, alpha = 0.7) +
+    scale_color_brewer(palette = "Set2", name = "Batch") +
+    scale_shape_manual(values = group_shapes, name = "Group") +
+    labs(
+      title = "PCA: Batch Effects (Before Correction)",
+      subtitle = paste("PC1 (", round(pc1_var, 1), "%) vs PC2 (", round(pc2_var, 1), "%)"),
+      x = paste0("PC1 (", round(pc1_var, 1), "%)"),
+      y = paste0("PC2 (", round(pc2_var, 1), "%)"),
+      caption = "Note: Only 1 batch detected - batch correction not applicable"
+    ) +
+    theme_professional +
+    theme(
+      legend.position = "right",
+      plot.title = element_text(size = 14, face = "bold")
+    )
+  
+  # Save figure
+  config <- snakemake@config
+  fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+  fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
+  fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
+  
+  ggsave(output_pca_before, p_pca_before, 
+         width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
+  log_success(paste("PCA plot saved:", output_pca_before))
+  
+  # Write corrected (or original) data
+  write_csv(data, output_batch_corrected)
+  log_success(paste("Data saved:", output_batch_corrected))
+  
   log_success("Batch effect analysis completed (no correction needed)")
   quit(status = 0)
 }
