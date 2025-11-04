@@ -8,7 +8,7 @@ results/
 logs/
 **/logs/
 
-# HTML viewers (generados automáticamente)
+# HTML viewers (automatically generated)
 viewers/
 *.html
 
@@ -35,7 +35,7 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Conda environments (si se crean localmente)
+# Conda environments (if created locally)
 .env
 .conda/
 
@@ -46,10 +46,12 @@ config/config.yaml
 *.csv
 *.txt
 !example_data/*.csv  # Keep example data small
+!sample_metadata_template*.tsv  # Keep templates
 
 # Large output files
 *.png
 *.pdf
+!docs/figures/*.png  # Keep documentation figures if needed
 
 # IDE files
 .vscode/
@@ -61,8 +63,7 @@ config/config.yaml
 *.backup
 *_old.*
 
-# Documentation - Internal/Development (keep only essential)
-# These are temporary planning documents, not needed for pipeline execution
+# Remove all temporary/development documentation files
 ACTUALIZACION_*.md
 ADAPTACION_*.md
 ALS_Neuronal_miRNAs.md
@@ -79,6 +80,7 @@ GUIA_*.md
 IMPLEMENTACION_*.md
 INSTALACION_*.md
 INVENTARIO_*.md
+MISSING_ITEMS.md
 OPCIONES_*.md
 OPTIMIZACIONES_*.md
 ORGANIZACION_*.md
@@ -96,31 +98,30 @@ RESUMEN_*.md
 REVISION_*.md
 SETUP.md
 STEP*.md
+SUMMARY_QUESTIONS_STEPS_3-7.md
 TAREA_*.md
+TESTING_RESULTS.md
 VALIDACIONES_*.md
+VALIDACION_*.md
 VERIFICACION_*.md
 
 # Keep essential documentation (explicit exceptions)
 !README.md
+!COMPREHENSIVE_PIPELINE_REVIEW.md
+!CRITICAL_EXPERT_REVIEW.md
 !SOFTWARE_VERSIONS.md
-!REVIEW_STEPS_3-7.md
-!RESUMEN_PREGUNTAS_STEPS_3-7.md
+!TESTING_PLAN.md
+!docs/**/*.md
 
-# Keep docs/ subdirectory (if it has essential content)
-!docs/STEP3_*.md
-!docs/UMBRALES_*.md
-
-# Duplicate directories
+# Remove duplicate/old directories
 final_analysis/
+first_step/
+fastqc_reports/
+Mapping_miRNA/
+R/
+renv/
 
-# Scripts and other non-essential files
-*.sh
-!setup.sh
-!run.sh
-push_to_github.sh
-setup_github.sh
-
-# Other temporary files
+# Remove data files
 *.fasta
 *.sam
 *.xlsx
@@ -133,3 +134,20 @@ setup_github.sh
 *.json
 !data_schema.json
 !package.json
+!nx.json
+!tsconfig*.json
+
+# Remove scripts (keep only essential)
+*.sh
+!setup.sh
+!run.sh
+
+# Remove temporary files
+control.sam
+oxidation.sam
+mat*.csv
+all_matches*.csv
+
+# Remove test files
+test_*.sh
+test_*.md

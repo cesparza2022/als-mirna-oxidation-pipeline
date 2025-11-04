@@ -4,11 +4,31 @@
 [![R](https://img.shields.io/badge/R-4.3+-blue.svg)](https://www.r-project.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Reproducible Snakemake pipeline for analyzing G>T oxidation patterns in miRNAs.
+A comprehensive, reproducible Snakemake pipeline for analyzing G>T oxidation patterns in microRNAs (miRNAs), with applications in neurodegenerative disease research (e.g., ALS).
+
+## 🎯 Overview
+
+This pipeline analyzes 8-oxoguanine (8-oxoG) damage in miRNAs, identified through G>T mutations, which are biomarkers of oxidative stress. The pipeline performs:
+
+- **Quality Control**: VAF filtering to remove technical artifacts
+- **Statistical Analysis**: Group comparisons with assumption validation
+- **Position-Specific Analysis**: Individual position analysis (1-24)
+- **Functional Analysis**: Target prediction and pathway enrichment
+- **Biomarker Analysis**: ROC curves and diagnostic signatures
+- **Family Analysis**: miRNA family-level oxidation patterns
+- **Expression Correlation**: Relationship between expression and oxidation
+- **Clustering**: Identification of miRNA groups with similar oxidation patterns
 
 ## 🚀 Quick Start
 
-### Option 1: Automated Setup (Recommended) ⚡
+### Prerequisites
+
+- **Conda** (Miniconda or Anaconda) or **Mamba** - [Install Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+  - Mamba is faster and recommended: [Install Mamba](https://mamba.readthedocs.io/en/latest/installation.html)
+
+### Installation
+
+#### Option 1: Automated Setup (Recommended)
 
 ```bash
 # 1. Clone repository
@@ -22,38 +42,16 @@ bash setup.sh --mamba  # Use mamba (faster) or --conda for conda
 conda activate mirna_oxidation_pipeline
 
 # 4. Configure data (edit path to your CSV file)
+cp config/config.yaml.example config/config.yaml
 nano config/config.yaml  # Update the path to your data file
 
-# 5. Run pipeline (everything is generated automatically)
+# 5. Run pipeline
 snakemake -j 4
 
 # ✅ Done! Results are in results/
 ```
 
-**📁 Automatic Output Structure:**
-```
-results/
-├── step1/final/figures/      # 6 PNG figures
-├── step1/final/tables/        # 6 CSV tables
-├── step1_5/final/figures/    # 11 PNG figures
-├── step1_5/final/tables/     # Filtered data and reports
-├── step2/final/figures/      # 2 PNG figures
-├── step2/final/tables/       # Statistical results
-├── step3/final/figures/      # Functional analysis figures
-├── step3/final/tables/       # Functional analysis tables
-├── step4/final/figures/      # Biomarker analysis figures
-├── step4/final/tables/       # Biomarker analysis tables
-├── step5/final/figures/      # Family analysis figures
-├── step5/final/tables/       # Family analysis tables
-├── step6/final/figures/      # Expression-oxidation correlation figures
-├── step6/final/tables/       # Expression-oxidation correlation tables
-├── step7/final/figures/      # Clustering analysis figures
-├── step7/final/tables/       # Clustering analysis tables
-├── summary/                  # Consolidated report
-└── validation/               # Validation reports
-```
-
-### Option 2: Manual Setup
+#### Option 2: Manual Setup
 
 ```bash
 # 1. Clone repository
@@ -76,23 +74,7 @@ nano config/config.yaml  # Update paths to your data
 snakemake -j 4
 ```
 
-## 📋 Requirements
-
-### Required Software
-
-- **Conda** (Miniconda or Anaconda) or **Mamba** - [Install Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-  - Mamba is faster and recommended: [Install Mamba](https://mamba.readthedocs.io/en/latest/installation.html)
-
-### Pipeline Dependencies (installed automatically)
-
-- **Python** 3.10+
-- **Snakemake** 7.32+
-- **R** 4.3.2+ (installed via conda)
-- **R packages:** ggplot2, dplyr, pheatmap, patchwork, ggrepel, viridis, and more
-
-**Note:** All dependencies are installed automatically when creating the conda/mamba environment.
-
-## 📊 Input Format
+## 📊 Input Data Format
 
 The pipeline expects a CSV file with the following structure:
 
@@ -107,9 +89,11 @@ hsa-miR-1-1,2:G>A,2,95,1,75,...
 - `pos:mut` (or `pos.mut`): Position and mutation (format: `position:mutation`)
 - Sample columns: `SampleName_SNV` and `SampleName (PM+1MM+2MM)` pairs
 
+**See:** [Data Format Documentation](docs/DATA_FORMAT_AND_FLEXIBILITY.md) for detailed format specifications.
+
 ### 🎯 Flexible Group Assignment
 
-The pipeline supports **any group names** (not just "ALS" and "Control") through a metadata file system:
+The pipeline supports **any group names** (not just "ALS" and "Control") through a metadata file:
 
 **Option 1: Metadata File (Recommended)**
 ```yaml
@@ -132,7 +116,7 @@ Sample2	Control	Batch1	62	F
 - Searches for "control" → Control group
 - Works automatically with existing data
 
-**See:** [Flexible Group System Documentation](docs/FLEXIBLE_GROUP_SYSTEM.md) for details
+**See:** [Flexible Group System Documentation](docs/FLEXIBLE_GROUP_SYSTEM.md) for details.
 
 ## 📈 Pipeline Steps
 
@@ -148,7 +132,7 @@ Sample2	Control	Batch1	62	F
 
 ### Step 1.5: VAF Quality Control
 - VAF calculation and filtering
-- Technical artifact removal
+- Technical artifact removal (VAF ≥ 0.5)
 - Diagnostic visualizations
 
 **Outputs:**
@@ -159,19 +143,19 @@ Sample2	Control	Batch1	62	F
 - **Statistical assumptions validation** (normality, variance homogeneity)
 - **Batch effect analysis** (PCA, statistical testing, correction)
 - **Confounder analysis** (group balance assessment: age, sex)
-- ALS vs Control comparisons
-- Statistical testing (t-test, Wilcoxon) with automatic test selection
+- Group comparisons (t-test, Wilcoxon) with automatic test selection
 - Effect size calculations
 - Volcano plots
+- **Position-specific analysis** (NEW: Step 2.5)
 
 **Outputs:**
-- 2 figures (PNG, 300 DPI)
+- 4 figures (PNG, 300 DPI)
 - Statistical results tables (CSV)
 
 ### Step 3: Functional Analysis
 - Target prediction for oxidized miRNAs
 - GO and KEGG pathway enrichment
-- ALS-relevant genes impact
+- Disease-relevant genes impact
 
 **Outputs:**
 - 5 figures (PNG, 300 DPI)
@@ -189,7 +173,7 @@ Sample2	Control	Batch1	62	F
 ### Step 5: miRNA Family Analysis
 - Family identification and grouping
 - Family-level oxidation patterns
-- ALS vs Control comparison by family
+- Group comparison by family
 
 **Outputs:**
 - 2 figures (PNG, 300 DPI)
@@ -212,26 +196,42 @@ Sample2	Control	Batch1	62	F
 - 2 figures (PNG, 300 DPI)
 - 2 tables (CSV)
 
-## 📦 Environment Setup
+## 📁 Output Structure
 
-### Quick Setup (Recommended)
-```bash
-# 1. Create conda environment from environment.yml
-conda env create -f environment.yml
-
-# 2. Activate environment
-conda activate mirna_oxidation_pipeline
-
-# 3. Verify installation
-R --version  # Should show R 4.3.2+
-snakemake --version  # Should show >=7.0
 ```
-
-See [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) for detailed version requirements.
+results/
+├── step1/final/
+│   ├── figures/      # 6 PNG figures
+│   └── tables/        # 6 CSV tables
+├── step1_5/final/
+│   ├── figures/      # 11 PNG figures
+│   └── tables/        # Filtered data and reports
+├── step2/final/
+│   ├── figures/      # 4 PNG figures (including position-specific)
+│   └── tables/        # Statistical results
+├── step3/final/
+│   ├── figures/      # Functional analysis figures
+│   └── tables/        # Functional analysis tables
+├── step4/final/
+│   ├── figures/      # Biomarker analysis figures
+│   └── tables/        # Biomarker analysis tables
+├── step5/final/
+│   ├── figures/      # Family analysis figures
+│   └── tables/        # Family analysis tables
+├── step6/final/
+│   ├── figures/      # Expression-oxidation correlation figures
+│   └── tables/        # Expression-oxidation correlation tables
+├── step7/final/
+│   ├── figures/      # Clustering analysis figures
+│   └── tables/        # Clustering analysis tables
+├── summary/          # Consolidated summary reports
+└── validation/        # Validation reports
+```
 
 ## 🎯 Usage
 
 ### Basic Usage
+
 ```bash
 # Run complete pipeline
 snakemake -j 4
@@ -242,11 +242,15 @@ snakemake -j 4 all_step1
 # Run only Step 1.5
 snakemake -j 1 all_step1_5
 
+# Run only Step 2
+snakemake -j 4 all_step2
+
 # Dry-run (see what would execute)
 snakemake -j 4 -n
 ```
 
 ### Using the wrapper script
+
 ```bash
 # Make executable (first time)
 chmod +x run.sh
@@ -255,66 +259,11 @@ chmod +x run.sh
 ./run.sh /path/to/your/data.csv
 ```
 
-## 📁 Project Structure
+### Configuration
 
-```
-snakemake_pipeline/
-├── README.md                 # This file
-├── Snakefile                 # Main pipeline orchestrator
-├── setup.sh                  # ⚡ Automated setup script
-├── config/
-│   ├── config.yaml.example   # Configuration template
-│   └── config.yaml           # Your configuration (edit with your data path)
-├── scripts/                  # R analysis scripts
-│   ├── step1/               # Step 1 analysis scripts
-│   ├── step1_5/             # Step 1.5 VAF QC scripts
-│   ├── step2/               # Step 2 statistical scripts
-│   ├── step3/               # Step 3 functional analysis scripts
-│   ├── step4/               # Step 4 biomarker analysis scripts
-│   ├── step5/               # Step 5 family analysis scripts
-│   ├── step6/               # Step 6 expression-oxidation correlation scripts
-│   ├── step7/               # Step 7 clustering analysis scripts
-│   └── utils/                # Shared utilities & validations
-├── rules/                    # Snakemake rule files
-│   ├── output_structure.smk  # ⚡ Auto-creates output directories
-│   ├── step1.smk
-│   ├── step1_5.smk
-│   ├── step2.smk
-│   ├── step3.smk
-│   ├── step4.smk
-│   ├── step5.smk
-│   ├── step6.smk
-│   ├── step7.smk
-│   ├── pipeline_info.smk     # Pipeline metadata generation
-│   ├── summary.smk           # Consolidated summary reports
-│   └── validation.smk       # Output validation
-├── envs/                     # Conda environment files
-│   ├── r_base.yaml
-│   └── r_analysis.yaml
-└── results/                  # 📊 Generated outputs (auto-organized)
-    ├── step1/final/         # Figures + Tables
-    ├── step1_5/final/       # Figures + Tables
-    ├── step2/final/         # Figures + Tables
-    ├── step3/final/         # Figures + Tables
-    ├── step4/final/         # Figures + Tables
-    ├── step5/final/         # Figures + Tables
-    ├── step6/final/         # Figures + Tables
-    ├── step7/final/         # Figures + Tables
-    ├── summary/             # Consolidated summaries
-    └── validation/          # Validation reports
-```
+Edit `config/config.yaml` to customize:
 
-**📊 Output Organization:**
-- **Figures**: Automatically organized by step in `results/stepX/final/figures/`
-- **Tables**: Automatically organized by step in `results/stepX/final/tables/`
-- **All directories created automatically** - no manual setup needed!
-
-## ⚙️ Configuration
-
-Edit `config/config.yaml` to specify:
-
-- **Input data paths**: Location of your data files
-- **Output directories**: Where to save results
+- **Data paths**: Input data files, metadata file
 - **Analysis parameters**: VAF thresholds, significance levels, etc.
 - **Visualization settings**: Colors, figure dimensions, etc.
 
@@ -323,84 +272,82 @@ See `config/config.yaml.example` for detailed documentation.
 ## 📚 Documentation
 
 ### Essential Documentation
-* **🔄 Flexible Group System**: [docs/FLEXIBLE_GROUP_SYSTEM.md](docs/FLEXIBLE_GROUP_SYSTEM.md) - How to use any group names (not just ALS/Control) via metadata file
+* **🔄 Flexible Group System**: [docs/FLEXIBLE_GROUP_SYSTEM.md](docs/FLEXIBLE_GROUP_SYSTEM.md) - How to use any group names via metadata file
 * **🔧 How It Works**: [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) - Technical explanation of the flexible group system
 * **📊 Data Format**: [docs/DATA_FORMAT_AND_FLEXIBILITY.md](docs/DATA_FORMAT_AND_FLEXIBILITY.md) - Input data format and parsing details
 * **📊 Statistical Methodology**: [docs/METHODOLOGY.md](docs/METHODOLOGY.md) - Comprehensive documentation of statistical methods, assumptions validation, batch effects, and confounders
-* **🧪 Testing Plan**: [TESTING_PLAN.md](TESTING_PLAN.md) - Step-by-step testing plan for validating Phase 1 critical corrections
+* **🧪 Testing Plan**: [TESTING_PLAN.md](TESTING_PLAN.md) - Step-by-step testing plan
 * **🔧 Software Versions**: [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) - All software and package versions
 * **🔬 Critical Expert Review**: [CRITICAL_EXPERT_REVIEW.md](CRITICAL_EXPERT_REVIEW.md) - Expert bioinformatics and statistical review
+* **📋 Comprehensive Review**: [COMPREHENSIVE_PIPELINE_REVIEW.md](COMPREHENSIVE_PIPELINE_REVIEW.md) - Complete pipeline review with missing elements identified
 
 ## 🔧 Troubleshooting
 
 ### Error: "File not found"
 - Verify paths in `config/config.yaml`
-- Use absolute paths or paths relative to `snakemake_dir`
+- Check that input data file exists
+- Ensure metadata file path is correct (if using)
 
-### Error: "R package not found"
+### Error: "No groups found"
+- Check metadata file format (must have `sample_id` and `group` columns)
+- Verify sample names match between data and metadata
+- If using pattern matching, ensure sample names contain group identifiers
+
+### Error: "Environment not found"
 - Activate conda environment: `conda activate mirna_oxidation_pipeline`
-- Reinstall: `conda env update -f environment.yml --prune`
+- Or recreate environment: `conda env create -f environment.yml`
 
-### Error: "Snakemake not found"
+### Low Signal Warnings
+- If you see "LOW SIGNAL DETECTED" warnings, check:
+  - Data quality (VAF filter rate should be <90%)
+  - Sample sizes (at least 10 samples per group recommended)
+  - Group assignments (verify metadata file)
 
-* Verify that the environment is activated: `conda activate mirna_oxidation_pipeline`
-* If still not installed:
-  ```bash
-  conda install -c bioconda -c conda-forge snakemake
-  # or with mamba (faster):
-  mamba install -c bioconda -c conda-forge snakemake
-  ```
+## 🧪 Requirements
 
-### Error: "Conda/Mamba not found"
+### Required Software
 
-**Install Miniconda (recommended):**
-* **macOS**: `curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh && bash Miniconda3-latest-MacOSX-arm64.sh`
-* **Linux**: `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && bash Miniconda3-latest-Linux-x86_64.sh`
-* Restart your terminal after installation
+- **Conda** (Miniconda or Anaconda) or **Mamba**
+- **Python** 3.10+
+- **Snakemake** 7.32+
+- **R** 4.3.2+ (installed via conda)
 
-**Install Mamba (optional, faster):**
-```bash
-conda install mamba -n base -c conda-forge
-```
+### Pipeline Dependencies (installed automatically)
 
-### Verify Installation
+All dependencies are installed automatically when creating the conda/mamba environment from `environment.yml`.
 
-```bash
-# Run verification script
-bash setup.sh --check
+**R packages:** ggplot2, dplyr, pheatmap, patchwork, ggrepel, viridis, and more
 
-# Or manually
-conda activate mirna_oxidation_pipeline
-snakemake --version
-R --version
-Rscript -e "library(ggplot2); library(dplyr); cat('✅ OK\n')"
+See [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) for detailed version requirements.
+
+## 📖 Citation
+
+If you use this pipeline in your research, please cite:
+
+```bibtex
+@software{miRNA_oxidation_pipeline,
+  title = {miRNA Oxidation Analysis Pipeline},
+  author = {Esparza, Cesar},
+  year = {2025},
+  url = {https://github.com/cesparza2022/miRNA-oxidation-pipeline}
+}
 ```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-analysis`)
-3. Commit your changes (`git commit -am 'Add new analysis'`)
-4. Push to the branch (`git push origin feature/new-analysis`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
+## 📝 License
 
-[Add your license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Citation
+## 🙏 Acknowledgments
 
-If you use this pipeline in your research, please cite:
-
-```
-[Citation information to be added]
-```
-
-## 📧 Contact
-
-[Add contact information]
+- Snakemake workflow management system
+- R statistical computing environment
+- All package developers and maintainers
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-01
+**Last Updated:** 2025-01-21  
+**Pipeline Version:** 1.0.0
