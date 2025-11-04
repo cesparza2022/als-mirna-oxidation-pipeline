@@ -44,7 +44,7 @@ output_target_comparison <- snakemake@output[["target_comparison"]]
 
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
-log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold)) config$analysis$log2fc_threshold else 0.0
+log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step3)) config$analysis$log2fc_threshold_step3 else 1.0
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
 
