@@ -293,7 +293,7 @@ See `config/config.yaml.example` for detailed documentation.
 ## 📚 Documentation
 
 ### Essential Documentation
-* **📋 Questions Answered**: [RESUMEN_PREGUNTAS_STEPS_3-7.md](RESUMEN_PREGUNTAS_STEPS_3-7.md) - Executive summary of questions answered by Steps 3-7
+* **📋 Questions Answered**: [SUMMARY_QUESTIONS_STEPS_3-7.md](SUMMARY_QUESTIONS_STEPS_3-7.md) - Executive summary of questions answered by Steps 3-7
 * **📖 Detailed Review**: [REVIEW_STEPS_3-7.md](REVIEW_STEPS_3-7.md) - Exhaustive review of Steps 3-7
 * **🔧 Software Versions**: [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) - All software and package versions
 
