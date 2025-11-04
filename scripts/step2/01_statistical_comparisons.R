@@ -207,11 +207,26 @@ groups_df <- tryCatch({
 
 # Split data by groups
 grouped_data <- split_data_by_groups(data, groups_df)
-als_samples <- grouped_data$als_samples
-control_samples <- grouped_data$control_samples
 
-log_info(paste("ALS samples:", length(als_samples)))
-log_info(paste("Control samples:", length(control_samples)))
+# Get dynamic group names
+unique_groups <- sort(unique(groups_df$group))
+if (length(unique_groups) != 2) {
+  stop("Currently only 2-group comparisons are supported. Found ", length(unique_groups), " groups: ", paste(unique_groups, collapse = ", "))
+}
+
+group1_name <- unique_groups[1]
+group2_name <- unique_groups[2]
+
+# Get samples for each group (using backward-compatible names)
+group1_samples <- grouped_data[[paste0(group1_name, "_samples")]]
+group2_samples <- grouped_data[[paste0(group2_name, "_samples")]]
+
+# Also get backward-compatible names for logging
+als_samples <- grouped_data$als_samples  # Will be group1
+control_samples <- grouped_data$control_samples  # Will be group2
+
+log_info(paste(group1_name, "samples:", length(group1_samples)))
+log_info(paste(group2_name, "samples:", length(group2_samples)))
 
 # ============================================================================
 # PREPARE DATA FOR COMPARISONS
@@ -228,7 +243,7 @@ data_long <- data %>%
     values_to = "Count"
   ) %>%
   left_join(groups_df, by = c("Sample" = "sample_id")) %>%
-  filter(!is.na(group), group %in% c("ALS", "Control")) %>%
+  filter(!is.na(group), group %in% unique_groups) %>%
   rename(Group = group) %>%
   mutate(
     SNV_id = paste(miRNA_name, pos.mut, sep = "|")
@@ -338,28 +353,44 @@ snv_by_sample <- data_long %>%
 # Perform statistical comparisons per SNV
 log_info(paste("Running statistical tests (recommendation:", test_recommendation, ")..."))
 
+# Generate dynamic column names
+group1_mean_col <- paste0(group1_name, "_mean")
+group1_sd_col <- paste0(group1_name, "_sd")
+group1_n_col <- paste0(group1_name, "_n")
+group2_mean_col <- paste0(group2_name, "_mean")
+group2_sd_col <- paste0(group2_name, "_sd")
+group2_n_col <- paste0(group2_name, "_n")
+
 comparison_results <- snv_by_sample %>%
   group_by(SNV_id) %>%
   summarise(
-    # Mean and SD for each group
-    ALS_mean = mean(Total_Count[Group == "ALS"], na.rm = TRUE),
-    ALS_sd = sd(Total_Count[Group == "ALS"], na.rm = TRUE),
-    ALS_n = sum(!is.na(Total_Count[Group == "ALS"])),
-    Control_mean = mean(Total_Count[Group == "Control"], na.rm = TRUE),
-    Control_sd = sd(Total_Count[Group == "Control"], na.rm = TRUE),
-    Control_n = sum(!is.na(Total_Count[Group == "Control"])),
+    # Mean and SD for each group (dynamic names)
+    !!group1_mean_col := mean(Total_Count[Group == group1_name], na.rm = TRUE),
+    !!group1_sd_col := sd(Total_Count[Group == group1_name], na.rm = TRUE),
+    !!group1_n_col := sum(!is.na(Total_Count[Group == group1_name])),
+    !!group2_mean_col := mean(Total_Count[Group == group2_name], na.rm = TRUE),
+    !!group2_sd_col := sd(Total_Count[Group == group2_name], na.rm = TRUE),
+    !!group2_n_col := sum(!is.na(Total_Count[Group == group2_name])),
     
-    # Fold change (ALS / Control)
-    fold_change = ifelse(Control_mean > 0, ALS_mean / Control_mean, NA_real_),
-    log2_fold_change = ifelse(Control_mean > 0, log2(ALS_mean / Control_mean), NA_real_),
+    # Fold change (group1 / group2)
+    fold_change = ifelse(
+      mean(Total_Count[Group == group2_name], na.rm = TRUE) > 0,
+      mean(Total_Count[Group == group1_name], na.rm = TRUE) / mean(Total_Count[Group == group2_name], na.rm = TRUE),
+      NA_real_
+    ),
+    log2_fold_change = ifelse(
+      mean(Total_Count[Group == group2_name], na.rm = TRUE) > 0,
+      log2(mean(Total_Count[Group == group1_name], na.rm = TRUE) / mean(Total_Count[Group == group2_name], na.rm = TRUE)),
+      NA_real_
+    ),
     
     # Statistical tests
     # t-test (if recommended or default)
     t_test_pvalue = if (test_recommendation %in% c("both", "parametric")) {
       tryCatch({
         test_result <- t.test(
-          Total_Count[Group == "ALS"],
-          Total_Count[Group == "Control"],
+          Total_Count[Group == group1_name],
+          Total_Count[Group == group2_name],
           alternative = "two.sided"
         )
         test_result$p.value
@@ -371,14 +402,26 @@ comparison_results <- snv_by_sample %>%
     # Wilcoxon rank-sum test (always calculate as it's robust)
     wilcoxon_pvalue = tryCatch({
       test_result <- wilcox.test(
-        Total_Count[Group == "ALS"],
-        Total_Count[Group == "Control"],
+        Total_Count[Group == group1_name],
+        Total_Count[Group == group2_name],
         alternative = "two.sided"
       )
       test_result$p.value
     }, error = function(e) NA_real_),
     
     .groups = "drop"
+  )
+
+# For backward compatibility, also add ALS_mean/Control_mean if needed
+# (These map to group1/group2 for compatibility with downstream scripts)
+comparison_results <- comparison_results %>%
+  mutate(
+    ALS_mean = !!sym(group1_mean_col),
+    ALS_sd = !!sym(group1_sd_col),
+    ALS_n = !!sym(group1_n_col),
+    Control_mean = !!sym(group2_mean_col),
+    Control_sd = !!sym(group2_sd_col),
+    Control_n = !!sym(group2_n_col)
   )
 
 # ============================================================================

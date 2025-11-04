@@ -173,6 +173,17 @@ groups_df <- tryCatch({
   handle_error(e, context = "Step 2.0b - Group Identification", exit_code = 1, log_file = log_file)
 })
 
+# Get dynamic group names
+unique_groups <- sort(unique(groups_df$group))
+if (length(unique_groups) < 2) {
+  stop("Need at least 2 groups for comparison. Found:", paste(unique_groups, collapse = ", "))
+}
+
+group1_name <- unique_groups[1]
+group2_name <- unique_groups[2]
+
+log_info(paste("Groups for confounder analysis:", paste(unique_groups, collapse = ", ")))
+
 # Merge with metadata if available
 if (!is.null(metadata)) {
   # Match sample_id column
@@ -226,13 +237,13 @@ if ("age" %in% names(groups_df) && sum(!is.na(groups_df$age)) >= 2) {
       .groups = "drop"
     )
   
-  # Test for age difference
-  als_ages <- groups_df %>% filter(group == "ALS", !is.na(age)) %>% pull(age)
-  control_ages <- groups_df %>% filter(group == "Control", !is.na(age)) %>% pull(age)
+  # Test for age difference (using dynamic group names)
+  group1_ages <- groups_df %>% filter(group == group1_name, !is.na(age)) %>% pull(age)
+  group2_ages <- groups_df %>% filter(group == group2_name, !is.na(age)) %>% pull(age)
   
-  if (length(als_ages) >= 2 && length(control_ages) >= 2) {
+  if (length(group1_ages) >= 2 && length(group2_ages) >= 2) {
     age_test <- tryCatch({
-      t.test(als_ages, control_ages)
+      t.test(group1_ages, group2_ages)
     }, error = function(e) NULL)
     
     if (!is.null(age_test)) {
@@ -348,17 +359,24 @@ if (!is.null(output_balance_plot) && (!is.null(group_balance$age) || !is.null(gr
   
   plots_list <- list()
   
-  # Age distribution plot
+  # Age distribution plot (dynamic group names)
   if (!is.null(group_balance$age) && "age" %in% names(groups_df)) {
     age_data <- groups_df %>%
-      filter(!is.na(age), group %in% c("ALS", "Control"))
+      filter(!is.na(age), group %in% unique_groups)
     
     if (nrow(age_data) > 0) {
+      # Get colors from config or use defaults
+      config <- snakemake@config
+      color_group1 <- if (!is.null(config$analysis$colors$als)) config$analysis$colors$als else "#D62728"
+      color_group2 <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
+      
+      group_colors <- setNames(c(color_group1, color_group2), unique_groups)
+      
       p_age <- ggplot(age_data, aes(x = group, y = age, fill = group)) +
         geom_violin(alpha = 0.7) +
         geom_boxplot(width = 0.2, alpha = 0.9) +
         geom_jitter(width = 0.1, alpha = 0.3) +
-        scale_fill_manual(values = c("ALS" = "#D62728", "Control" = "grey60")) +
+        scale_fill_manual(values = group_colors) +
         labs(
           title = "Age Distribution by Group",
           subtitle = "Group balance assessment",
@@ -371,10 +389,10 @@ if (!is.null(output_balance_plot) && (!is.null(group_balance$age) || !is.null(gr
     }
   }
   
-  # Sex distribution plot
+  # Sex distribution plot (dynamic group names)
   if (!is.null(group_balance$sex) && "sex" %in% names(groups_df)) {
     sex_data <- groups_df %>%
-      filter(!is.na(sex), group %in% c("ALS", "Control")) %>%
+      filter(!is.na(sex), group %in% unique_groups) %>%
       count(group, sex) %>%
       group_by(group) %>%
       mutate(percentage = n / sum(n) * 100)
@@ -440,17 +458,23 @@ report_lines <- c(
   ""
 )
 
-# Add age information
+# Add age information (dynamic group names)
 if (!is.null(group_balance$age)) {
   report_lines <- c(report_lines,
-    "AGE:",
-    paste("  • ALS: n =", sum(groups_df$group == "ALS" & !is.na(groups_df$age)),
-          ", mean =", round(mean(groups_df$age[groups_df$group == "ALS"], na.rm = TRUE), 1),
-          ", SD =", round(sd(groups_df$age[groups_df$group == "ALS"], na.rm = TRUE), 1)),
-    paste("  • Control: n =", sum(groups_df$group == "Control" & !is.na(groups_df$age)),
-          ", mean =", round(mean(groups_df$age[groups_df$group == "Control"], na.rm = TRUE), 1),
-          ", SD =", round(sd(groups_df$age[groups_df$group == "Control"], na.rm = TRUE), 1))
+    "AGE:"
   )
+  
+  # Add info for each group dynamically
+  for (grp in unique_groups) {
+    grp_ages <- groups_df$age[groups_df$group == grp & !is.na(groups_df$age)]
+    if (length(grp_ages) > 0) {
+      report_lines <- c(report_lines,
+        paste("  •", grp, ": n =", length(grp_ages),
+              ", mean =", round(mean(grp_ages, na.rm = TRUE), 1),
+              ", SD =", round(sd(grp_ages, na.rm = TRUE), 1))
+      )
+    }
+  }
   
   if (!is.null(group_balance$age$age_difference_pvalue)) {
     report_lines <- c(report_lines,

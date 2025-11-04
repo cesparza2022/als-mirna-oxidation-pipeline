@@ -343,10 +343,17 @@ if (batch_effect_significant) {
 
 log_subsection("Generating PCA visualization (before correction)")
 
+# Get unique groups from pca_scores
+unique_groups_pca <- sort(unique(pca_scores$group))
+group_shapes <- setNames(c(16, 17, 1)[1:length(unique_groups_pca)], unique_groups_pca)
+if (length(unique_groups_pca) > 2) {
+  group_shapes <- setNames(rep(16, length(unique_groups_pca)), unique_groups_pca)  # All same shape if > 2 groups
+}
+
 p_pca_before <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = batch, shape = group)) +
   geom_point(size = 3, alpha = 0.7) +
   scale_color_brewer(palette = "Set2", name = "Batch") +
-  scale_shape_manual(values = c("ALS" = 16, "Control" = 17, "unknown" = 1), name = "Group") +
+  scale_shape_manual(values = group_shapes, name = "Group") +
   labs(
     title = "PCA: Batch Effects (Before Correction)",
     subtitle = paste("PC1 (", round(pc1_var, 1), "%) vs PC2 (", round(pc2_var, 1), "%)"),
