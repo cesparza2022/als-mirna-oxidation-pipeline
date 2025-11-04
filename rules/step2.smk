@@ -19,6 +19,9 @@ INPUT_DATA_VAF_FILTERED = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATION
 # Alternative: use processed clean data if VAF filtered not available
 INPUT_DATA_FALLBACK = config["paths"]["data"]["processed_clean"]
 
+# Sample metadata file (optional - for flexible group assignment)
+METADATA_FILE = config["paths"]["data"].get("metadata", None)
+
 # Output directories
 OUTPUT_STEP2 = config["paths"]["outputs"]["step2"]
 OUTPUT_FIGURES = OUTPUT_STEP2 + "/figures"
@@ -43,14 +46,16 @@ rule step2_batch_effect_analysis:
     input:
         vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
         fallback_data = INPUT_DATA_FALLBACK,
-        functions = FUNCTIONS_COMMON
+        functions = FUNCTIONS_COMMON,
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
     output:
         batch_corrected = OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
         report = OUTPUT_LOGS + "/batch_effect_report.txt",
         pca_before = OUTPUT_FIGURES + "/step2_batch_effect_pca_before.png"
     params:
         functions = FUNCTIONS_COMMON,
-        group_functions = GROUP_FUNCTIONS
+        group_functions = GROUP_FUNCTIONS,
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
     log:
         OUTPUT_LOGS + "/batch_effect_analysis.log"
     script:
@@ -64,14 +69,16 @@ rule step2_confounder_analysis:
     input:
         vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
         fallback_data = INPUT_DATA_FALLBACK,
-        functions = FUNCTIONS_COMMON
+        functions = FUNCTIONS_COMMON,
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
     output:
         report = OUTPUT_LOGS + "/confounder_analysis_report.txt",
         group_balance = OUTPUT_TABLES_STATISTICAL + "/S2_group_balance.json",
         balance_plot = OUTPUT_FIGURES + "/step2_group_balance.png"
     params:
         functions = FUNCTIONS_COMMON,
-        group_functions = GROUP_FUNCTIONS
+        group_functions = GROUP_FUNCTIONS,
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
     log:
         OUTPUT_LOGS + "/confounder_analysis.log"
     script:
@@ -88,14 +95,16 @@ rule step2_statistical_comparisons:
         vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Fallback: Try VAF filtered
         fallback_data = INPUT_DATA_FALLBACK,  # Fallback: processed clean
         functions = FUNCTIONS_COMMON,
-        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R"
+        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R",
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
     output:
         table = OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
         assumptions_report = OUTPUT_LOGS + "/statistical_assumptions_report.txt"
     params:
         functions = FUNCTIONS_COMMON,
         group_functions = GROUP_FUNCTIONS,
-        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R"
+        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R",
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
     log:
         OUTPUT_LOGS + "/statistical_comparisons.log"
     script:

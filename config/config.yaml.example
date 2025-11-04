@@ -24,6 +24,12 @@ paths:
     
     # Original data for Step 1.5 (VAF filtering - needs SNV + total counts)
     step1_original: "/path/to/your/step1_original_data.csv"
+    
+    # Sample metadata file (OPTIONAL but RECOMMENDED for flexible group assignment)
+    # Format: TSV with columns: sample_id, group (and optionally: batch, age, sex, etc.)
+    # If not provided, pipeline will use pattern matching on column names as fallback
+    # See: sample_metadata_template.tsv for format
+    metadata: null  # e.g., "/path/to/your/sample_metadata.tsv"
   
   # Output directories (relative to snakemake_dir - usually no need to change)
   outputs:
