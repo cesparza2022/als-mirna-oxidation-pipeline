@@ -1,4 +1,4 @@
-# Data Validation Script for ALS miRNA Oxidation Research
+# Data Validation Script for miRNA Oxidation Research
 # This script validates input data against the project schema
 
 # Load required libraries
@@ -192,7 +192,7 @@ validate_project_data <- function(config_file = "config.yaml",
                                  metadata_file = NULL,
                                  sequences_file = NULL) {
   
-  cat("Starting data validation for ALS miRNA Oxidation Research Project\n")
+  cat("Starting data validation for miRNA Oxidation Research Project\n")
   cat(paste(rep("=", 60), collapse = ""), "\n")
   
   # Load configuration and schema

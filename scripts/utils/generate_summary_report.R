@@ -216,14 +216,14 @@ html_lines <- c(
   '<head>',
   '  <meta charset="UTF-8">',
   '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-  sprintf('  <title>%s - Summary Report</title>', config$project$name %||% "ALS miRNA Oxidation Analysis"),
+  sprintf('  <title>%s - Summary Report</title>', config$project$name %||% "miRNA Oxidation Analysis"),
   css_styles,
   '</head>',
   '<body>',
-  '  <h1>🧬 ALS miRNA Oxidation Analysis - Summary Report</h1>',
+  '  <h1>🧬 miRNA Oxidation Analysis - Summary Report</h1>',
   '',
   '  <div class="summary-box">',
-  sprintf('    <p><strong>Pipeline:</strong> %s</p>', config$project$name %||% "ALS miRNA Oxidation Analysis"),
+    sprintf('    <p><strong>Pipeline:</strong> %s</p>', config$project$name %||% "miRNA Oxidation Analysis"),
   sprintf('    <p><strong>Version:</strong> %s</p>', config$project$version %||% "1.0.0"),
   if (!is.null(execution_info)) {
     sprintf('    <p><strong>Execution Date:</strong> %s</p>', execution_info$execution$date %||% "Unknown")
@@ -395,7 +395,7 @@ cat("Generating summary_statistics.json...\n")
 
 summary_stats <- list(
   pipeline = list(
-    name = config$project$name %||% "ALS miRNA Oxidation Analysis",
+    name = config$project$name %||% "miRNA Oxidation Analysis",
     version = config$project$version %||% "1.0.0",
     execution_date = if (!is.null(execution_info)) execution_info$execution$date else as.character(Sys.Date()),
     status = if (!is.null(execution_info)) execution_info$execution$status else "unknown"
@@ -443,7 +443,7 @@ cat("✅ summary_statistics.json created\n")
 cat("Generating key_findings.md...\n")
 
 key_findings_lines <- c(
-  "# 🔑 Key Findings - ALS miRNA Oxidation Analysis",
+  "# 🔑 Key Findings - miRNA Oxidation Analysis",
   "",
   sprintf("**Generated:** %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
   "",

@@ -1,4 +1,4 @@
-# Configuration Loader for ALS miRNA Oxidation Research
+# Configuration Loader for miRNA Oxidation Research
 # This script loads and validates project configuration
 
 # Load required libraries
@@ -247,7 +247,7 @@ setup_logging <- function(config) {
 
 # Main configuration loader function
 load_project_config <- function(config_file = "config.yaml") {
-  cat("Loading ALS miRNA Oxidation Research Project Configuration\n")
+  cat("Loading miRNA Oxidation Research Project Configuration\n")
   cat(paste(rep("=", 60), collapse = ""), "\n")
   
   # Load configuration

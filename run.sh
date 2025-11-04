@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# 🚀 Pipeline ALS miRNA Oxidation Analysis - Script Ejecutor Simple
+# 🚀 miRNA Oxidation Analysis Pipeline - Simple Execution Script
 # ============================================================================
 # Uso: ./run.sh [input_file.csv]
 #
@@ -22,7 +22,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}   🚀 Pipeline ALS miRNA Oxidation Analysis${NC}"
+echo -e "${BLUE}   🚀 miRNA Oxidation Analysis Pipeline${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 echo ""
 
@@ -184,7 +184,7 @@ echo "   open viewers/step1_5.html"
 echo ""
 
 
-# 🚀 Pipeline ALS miRNA Oxidation Analysis - Script Ejecutor Simple
+# 🚀 miRNA Oxidation Analysis Pipeline - Simple Execution Script
 # ============================================================================
 # Uso: ./run.sh [input_file.csv]
 #
@@ -206,7 +206,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}   🚀 Pipeline ALS miRNA Oxidation Analysis${NC}"
+echo -e "${BLUE}   🚀 miRNA Oxidation Analysis Pipeline${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 echo ""
 
@@ -368,7 +368,7 @@ echo "   open viewers/step1_5.html"
 echo ""
 
 
-# 🚀 Pipeline ALS miRNA Oxidation Analysis - Script Ejecutor Simple
+# 🚀 miRNA Oxidation Analysis Pipeline - Simple Execution Script
 # ============================================================================
 # Uso: ./run.sh [input_file.csv]
 #
@@ -390,7 +390,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}   🚀 Pipeline ALS miRNA Oxidation Analysis${NC}"
+echo -e "${BLUE}   🚀 miRNA Oxidation Analysis Pipeline${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 echo ""
 

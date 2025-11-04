@@ -69,7 +69,7 @@ if (file.exists(step2_dir) && file.info(step2_dir)$isdir) steps_completed <- c(s
 
 execution_info <- list(
   pipeline = list(
-    name = config$project$name %||% "ALS miRNA Oxidation Analysis",
+    name = config$project$name %||% "miRNA Oxidation Analysis",
     version = config$project$version %||% "1.0.0",
     description = config$project$description %||% "Reproducible pipeline for analyzing G>T oxidation patterns"
   ),
@@ -181,7 +181,7 @@ if (!exists("%||%")) {
 
 provenance <- list(
   pipeline = list(
-    name = config$project$name %||% "ALS miRNA Oxidation Analysis",
+    name = config$project$name %||% "miRNA Oxidation Analysis",
     version = config$project$version %||% "1.0.0",
     execution_date = as.character(execution_date)
   ),

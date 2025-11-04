@@ -1,9 +1,9 @@
-# ALS miRNA Oxidation Research Project Configuration
+# miRNA Oxidation Research Project Configuration
 # This file contains all project settings and parameters
 
 # Project Information
 project:
-  name: "ALS miRNA Oxidation Research"
+  name: "miRNA Oxidation Research"
   version: "1.0.0"
   description: "Investigation of oxidation patterns in miRNAs in ALS"
   author: "Research Team"

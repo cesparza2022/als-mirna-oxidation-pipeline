@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# SETUP SCRIPT - ALS miRNA Oxidation Pipeline
+# SETUP SCRIPT - miRNA Oxidation Pipeline
 # ============================================================================
 # Purpose: Automated setup of the pipeline environment
 # Usage: bash setup.sh [--conda|--mamba]
@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}  🧬 ALS miRNA Oxidation Pipeline - Setup${NC}"
+echo -e "${BLUE}  🧬 miRNA Oxidation Pipeline - Setup${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════════${NC}"
 echo ""
 
