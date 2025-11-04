@@ -5,6 +5,12 @@
 # Purpose: Analyze correlation between miRNA expression levels (RPM) and 
 #          oxidative damage (G>T mutations in seed region)
 #
+# This step uses SIGNIFICANT G>T mutations in seed region (same criteria as Steps 3-5):
+# - G>T mutations only (str_detect(pos.mut, ":GT$"))
+# - In seed region (positions 2-8)
+# - Statistically significant (FDR < alpha)
+# - Higher in ALS (log2FC > threshold)
+#
 # Snakemake parameters:
 #   input: Statistical comparisons, VAF-filtered data, and raw expression data
 #   output: Correlation tables and summary statistics
@@ -38,12 +44,16 @@ output_correlation <- snakemake@output[["correlation_table"]]
 output_expression_summary <- snakemake@output[["expression_summary"]]
 
 config <- snakemake@config
+alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
+log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step3)) config$analysis$log2fc_threshold_step3 else 1.0
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
 
 log_info(paste("Input statistical:", input_statistical))
 log_info(paste("Input VAF filtered:", input_vaf_filtered))
 log_info(paste("Input expression data:", input_expression))
+log_info(paste("Significance threshold (FDR):", alpha))
+log_info(paste("Log2FC threshold (minimum):", log2fc_threshold))
 log_info(paste("Seed region: positions", seed_start, "-", seed_end))
 
 ensure_output_dir(dirname(output_correlation))
@@ -163,25 +173,63 @@ if (is.null(expression_data)) {
 }
 
 # ============================================================================
-# CALCULATE OXIDATION METRICS (G>T in seed region)
+# FILTER SIGNIFICANT G>T MUTATIONS IN SEED REGION
 # ============================================================================
 
-log_subsection("Calculating oxidation metrics (G>T in seed region)")
+log_subsection("Filtering significant G>T mutations in seed region")
 
-# Extract sample columns from VAF data
-sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
+# Normalize column names for statistical results
+if ("miRNA name" %in% names(statistical_results)) {
+  statistical_results <- statistical_results %>% rename(miRNA_name = `miRNA name`)
+}
+if ("pos:mut" %in% names(statistical_results)) {
+  statistical_results <- statistical_results %>% rename(pos.mut = `pos:mut`)
+}
 
-# Filter G>T mutations in seed region
-oxidation_data <- vaf_data %>%
+# Filter significant G>T mutations in seed region (same criteria as Steps 3-5)
+significant_gt <- statistical_results %>%
   filter(
     str_detect(pos.mut, ":GT$"),
-    !is.na(miRNA_name)
+    !is.na(t_test_fdr) | !is.na(wilcoxon_fdr),
+    (t_test_fdr < alpha | wilcoxon_fdr < alpha),
+    !is.na(log2_fold_change),
+    log2_fold_change > log2fc_threshold  # Higher in ALS (configurable threshold)
   ) %>%
   mutate(
     position = as.numeric(str_extract(pos.mut, "^\\d+")),
     in_seed = position >= seed_start & position <= seed_end
   ) %>%
   filter(in_seed == TRUE) %>%
+  distinct(miRNA_name, pos.mut, .keep_all = TRUE)
+
+log_info(paste("Significant G>T mutations in seed region:", nrow(significant_gt)))
+log_info(paste("Unique miRNAs affected:", n_distinct(significant_gt$miRNA_name)))
+
+if (nrow(significant_gt) == 0) {
+  log_warning("No significant G>T mutations in seed region found. Skipping Step 6.1.")
+  write_csv(tibble(), output_correlation)
+  write_csv(tibble(), output_expression_summary)
+  log_success("Step 6.1 completed (skipped due to no data).")
+  quit(save = "no", status = 0)
+}
+
+# ============================================================================
+# CALCULATE OXIDATION METRICS (G>T in seed region)
+# ============================================================================
+
+log_subsection("Calculating oxidation metrics for significant G>T in seed region")
+
+# Extract sample columns from VAF data
+sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
+
+# Filter VAF data to only include significant G>T mutations in seed region
+oxidation_data <- vaf_data %>%
+  semi_join(significant_gt, by = c("miRNA_name", "pos.mut")) %>%  # Only significant G>T in seed
+  mutate(
+    position = as.numeric(str_extract(pos.mut, "^\\d+")),
+    in_seed = position >= seed_start & position <= seed_end
+  ) %>%
+  filter(in_seed == TRUE) %>%  # Double-check seed region
   group_by(miRNA_name) %>%
   summarise(
     n_seed_gt_mutations = n(),
@@ -192,7 +240,7 @@ oxidation_data <- vaf_data %>%
   ) %>%
   arrange(desc(total_gt_counts))
 
-log_info(paste("miRNAs with G>T in seed region:", nrow(oxidation_data)))
+log_info(paste("miRNAs with significant G>T in seed region:", nrow(oxidation_data)))
 
 # ============================================================================
 # COMBINE EXPRESSION AND OXIDATION DATA
