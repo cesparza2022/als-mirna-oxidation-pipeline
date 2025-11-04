@@ -22,7 +22,7 @@ include: "rules/step4.smk"    # NEW: Biomarker Analysis (ROC, signatures)
 include: "rules/step5.smk"    # NEW: miRNA Family Analysis
 include: "rules/step6.smk"    # NEW: Expression vs Oxidation Correlation
 include: "rules/step7.smk"    # NEW: Clustering Analysis
-include: "rules/viewers.smk"  # HTML viewers
+# Viewers HTML removed - output is organized in folders with figures and tables
 include: "rules/pipeline_info.smk"  # FASE 2: Pipeline metadata generation
 include: "rules/summary.smk"  # FASE 3: Consolidated summary reports
 include: "rules/validation.smk"  # Output validation and final checks
@@ -42,14 +42,6 @@ rule all:
             rules.all_step5.output,    # NEW: miRNA Family Analysis
             rules.all_step6.output,    # NEW: Expression vs Oxidation Correlation
             rules.all_step7.output,    # NEW: Clustering Analysis
-            rules.generate_step1_viewer.output,  # HTML viewer Step 1
-        rules.generate_step1_5_viewer.output,  # HTML viewer Step 1.5
-        rules.generate_step2_viewer.output,  # HTML viewer Step 2
-        rules.generate_step3_viewer.output,  # HTML viewer Step 3
-        rules.generate_step4_viewer.output,  # HTML viewer Step 4
-        rules.generate_step5_viewer.output,  # HTML viewer Step 5
-        rules.generate_step6_viewer.output,  # HTML viewer Step 6
-        rules.generate_step7_viewer.output,  # HTML viewer Step 7
         rules.generate_pipeline_info.output,  # FASE 2: Pipeline metadata
         rules.generate_summary_report.output,  # FASE 3: Summary reports
         rules.validate_pipeline_completion.output  # Final validation report

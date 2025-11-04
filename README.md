@@ -116,9 +116,8 @@ hsa-miR-1-1,2:G>A,2,95,1,75,...
 - Seed region analysis
 
 **Outputs:**
-- 6 figures (PNG)
+- 6 figures (PNG, 300 DPI)
 - 6 tables (CSV)
-- HTML viewer
 
 ### Step 1.5: VAF Quality Control
 - VAF calculation and filtering
@@ -126,14 +125,55 @@ hsa-miR-1-1,2:G>A,2,95,1,75,...
 - Diagnostic visualizations
 
 **Outputs:**
-- 11 figures (PNG)
+- 11 figures (PNG, 300 DPI)
 - 7 tables (CSV)
-- HTML viewer
 
-### Step 2: Group Comparisons *(Coming Soon)*
+### Step 2: Statistical Comparisons
 - ALS vs Control comparisons
-- Statistical testing
+- Statistical testing (t-test, Wilcoxon)
 - Effect size calculations
+- Volcano plots
+
+### Step 3: Functional Analysis
+- Target prediction for oxidized miRNAs
+- GO and KEGG pathway enrichment
+- ALS-relevant genes impact
+
+### Step 4: Biomarker Analysis
+- ROC curve analysis
+- AUC calculation
+- Multi-miRNA diagnostic signatures
+
+### Step 5: miRNA Family Analysis
+- Family identification and grouping
+- Family-level oxidation patterns
+- ALS vs Control comparison by family
+
+### Step 6: Expression vs Oxidation Correlation
+- Correlation between RPM and G>T mutations
+- Expression category analysis
+
+### Step 7: Clustering Analysis
+- Hierarchical clustering of miRNAs
+- Cluster identification (k=6)
+- Pattern-based grouping
+
+## 📦 Environment Setup
+
+### Quick Setup (Recommended)
+```bash
+# 1. Create conda environment from environment.yml
+conda env create -f environment.yml
+
+# 2. Activate environment
+conda activate als_mirna_pipeline
+
+# 3. Verify installation
+R --version  # Should show R 4.3.2+
+snakemake --version  # Should show >=7.0
+```
+
+See [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) for detailed version requirements.
 
 ## 🎯 Usage
 
