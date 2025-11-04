@@ -230,6 +230,12 @@ log_success(paste("Cluster assignments saved:", output_cluster_assignments))
 
 log_subsection("Creating cluster summary")
 
+# Detect group mean columns dynamically (before summarise)
+group1_mean_col <- paste0(group1_name, "_mean")
+group2_mean_col <- paste0(group2_name, "_mean")
+if (!group1_mean_col %in% names(significant_gt)) group1_mean_col <- "ALS_mean"
+if (!group2_mean_col %in% names(significant_gt)) group2_mean_col <- "Control_mean"
+
 cluster_summary <- cluster_assignments_df %>%
   left_join(
     significant_gt %>%
@@ -237,12 +243,6 @@ cluster_summary <- cluster_assignments_df %>%
       summarise(
         n_mutations = n(),
         avg_log2FC = mean(log2_fold_change, na.rm = TRUE),
-        # Detect group mean columns dynamically
-        group1_mean_col <- paste0(group1_name, "_mean")
-        group2_mean_col <- paste0(group2_name, "_mean")
-        if (!group1_mean_col %in% names(significant_gt)) group1_mean_col <- "ALS_mean"
-        if (!group2_mean_col %in% names(significant_gt)) group2_mean_col <- "Control_mean"
-        
         avg_group1_mean = mean(!!sym(group1_mean_col), na.rm = TRUE),
         avg_group2_mean = mean(!!sym(group2_mean_col), na.rm = TRUE),
         # Backward compatibility

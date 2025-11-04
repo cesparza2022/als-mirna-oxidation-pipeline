@@ -84,31 +84,19 @@ log_info(paste("Loaded family summary:", nrow(family_summary), "families"))
 log_info(paste("Loaded family comparison:", nrow(family_comparison), "families"))
 
 # Detect group names from family_comparison columns
-# Look for group1_mean_vaf and group2_mean_vaf, or fallback to als_mean_vaf/control_mean_vaf
-if ("group1_mean_vaf" %in% names(family_comparison) && "group2_mean_vaf" %in% names(family_comparison)) {
-  # Extract group names from column names (remove _mean_vaf suffix)
-  group1_name <- str_replace("group1", "group1", 
-    if ("group1_mean_vaf" %in% names(family_comparison)) {
-      # Try to infer from other columns or use defaults
-      if ("avg_group1_mean" %in% names(family_summary)) {
-        str_replace(names(family_summary)[str_detect(names(family_summary), "avg_.*_mean")][1], "avg_|_mean", "")
-      } else {
-        "Group1"
-      }
-    } else {
-      "Group1"
-    })
-  group2_name <- "Group2"
-  
-  # Try to extract from column names in family_summary
-  mean_cols <- names(family_summary)[str_detect(names(family_summary), "avg_.*_mean$")]
-  if (length(mean_cols) >= 2) {
-    group_names <- str_replace(mean_cols, "avg_|_mean", "")
-    group_names <- group_names[!group_names %in% c("ALS", "Control")][1:2]
-    if (length(group_names) >= 2) {
-      group1_name <- group_names[1]
-      group2_name <- group_names[2]
-    }
+# Try to extract from column names in family_summary first (most reliable)
+mean_cols <- names(family_summary)[str_detect(names(family_summary), "avg_.*_mean$")]
+if (length(mean_cols) >= 2) {
+  group_names <- str_replace(mean_cols, "avg_|_mean", "")
+  # Remove backward compatibility columns if dynamic names exist
+  group_names <- group_names[!group_names %in% c("ALS", "Control")]
+  if (length(group_names) >= 2) {
+    group1_name <- sort(group_names)[1]
+    group2_name <- sort(group_names)[2]
+  } else {
+    # Fallback to ALS/Control
+    group1_name <- "ALS"
+    group2_name <- "Control"
   }
 } else {
   # Fallback: use ALS/Control
