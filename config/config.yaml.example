@@ -65,14 +65,7 @@ analysis:
   # Confounder analysis and control
   confounders:
     adjust: true  # Whether to adjust for confounders in models
-    variables: ["age", "sex"]  # List of confounders to analyze/adjust for (Benjamini-Hochberg)
-  
-  # Statistical assumptions validation
-  assumptions:
-    check_normality: true  # Perform normality tests (Shapiro-Wilk, KS)
-    check_variance_homogeneity: true  # Perform variance homogeneity tests (Levene's, Bartlett's)
-    generate_diagnostic_plots: true  # Generate Q-Q plots and histograms
-    auto_select_test: true  # Automatically select parametric vs non-parametric test
+    variables: ["age", "sex"]  # List of confounders to analyze/adjust for
   
   # Batch effect analysis and correction
   batch_correction:
