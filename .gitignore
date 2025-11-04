@@ -158,3 +158,5 @@ all_matches*.csv
 # Remove test files
 test_*.sh
 test_*.md
+.taskmaster/
+.cursor/
