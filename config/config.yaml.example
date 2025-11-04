@@ -48,7 +48,24 @@ analysis:
   
   # Statistical parameters
   alpha: 0.05  # Significance threshold
-  fdr_method: "BH"  # FDR correction method (Benjamini-Hochberg)
+  fdr_method: "BH"  # FDR correction method
+  
+  # Statistical assumptions validation
+  assumptions:
+    check_normality: true  # Perform normality tests (Shapiro-Wilk, KS)
+    check_variance_homogeneity: true  # Perform variance homogeneity tests (Levene's, Bartlett's)
+    generate_diagnostic_plots: true  # Generate Q-Q plots and histograms
+    auto_select_test: true  # Automatically select parametric vs non-parametric test
+  
+  # Batch effect analysis and correction
+  batch_correction:
+    method: "none"  # Options: "none", "mean_centering", "combat", "limma"
+    pvalue_threshold: 0.05  # p-value threshold for detecting batch effects
+  
+  # Confounder analysis and control
+  confounders:
+    adjust: true  # Whether to adjust for confounders in models
+    variables: ["age", "sex"]  # List of confounders to analyze/adjust for (Benjamini-Hochberg)
   
   # Statistical assumptions validation
   assumptions:
