@@ -48,8 +48,15 @@ output_roc_figure <- snakemake@output[["roc_figure"]]
 
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
+log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step3)) config$analysis$log2fc_threshold_step3 else 1.0
+seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
+seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
 color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
 color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
+
+log_info(paste("Significance threshold (FDR):", alpha))
+log_info(paste("Log2FC threshold (minimum):", log2fc_threshold))
+log_info(paste("Seed region: positions", seed_start, "-", seed_end))
 
 log_info(paste("Input statistical:", input_statistical))
 log_info(paste("Input VAF filtered:", input_vaf_filtered))
@@ -64,8 +71,16 @@ log_subsection("Loading data")
 statistical_results <- read_csv(input_statistical, show_col_types = FALSE)
 vaf_data <- read_csv(input_vaf_filtered, show_col_types = FALSE)
 
+# Normalize column names (handle different formats)
+if ("miRNA name" %in% names(vaf_data)) {
+  vaf_data <- vaf_data %>% rename(miRNA_name = `miRNA name`)
+}
+if ("pos:mut" %in% names(vaf_data)) {
+  vaf_data <- vaf_data %>% rename(pos.mut = `pos:mut`)
+}
+
 # Extract sample groups
-sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut"))
+sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
 sample_groups <- tibble(sample_id = sample_cols) %>%
   mutate(
     group = case_when(
@@ -88,20 +103,21 @@ log_info(paste("Control samples:", length(control_samples)))
 
 log_subsection("Preparing data for ROC analysis")
 
-# Filter significant G>T mutations in seed region
+# Filter significant G>T mutations in seed region (same criteria as Step 3)
 significant_gt <- statistical_results %>%
   filter(
     str_detect(pos.mut, ":GT$"),
     !is.na(t_test_fdr) | !is.na(wilcoxon_fdr),
     (t_test_fdr < alpha | wilcoxon_fdr < alpha),
     !is.na(log2_fold_change),
-    log2_fold_change > 0  # Higher in ALS
+    log2_fold_change > log2fc_threshold  # Higher in ALS (configurable threshold)
   ) %>%
   mutate(
     position = as.numeric(str_extract(pos.mut, "^\\d+")),
-    in_seed = position >= 2 & position <= 8
+    in_seed = position >= seed_start & position <= seed_end
   ) %>%
   filter(in_seed == TRUE) %>%
+  distinct(miRNA_name, pos.mut, .keep_all = TRUE) %>%
   arrange(desc(log2_fold_change)) %>%
   head(50)  # Top 50 for ROC analysis
 
@@ -120,9 +136,9 @@ for (i in 1:min(nrow(significant_gt), 30)) {  # Top 30 for computational efficie
   mirna <- significant_gt$miRNA_name[i]
   pos_mut <- significant_gt$pos.mut[i]
   
-  # Get data for this SNV
+  # Get data for this SNV (match by miRNA_name and pos.mut)
   snv_data <- vaf_data %>%
-    filter(paste(miRNA_name, pos.mut, sep = "|") == snv_id) %>%
+    filter(miRNA_name == mirna & pos.mut == pos_mut) %>%
     select(all_of(sample_cols))
   
   if (nrow(snv_data) == 0) next
@@ -192,8 +208,10 @@ if (nrow(top_biomarkers) > 0) {
   
   for (i in 1:nrow(top_biomarkers)) {
     snv_id <- top_biomarkers$SNV_id[i]
+    mirna <- top_biomarkers$miRNA_name[i]
+    pos_mut <- top_biomarkers$pos.mut[i]
     snv_data <- vaf_data %>%
-      filter(paste(miRNA_name, pos.mut, sep = "|") == snv_id) %>%
+      filter(miRNA_name == mirna & pos.mut == pos_mut) %>%
       select(all_of(sample_cols))
     
     if (nrow(snv_data) > 0) {
@@ -267,8 +285,10 @@ roc_curves <- list()
 # Individual ROC curves
 for (i in 1:nrow(top_5)) {
   snv_id <- top_5$SNV_id[i]
+  mirna <- top_5$miRNA_name[i]
+  pos_mut <- top_5$pos.mut[i]
   snv_data <- vaf_data %>%
-    filter(paste(miRNA_name, pos.mut, sep = "|") == snv_id) %>%
+    filter(miRNA_name == mirna & pos.mut == pos_mut) %>%
     select(all_of(sample_cols))
   
   if (nrow(snv_data) == 0) next
