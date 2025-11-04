@@ -166,6 +166,28 @@ rule step2_generate_summary_tables:
         SCRIPTS_STEP2 + "/04_generate_summary_tables.R"
 
 # ============================================================================
+# RULE: Position-Specific Analysis (Step 2.5)
+# ============================================================================
+
+rule step2_position_specific_analysis:
+    input:
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
+        fallback_data = INPUT_DATA_FALLBACK,
+        functions = FUNCTIONS_COMMON,
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
+    output:
+        table = OUTPUT_TABLES_STATISTICAL + "/S2_position_specific_statistics.csv",
+        figure = OUTPUT_FIGURES + "/step2_position_specific_distribution.png"
+    params:
+        functions = FUNCTIONS_COMMON,
+        group_functions = GROUP_FUNCTIONS,
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
+    log:
+        OUTPUT_LOGS + "/position_specific_analysis.log"
+    script:
+        SCRIPTS_STEP2 + "/05_position_specific_analysis.R"
+
+# ============================================================================
 # AGGREGATE RULE: All Step 2 outputs
 # ============================================================================
 
@@ -181,6 +203,9 @@ rule all_step2:
         # Statistical results (complete)
         OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
         OUTPUT_TABLES_STATISTICAL + "/S2_effect_sizes.csv",
+        # NEW: Position-specific analysis
+        OUTPUT_TABLES_STATISTICAL + "/S2_position_specific_statistics.csv",
+        OUTPUT_FIGURES + "/step2_position_specific_distribution.png",
         # Figures
         OUTPUT_FIGURES + "/step2_volcano_plot.png",
         OUTPUT_FIGURES + "/step2_effect_size_distribution.png",
