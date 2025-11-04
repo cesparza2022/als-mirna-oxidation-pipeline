@@ -297,6 +297,7 @@ See `config/config.yaml.example` for detailed documentation.
 
 ### Essential Documentation
 * **📊 Statistical Methodology**: [docs/METHODOLOGY.md](docs/METHODOLOGY.md) - Comprehensive documentation of statistical methods, assumptions validation, batch effects, and confounders
+* **🧪 Testing Plan**: [TESTING_PLAN.md](TESTING_PLAN.md) - Step-by-step testing plan for validating Phase 1 critical corrections
 * **📋 Questions Answered**: [SUMMARY_QUESTIONS_STEPS_3-7.md](SUMMARY_QUESTIONS_STEPS_3-7.md) - Executive summary of questions answered by Steps 3-7
 * **📖 Detailed Review**: [REVIEW_STEPS_3-7.md](REVIEW_STEPS_3-7.md) - Exhaustive review of Steps 3-7
 * **🔧 Software Versions**: [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) - All software and package versions
