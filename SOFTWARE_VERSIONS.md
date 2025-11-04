@@ -89,14 +89,14 @@ This document lists all software versions used in the pipeline to ensure reprodu
 
 ```bash
 # Clone repository
-git clone https://github.com/cesparza2022/als-mirna-oxidation-pipeline.git
-cd als-mirna-oxidation-pipeline/final_analysis/pipeline_definitivo/snakemake_pipeline
+git clone https://github.com/cesparza2022/miRNA-oxidation-pipeline.git
+cd miRNA-oxidation-pipeline
 
 # Create environment from environment.yml
 conda env create -f environment.yml
 
 # Activate environment
-conda activate als_mirna_pipeline
+conda activate mirna_oxidation_pipeline
 
 # Verify installations
 R --version  # Should show R 4.3.2

@@ -1,11 +1,11 @@
 # Configuration file for Snakemake Pipeline
-# ALS miRNA Oxidation Analysis Pipeline
+# miRNA Oxidation Analysis Pipeline
 #
 # COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
 
 # Project information
 project:
-  name: "ALS miRNA Oxidation Analysis"
+  name: "miRNA Oxidation Analysis"
   version: "1.0.0"
   description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
 
@@ -76,13 +76,13 @@ conda_envs:
   r_base: "envs/r_base.yaml"
   r_analysis: "envs/r_analysis.yaml"
 
-# ALS miRNA Oxidation Analysis Pipeline
+# miRNA Oxidation Analysis Pipeline
 #
 # COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
 
 # Project information
 project:
-  name: "ALS miRNA Oxidation Analysis"
+  name: "miRNA Oxidation Analysis"
   version: "1.0.0"
   description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
 
@@ -153,13 +153,13 @@ conda_envs:
   r_base: "envs/r_base.yaml"
   r_analysis: "envs/r_analysis.yaml"
 
-# ALS miRNA Oxidation Analysis Pipeline
+# miRNA Oxidation Analysis Pipeline
 #
 # COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
 
 # Project information
 project:
-  name: "ALS miRNA Oxidation Analysis"
+  name: "miRNA Oxidation Analysis"
   version: "1.0.0"
   description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
 

@@ -1,4 +1,4 @@
-name: als_mirna_pipeline
+name: mirna_oxidation_pipeline
 channels:
   - conda-forge
   - bioconda

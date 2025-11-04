@@ -1,5 +1,5 @@
 # ============================================================================
-# SNAKEMAKE PIPELINE: ALS miRNA Oxidation Analysis
+# SNAKEMAKE PIPELINE: miRNA Oxidation Analysis
 # ============================================================================
 # Main orchestrator for the complete analysis pipeline
 #

@@ -1,10 +1,10 @@
-# 🧬 ALS miRNA Oxidation Analysis Pipeline
+# 🧬 miRNA Oxidation Analysis Pipeline
 
 [![Snakemake](https://img.shields.io/badge/Snakemake-7.0+-green.svg)](https://snakemake.github.io)
 [![R](https://img.shields.io/badge/R-4.3+-blue.svg)](https://www.r-project.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Reproducible Snakemake pipeline for analyzing G>T oxidation patterns in miRNAs associated with ALS.
+Reproducible Snakemake pipeline for analyzing G>T oxidation patterns in miRNAs.
 
 ## 🚀 Quick Start
 
@@ -12,14 +12,14 @@ Reproducible Snakemake pipeline for analyzing G>T oxidation patterns in miRNAs a
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/cesparza2022/als-mirna-oxidation-pipeline.git
-cd als-mirna-oxidation-pipeline
+git clone https://github.com/cesparza2022/miRNA-oxidation-pipeline.git
+cd miRNA-oxidation-pipeline
 
 # 2. Run automated setup script
 bash setup.sh --mamba  # Use mamba (faster) or --conda for conda
 
 # 3. Activate environment
-conda activate als_mirna_pipeline
+conda activate mirna_oxidation_pipeline
 
 # 4. Configure data (edit path to your CSV file)
 nano config/config.yaml  # Update the path to your data file
@@ -57,8 +57,8 @@ results/
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/cesparza2022/als-mirna-oxidation-pipeline.git
-cd als-mirna-oxidation-pipeline
+git clone https://github.com/cesparza2022/miRNA-oxidation-pipeline.git
+cd miRNA-oxidation-pipeline
 
 # 2. Create conda/mamba environment
 conda env create -f environment.yml
@@ -66,7 +66,7 @@ conda env create -f environment.yml
 # mamba env create -f environment.yml
 
 # 3. Activate environment
-conda activate als_mirna_pipeline
+conda activate mirna_oxidation_pipeline
 
 # 4. Configure data
 cp config/config.yaml.example config/config.yaml
@@ -190,7 +190,7 @@ hsa-miR-1-1,2:G>A,2,95,1,75,...
 conda env create -f environment.yml
 
 # 2. Activate environment
-conda activate als_mirna_pipeline
+conda activate mirna_oxidation_pipeline
 
 # 3. Verify installation
 R --version  # Should show R 4.3.2+
@@ -304,12 +304,12 @@ See `config/config.yaml.example` for detailed documentation.
 - Use absolute paths or paths relative to `snakemake_dir`
 
 ### Error: "R package not found"
-- Activate conda environment: `conda activate als_mirna_pipeline`
+- Activate conda environment: `conda activate mirna_oxidation_pipeline`
 - Reinstall: `conda env update -f environment.yml --prune`
 
 ### Error: "Snakemake not found"
 
-* Verify that the environment is activated: `conda activate als_mirna_pipeline`
+* Verify that the environment is activated: `conda activate mirna_oxidation_pipeline`
 * If still not installed:
   ```bash
   conda install -c bioconda -c conda-forge snakemake
@@ -336,7 +336,7 @@ conda install mamba -n base -c conda-forge
 bash setup.sh --check
 
 # Or manually
-conda activate als_mirna_pipeline
+conda activate mirna_oxidation_pipeline
 snakemake --version
 R --version
 Rscript -e "library(ggplot2); library(dplyr); cat('✅ OK\n')"
