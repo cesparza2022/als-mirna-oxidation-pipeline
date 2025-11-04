@@ -154,8 +154,21 @@ if (!is.null(metadata_file) && file.exists(metadata_file)) {
 
 log_subsection("Identifying samples and groups")
 
+# Get metadata file path from Snakemake params
+metadata_file <- if (!is.null(snakemake@params[["metadata_file"]])) {
+  metadata_path <- snakemake@params[["metadata_file"]]
+  if (metadata_path != "" && file.exists(metadata_path)) {
+    log_info(paste("Using metadata file:", metadata_path))
+    metadata_path
+  } else {
+    NULL
+  }
+} else {
+  NULL
+}
+
 groups_df <- tryCatch({
-  extract_sample_groups(data)
+  extract_sample_groups(data, metadata_file = metadata_file)
 }, error = function(e) {
   handle_error(e, context = "Step 2.0b - Group Identification", exit_code = 1, log_file = log_file)
 })
