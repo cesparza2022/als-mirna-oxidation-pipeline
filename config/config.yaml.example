@@ -56,11 +56,11 @@ analysis:
     control: "grey60"  # Grey for control
     als: "#D62728"  # Red for ALS
   
-  # Figure settings
+  # Figure settings (for publication-quality figures)
   figure:
-    dpi: 300
-    width: 10
-    height: 8
+    dpi: 300  # High resolution for publications
+    width: 12  # Default width in inches
+    height: 10  # Default height in inches
     units: "in"
 
 # Resources
