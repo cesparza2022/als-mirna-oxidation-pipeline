@@ -36,19 +36,66 @@ FUNCTIONS_COMMON = SCRIPTS_UTILS + "/functions_common.R"
 GROUP_FUNCTIONS = SCRIPTS_UTILS + "/group_comparison.R"
 
 # ============================================================================
-# RULE: Statistical Comparisons
+# RULE: Batch Effect Analysis (Step 2.0)
+# ============================================================================
+
+rule step2_batch_effect_analysis:
+    input:
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
+        fallback_data = INPUT_DATA_FALLBACK,
+        functions = FUNCTIONS_COMMON
+    output:
+        batch_corrected = OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
+        report = OUTPUT_LOGS + "/batch_effect_report.txt",
+        pca_before = OUTPUT_FIGURES + "/step2_batch_effect_pca_before.png"
+    params:
+        functions = FUNCTIONS_COMMON,
+        group_functions = GROUP_FUNCTIONS
+    log:
+        OUTPUT_LOGS + "/batch_effect_analysis.log"
+    script:
+        SCRIPTS_STEP2 + "/00_batch_effect_analysis.R"
+
+# ============================================================================
+# RULE: Confounder Analysis (Step 2.0b)
+# ============================================================================
+
+rule step2_confounder_analysis:
+    input:
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
+        fallback_data = INPUT_DATA_FALLBACK,
+        functions = FUNCTIONS_COMMON
+    output:
+        report = OUTPUT_LOGS + "/confounder_analysis_report.txt",
+        group_balance = OUTPUT_TABLES_STATISTICAL + "/S2_group_balance.json",
+        balance_plot = OUTPUT_FIGURES + "/step2_group_balance.png"
+    params:
+        functions = FUNCTIONS_COMMON,
+        group_functions = GROUP_FUNCTIONS
+    log:
+        OUTPUT_LOGS + "/confounder_analysis.log"
+    script:
+        SCRIPTS_STEP2 + "/00_confounder_analysis.R"
+
+# ============================================================================
+# RULE: Statistical Comparisons (Step 2.1) - Updated with assumptions validation
 # ============================================================================
 
 rule step2_statistical_comparisons:
     input:
-        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Try VAF filtered first
-        fallback_data = INPUT_DATA_FALLBACK,  # Fallback to processed clean
-        functions = FUNCTIONS_COMMON
+        # Use batch-corrected data if available, otherwise original
+        batch_corrected = OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Fallback: Try VAF filtered
+        fallback_data = INPUT_DATA_FALLBACK,  # Fallback: processed clean
+        functions = FUNCTIONS_COMMON,
+        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R"
     output:
-        table = OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv"
+        table = OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
+        assumptions_report = OUTPUT_LOGS + "/statistical_assumptions_report.txt"
     params:
         functions = FUNCTIONS_COMMON,
-        group_functions = GROUP_FUNCTIONS
+        group_functions = GROUP_FUNCTIONS,
+        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R"
     log:
         OUTPUT_LOGS + "/statistical_comparisons.log"
     script:
@@ -115,6 +162,13 @@ rule step2_generate_summary_tables:
 
 rule all_step2:
     input:
+        # Pre-analysis (new critical steps)
+        OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
+        OUTPUT_LOGS + "/batch_effect_report.txt",
+        OUTPUT_FIGURES + "/step2_batch_effect_pca_before.png",
+        OUTPUT_LOGS + "/confounder_analysis_report.txt",
+        OUTPUT_TABLES_STATISTICAL + "/S2_group_balance.json",
+        OUTPUT_FIGURES + "/step2_group_balance.png",
         # Statistical results (complete)
         OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
         OUTPUT_TABLES_STATISTICAL + "/S2_effect_sizes.csv",
