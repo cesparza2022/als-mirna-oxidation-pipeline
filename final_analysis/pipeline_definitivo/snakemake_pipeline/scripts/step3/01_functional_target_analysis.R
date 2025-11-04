@@ -44,9 +44,14 @@ output_target_comparison <- snakemake@output[["target_comparison"]]
 
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
+log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold)) config$analysis$log2fc_threshold else 0.0
+seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
+seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
 
 log_info(paste("Input:", input_statistical))
 log_info(paste("Significance threshold (FDR):", alpha))
+log_info(paste("Log2FC threshold (minimum):", log2fc_threshold))
+log_info(paste("Seed region: positions", seed_start, "-", seed_end))
 
 ensure_output_dir(dirname(output_targets))
 
@@ -71,11 +76,11 @@ significant_gt <- statistical_results %>%
     !is.na(t_test_fdr) | !is.na(wilcoxon_fdr),
     (t_test_fdr < alpha | wilcoxon_fdr < alpha),
     !is.na(log2_fold_change),
-    log2_fold_change > 0  # Higher in ALS
+    log2_fold_change > log2fc_threshold  # Higher in ALS (configurable threshold)
   ) %>%
   mutate(
     position = as.numeric(str_extract(pos.mut, "^\\d+")),
-    in_seed = position >= 2 & position <= 8
+    in_seed = position >= seed_start & position <= seed_end
   ) %>%
   filter(in_seed == TRUE) %>%
   distinct(miRNA_name, pos.mut, .keep_all = TRUE)
@@ -113,12 +118,12 @@ target_analysis <- significant_gt %>%
     canonical_targets = paste0("TARGET_", miRNA_name, "_CANONICAL"),
     oxidized_targets = paste0("TARGET_", miRNA_name, "_OXIDIZED"),
     
-    # Categorize by position (positions 2-3 are most critical for target binding)
-    binding_impact = case_when(
-      position <= 3 ~ "Critical",
-      position <= 5 ~ "High",
-      TRUE ~ "Moderate"
-    ),
+        # Categorize by position (positions 2-3 are most critical for target binding)
+        binding_impact = case_when(
+          position <= (seed_start + 1) ~ "Critical",
+          position <= (seed_start + 3) ~ "High",
+          TRUE ~ "Moderate"
+        ),
     
     # Estimate functional impact (higher log2FC = more likely to affect function)
     functional_impact_score = abs(log2_fold_change) * (-log10(t_test_fdr + 1e-10))

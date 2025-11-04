@@ -51,6 +51,9 @@ output_figure_c <- snakemake@output[["figure_c"]]
 output_figure_d <- snakemake@output[["figure_d"]]
 
 config <- snakemake@config
+alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
+seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
+seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
 color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
 color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
 fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
@@ -101,9 +104,9 @@ top_pathways <- bind_rows(
                           Pathway_Label)
   )
 
-# Get statistics for caption
-n_significant_go <- sum(go_data$p.adjust < 0.05, na.rm = TRUE)
-n_significant_kegg <- sum(kegg_data$p.adjust < 0.05, na.rm = TRUE)
+    # Get statistics for caption
+    n_significant_go <- sum(go_data$p.adjust < alpha, na.rm = TRUE)
+    n_significant_kegg <- sum(kegg_data$p.adjust < alpha, na.rm = TRUE)
 top_richfactor <- round(max(top_pathways$RichFactor, na.rm = TRUE), 2)
 
 panel_a <- ggplot(top_pathways, aes(x = reorder(Pathway_Label, -log10(p.adjust)), 
@@ -115,7 +118,7 @@ panel_a <- ggplot(top_pathways, aes(x = reorder(Pathway_Label, -log10(p.adjust))
   labs(
     title = "Top Enriched Pathways: Targets of Oxidized miRNAs",
     subtitle = paste("GO Biological Process & KEGG Pathways | Top 15 by significance |",
-                     n_significant_go, "GO terms,", n_significant_kegg, "KEGG pathways significant (p.adj < 0.05)"),
+                     n_significant_go, "GO terms,", n_significant_kegg, "KEGG pathways significant (p.adj < ", alpha, ")"),
     x = "",
     y = "-Log10 Adjusted p-value",
     caption = paste("Max RichFactor =", top_richfactor, "| Analysis based on targets of",
@@ -264,12 +267,12 @@ nonseed_impact <- position_impact %>% filter(!in_seed) %>% summarise(total = sum
 seed_ratio <- if (nonseed_impact > 0) round(seed_impact / nonseed_impact, 2) else Inf
 
 panel_d <- ggplot(position_impact, aes(x = position, y = total_impact)) +
-  annotate("rect", xmin = 2 - 0.5, xmax = 8 + 0.5, 
+  annotate("rect", xmin = seed_start - 0.5, xmax = seed_end + 0.5, 
            ymin = -Inf, ymax = Inf, 
            fill = "#e3f2fd", alpha = 0.5) +
-  annotate("text", x = 5, 
+  annotate("text", x = (seed_start + seed_end) / 2, 
            y = max(position_impact$total_impact) * 0.95, 
-           label = "SEED REGION\n(positions 2-8)", 
+           label = paste0("SEED REGION\n(positions ", seed_start, "-", seed_end, ")"), 
            color = "gray40", size = 4, fontface = "bold") +
   geom_bar(stat = "identity", fill = color_gt, alpha = 0.85, width = 0.7) +
   geom_point(aes(size = n_mutations), color = "white", fill = color_gt, 

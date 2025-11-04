@@ -47,9 +47,12 @@ output_als_pathways <- snakemake@output[["als_pathways"]]
 output_heatmap <- snakemake@output[["heatmap"]]
 
 config <- snakemake@config
+alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
+pathway_padjust_threshold <- if (!is.null(config$analysis$pathway_enrichment$padjust_threshold)) config$analysis$pathway_enrichment$padjust_threshold else 0.1
 color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
 
 log_info(paste("Input:", input_targets))
+log_info(paste("Pathway significance threshold (p.adjust):", pathway_padjust_threshold))
 ensure_output_dir(dirname(output_go_enrichment))
 
 # ============================================================================
@@ -117,7 +120,7 @@ go_enrichment <- tibble(
   Description = str_extract(GO_TERMS, "(?<=: ).*"),
   GeneRatio = runif(length(GO_TERMS), 0.1, 0.8),
   BgRatio = runif(length(GO_TERMS), 0.05, 0.3),
-  pvalue = runif(length(GO_TERMS), 1e-6, 0.05),
+      pvalue = runif(length(GO_TERMS), 1e-6, alpha),
   p.adjust = runif(length(GO_TERMS), 1e-5, 0.1),
   qvalue = runif(length(GO_TERMS), 1e-5, 0.1),
   Count = round(runif(length(GO_TERMS), 10, 150))
@@ -193,7 +196,7 @@ heatmap_data <- bind_rows(
     select(Pathway = Pathway_Name, RichFactor, p.adjust, Count) %>%
     mutate(Category = "KEGG Pathway")
 ) %>%
-  filter(p.adjust < 0.1) %>%  # Filter significant
+      filter(p.adjust < pathway_padjust_threshold) %>%  # Filter significant (configurable)
   arrange(desc(RichFactor)) %>%
   head(20)  # Top 20
 
