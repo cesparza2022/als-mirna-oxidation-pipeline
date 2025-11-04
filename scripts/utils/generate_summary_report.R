@@ -8,14 +8,22 @@ library(yaml)
 library(jsonlite)
 library(dplyr)
 
-# Get command line arguments
-args <- commandArgs(trailingOnly = TRUE)
-config_file <- args[1]
-output_dir <- args[2]
-snakemake_dir <- args[3]
-
-if (is.na(config_file) || is.na(output_dir)) {
-  stop("Usage: Rscript generate_summary_report.R <config.yaml> <output_dir> <snakemake_dir>")
+# Check if running in Snakemake context
+if (exists("snakemake")) {
+  # Snakemake context: use snakemake object
+  config_file <- snakemake@params[["config_file"]]
+  output_dir <- snakemake@params[["output_dir"]]
+  snakemake_dir <- snakemake@params[["snakemake_dir"]]
+} else {
+  # Command-line context: use commandArgs
+  args <- commandArgs(trailingOnly = TRUE)
+  config_file <- args[1]
+  output_dir <- args[2]
+  snakemake_dir <- args[3]
+  
+  if (is.na(config_file) || is.na(output_dir)) {
+    stop("Usage: Rscript generate_summary_report.R <config.yaml> <output_dir> <snakemake_dir>")
+  }
 }
 
 # Create output directory
