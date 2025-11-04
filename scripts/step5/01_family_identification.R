@@ -18,6 +18,17 @@ suppressPackageStartupMessages({
 # Load common functions
 source(snakemake@params[["functions"]], local = TRUE)
 
+# Load group comparison utilities for dynamic group detection
+group_functions_path <- if (!is.null(snakemake@params[["group_functions"]])) {
+  snakemake@params[["group_functions"]]
+} else {
+  "scripts/utils/group_comparison.R"
+}
+
+if (file.exists(group_functions_path)) {
+  source(group_functions_path, local = TRUE)
+}
+
 # Initialize logging
 log_file <- if (length(snakemake@log) > 0) snakemake@log[[1]] else {
   file.path(dirname(snakemake@output[[1]]), "family_identification.log")
@@ -100,21 +111,52 @@ if ("pos:mut" %in% names(vaf_data)) {
 
 # Extract sample groups
 sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
-sample_groups <- tibble(sample_id = sample_cols) %>%
-  mutate(
-    group = case_when(
-      str_detect(sample_id, regex("ALS", ignore_case = TRUE)) ~ "ALS",
-      str_detect(sample_id, regex("control|Control|CTRL", ignore_case = TRUE)) ~ "Control",
-      TRUE ~ NA_character_
-    )
-  ) %>%
-  filter(!is.na(group))
+# Get metadata file path from Snakemake params if available
+metadata_file <- if (!is.null(snakemake@params[["metadata_file"]])) {
+  metadata_path <- snakemake@params[["metadata_file"]]
+  if (metadata_path != "" && file.exists(metadata_path)) {
+    log_info(paste("Using metadata file:", metadata_path))
+    metadata_path
+  } else {
+    NULL
+  }
+} else {
+  NULL
+}
 
-als_samples <- sample_groups %>% filter(group == "ALS") %>% pull(sample_id)
-control_samples <- sample_groups %>% filter(group == "Control") %>% pull(sample_id)
+# Use flexible group extraction
+sample_groups <- tryCatch({
+  extract_sample_groups(vaf_data, metadata_file = metadata_file)
+}, error = function(e) {
+  handle_error(e, context = "Step 5.1 - Group Identification", exit_code = 1, log_file = log_file)
+})
 
-log_info(paste("ALS samples:", length(als_samples)))
-log_info(paste("Control samples:", length(control_samples)))
+# Get dynamic group names
+unique_groups <- sort(unique(sample_groups$group))
+if (length(unique_groups) < 2) {
+  stop("Need at least 2 groups for family analysis. Found:", paste(unique_groups, collapse = ", "))
+}
+
+group1_name <- unique_groups[1]
+group2_name <- unique_groups[2]
+
+group1_samples <- sample_groups %>% filter(group == group1_name) %>% pull(sample_id)
+group2_samples <- sample_groups %>% filter(group == group2_name) %>% pull(sample_id)
+
+log_info(paste("Group 1 (", group1_name, ") samples:", length(group1_samples)))
+log_info(paste("Group 2 (", group2_name, ") samples:", length(group2_samples)))
+
+# For backward compatibility
+if (group1_name == "ALS" || str_detect(group1_name, regex("als|disease", ignore_case = TRUE))) {
+  als_samples <- group1_samples
+  control_samples <- group2_samples
+} else if (group2_name == "ALS" || str_detect(group2_name, regex("als|disease", ignore_case = TRUE))) {
+  als_samples <- group2_samples
+  control_samples <- group1_samples
+} else {
+  als_samples <- group1_samples
+  control_samples <- group2_samples
+}
 
 # ============================================================================
 # IDENTIFY FAMILIES
@@ -176,13 +218,16 @@ log_success(paste("Family summary saved:", output_family_summary))
 # FAMILY COMPARISON TABLE (ALS vs Control)
 # ============================================================================
 
-log_subsection("Creating family comparison table (ALS vs Control)")
+log_subsection(paste("Creating family comparison table (", group1_name, " vs ", group2_name, ")"))
 
 # Calculate per-family statistics for ALS vs Control
 family_comparison <- vaf_data %>%
   filter(in_seed == TRUE) %>%  # Focus on seed region
   mutate(
-    # Calculate per-sample VAF values
+    # Calculate per-sample VAF values (using dynamic group names)
+    group1_mean_vaf = rowMeans(select(., all_of(group1_samples)), na.rm = TRUE),
+    group2_mean_vaf = rowMeans(select(., all_of(group2_samples)), na.rm = TRUE),
+    # Backward compatibility
     als_mean_vaf = rowMeans(select(., all_of(als_samples)), na.rm = TRUE),
     control_mean_vaf = rowMeans(select(., all_of(control_samples)), na.rm = TRUE)
   ) %>%
@@ -190,6 +235,11 @@ family_comparison <- vaf_data %>%
   summarise(
     n_miRNAs = n_distinct(miRNA_name),
     n_mutations = n(),
+    group1_mean_vaf = mean(group1_mean_vaf, na.rm = TRUE),
+    group2_mean_vaf = mean(group2_mean_vaf, na.rm = TRUE),
+    group1_median_vaf = median(group1_mean_vaf, na.rm = TRUE),
+    group2_median_vaf = median(group2_mean_vaf, na.rm = TRUE),
+    # Backward compatibility
     als_mean_vaf = mean(als_mean_vaf, na.rm = TRUE),
     control_mean_vaf = mean(control_mean_vaf, na.rm = TRUE),
     als_median_vaf = median(als_mean_vaf, na.rm = TRUE),
@@ -197,8 +247,10 @@ family_comparison <- vaf_data %>%
     .groups = "drop"
   ) %>%
   mutate(
-    vaf_difference = als_mean_vaf - control_mean_vaf,
-    fold_change = ifelse(control_mean_vaf > 0, als_mean_vaf / control_mean_vaf, NA_real_),
+    vaf_difference = group1_mean_vaf - group2_mean_vaf,
+    fold_change = ifelse(group2_mean_vaf > 0, group1_mean_vaf / group2_mean_vaf, NA_real_),
+    # Backward compatibility
+    vaf_difference_legacy = als_mean_vaf - control_mean_vaf,
     log2_fold_change = log2(fold_change)
   ) %>%
   arrange(desc(abs(vaf_difference)))
