@@ -95,7 +95,7 @@ p <- ggplot(summary_tbl, aes(x = region, y = total_mutations, fill = region)) +
   theme_professional
 
 log_subsection("Generating figure")
-ggsave(output_figure, p, width = 10, height = 7, dpi = 300, bg = "white")
+ggsave(output_figure, p, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Figure saved:", output_figure))
 
 log_success("Panel F completed successfully")
@@ -197,7 +197,7 @@ p <- ggplot(summary_tbl, aes(x = region, y = total_mutations, fill = region)) +
   theme_professional
 
 log_subsection("Generating figure")
-ggsave(output_figure, p, width = 10, height = 7, dpi = 300, bg = "white")
+ggsave(output_figure, p, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Figure saved:", output_figure))
 
 log_success("Panel F completed successfully")
@@ -299,7 +299,7 @@ p <- ggplot(summary_tbl, aes(x = region, y = total_mutations, fill = region)) +
   theme_professional
 
 log_subsection("Generating figure")
-ggsave(output_figure, p, width = 10, height = 7, dpi = 300, bg = "white")
+ggsave(output_figure, p, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Figure saved:", output_figure))
 
 log_success("Panel F completed successfully")

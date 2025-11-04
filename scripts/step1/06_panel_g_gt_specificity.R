@@ -99,7 +99,7 @@ p <- ggplot(spec_tbl, aes(x = category, y = percentage, fill = category)) +
   theme(legend.position = "none")
 
 log_subsection("Generating figure")
-ggsave(output_figure, p, width = 9, height = 7, dpi = 300, bg = "white")
+ggsave(output_figure, p, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Figure saved:", output_figure))
 
 log_success("Panel G completed successfully")
@@ -205,7 +205,7 @@ p <- ggplot(spec_tbl, aes(x = category, y = percentage, fill = category)) +
   theme(legend.position = "none")
 
 log_subsection("Generating figure")
-ggsave(output_figure, p, width = 9, height = 7, dpi = 300, bg = "white")
+ggsave(output_figure, p, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Figure saved:", output_figure))
 
 log_success("Panel G completed successfully")
@@ -311,7 +311,7 @@ p <- ggplot(spec_tbl, aes(x = category, y = percentage, fill = category)) +
   theme(legend.position = "none")
 
 log_subsection("Generating figure")
-ggsave(output_figure, p, width = 9, height = 7, dpi = 300, bg = "white")
+ggsave(output_figure, p, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Figure saved:", output_figure))
 
 log_success("Panel G completed successfully")

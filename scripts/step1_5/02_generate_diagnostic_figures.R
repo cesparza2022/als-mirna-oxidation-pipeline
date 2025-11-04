@@ -175,12 +175,9 @@ qc_fig2 <- ggplot(stats_by_type, aes(x = reorder(Mutation_Type, -N_Filtered), y 
   geom_bar(stat = "identity", fill = "#667eea", alpha = 0.85) +
   geom_text(aes(label = format(N_Filtered, big.mark = ",")), 
             vjust = -0.5, fontface = "bold", size = 4) +
-  theme_classic(base_size = 14) +
+  theme_professional +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
-    axis.title = element_text(face = "bold", size = 15),
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 17),
-    plot.subtitle = element_text(hjust = 0.5, size = 13, color = "gray40")
+    axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
   labs(
     title = "QC FIGURE 2: Filter Impact by Mutation Type",
@@ -234,11 +231,8 @@ qc_fig4 <- ggplot(comparison_data, aes(x = Dataset, y = Total_Values / 1e6, fill
             vjust = -0.5, fontface = "bold", size = 5) +
   scale_fill_manual(values = c("Original (Step 1)" = "gray60", 
                                "VAF-Filtered (Step 1.5)" = "#2CA02C")) +
-  theme_classic(base_size = 14) +
+  theme_professional +
   theme(
-    axis.title = element_text(face = "bold", size = 15),
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 17),
-    plot.subtitle = element_text(hjust = 0.5, size = 13, color = "gray40"),
     legend.position = "none"
   ) +
   labs(
@@ -250,7 +244,7 @@ qc_fig4 <- ggplot(comparison_data, aes(x = Dataset, y = Total_Values / 1e6, fill
     y = "Total Valid Values (Millions)"
   )
 
-ggsave(output_qc_fig4, qc_fig4, width = 12, height = 9, dpi = fig_dpi)
+ggsave(output_qc_fig4, qc_fig4, width = fig_width, height = fig_height, dpi = fig_dpi)
 
 cat("   ✅ 4 QC figures saved\n")
 
@@ -316,14 +310,12 @@ fig2 <- ggplot(position_all, aes(x = factor(Position), y = Mutation_Type, fill =
     name = "log10(Counts)",
     labels = comma
   ) +
-  theme_minimal(base_size = 13) +
+  theme_professional +
   theme(
-    axis.text.x = element_text(angle = 0, hjust = 0.5, face = "bold", size = 12),
-    axis.text.y = element_text(face = "bold", size = 13,
-                              color = ifelse(levels(position_all$Mutation_Type) == "GT", color_gt, "black")),
-    axis.title = element_text(face = "bold", size = 15),
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 17),
-    plot.subtitle = element_text(hjust = 0.5, size = 13, color = "gray40"),
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    axis.text.y = element_text(
+      color = ifelse(levels(position_all$Mutation_Type) == "GT", color_gt, "black")
+    ),
     panel.grid = element_blank(),
     legend.position = "right"
   ) +
