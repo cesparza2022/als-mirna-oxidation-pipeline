@@ -1,98 +1,80 @@
-# 🧬 ALS miRNA Oxidation Analysis Pipeline
+# 🧬 miRNA Oxidation Analysis Pipeline
 
 [![Snakemake](https://img.shields.io/badge/Snakemake-7.0+-green.svg)](https://snakemake.github.io)
 [![R](https://img.shields.io/badge/R-4.3+-blue.svg)](https://www.r-project.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Reproducible Snakemake pipeline for analyzing G>T oxidation patterns in miRNAs associated with ALS.
+A comprehensive, reproducible Snakemake pipeline for analyzing G>T oxidation patterns in microRNAs (miRNAs), with applications in neurodegenerative disease research (e.g., ALS).
+
+## 🎯 Overview
+
+This pipeline analyzes 8-oxoguanine (8-oxoG) damage in miRNAs, identified through G>T mutations, which are biomarkers of oxidative stress. The pipeline performs:
+
+- **Quality Control**: VAF filtering to remove technical artifacts
+- **Statistical Analysis**: Group comparisons with assumption validation
+- **Position-Specific Analysis**: Individual position analysis (1-24)
+- **Clustering Analysis**: Identification of miRNA groups with similar oxidation patterns
+- **Family Analysis**: miRNA family-level oxidation patterns
+- **Expression Correlation**: Relationship between expression and oxidation
+- **Functional Analysis**: Target prediction and pathway enrichment
+- **Biomarker Analysis**: ROC curves and diagnostic signatures (integrates all analyses)
 
 ## 🚀 Quick Start
 
-### Opción 1: Setup Automático (Recomendado) ⚡
+### Prerequisites
+
+- **Conda** (Miniconda or Anaconda) or **Mamba** - [Install Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+  - Mamba is faster and recommended: [Install Mamba](https://mamba.readthedocs.io/en/latest/installation.html)
+
+### Installation
+
+#### Option 1: Automated Setup (Recommended)
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/cesparza2022/als-mirna-oxidation-pipeline.git
-cd als-mirna-oxidation-pipeline/final_analysis/pipeline_definitivo/snakemake_pipeline
+git clone https://github.com/cesparza2022/miRNA-oxidation-pipeline.git
+cd miRNA-oxidation-pipeline
 
-# 2. Ejecutar script de setup automático
-bash setup.sh --mamba  # Usa mamba (más rápido) o --conda para conda
+# 2. Run automated setup script
+bash setup.sh --mamba  # Use mamba (faster) or --conda for conda
 
-# 3. Activar ambiente
-conda activate als_mirna_pipeline
+# 3. Activate environment
+conda activate mirna_oxidation_pipeline
 
-# 4. Configurar datos (editar ruta a tu archivo CSV)
-nano config/config.yaml  # Actualiza la ruta a tu archivo de datos
-
-# 5. Ejecutar pipeline (todo se genera automáticamente)
-snakemake -j 4
-
-# ✅ ¡Listo! Los resultados están en results/
-```
-
-**📁 Estructura de Output Automática:**
-```
-results/
-├── step1/final/figures/      # 6 figuras PNG
-├── step1/final/tables/       # 6 tablas CSV
-├── step1_5/final/figures/    # 11 figuras PNG
-├── step1_5/final/tables/     # Datos filtrados y reportes
-├── step2/final/figures/      # 2 figuras PNG
-├── step2/final/tables/       # Resultados estadísticos
-├── viewers/                  # 3 viewers HTML interactivos
-├── summary/                  # Reporte consolidado
-└── validation/              # Reportes de validación
-```
-
-**Ver resultados:**
-```bash
-# Abrir viewers HTML
-open viewers/step1_viewer.html
-open summary/summary_report.html
-```
-
-### Opción 2: Setup Manual
-
-```bash
-# 1. Clone repository
-git clone https://github.com/cesparza2022/als-mirna-oxidation-pipeline.git
-cd als-mirna-oxidation-pipeline/final_analysis/pipeline_definitivo/snakemake_pipeline
-
-# 2. Crear ambiente conda/mamba
-conda env create -f environment.yaml
-# O con mamba (más rápido):
-# mamba env create -f environment.yaml
-
-# 3. Activar ambiente
-conda activate als_mirna_pipeline
-
-# 4. Configurar datos
+# 4. Configure data (edit path to your CSV file)
 cp config/config.yaml.example config/config.yaml
-nano config/config.yaml  # Actualiza las rutas a tus datos
+nano config/config.yaml  # Update the path to your data file
 
-# 5. Ejecutar pipeline
+# 5. Run pipeline
+snakemake -j 4
+
+# ✅ Done! Results are in results/
+```
+
+#### Option 2: Manual Setup
+
+```bash
+# 1. Clone repository
+git clone https://github.com/cesparza2022/miRNA-oxidation-pipeline.git
+cd miRNA-oxidation-pipeline
+
+# 2. Create conda/mamba environment
+conda env create -f environment.yml
+# Or with mamba (faster):
+# mamba env create -f environment.yml
+
+# 3. Activate environment
+conda activate mirna_oxidation_pipeline
+
+# 4. Configure data
+cp config/config.yaml.example config/config.yaml
+nano config/config.yaml  # Update paths to your data
+
+# 5. Run pipeline
 snakemake -j 4
 ```
 
-**📚 Para instrucciones detalladas, consulta [SETUP.md](SETUP.md)**
-
-## 📋 Requirements
-
-### Software Requerido
-
-- **Conda** (Miniconda o Anaconda) o **Mamba** - [Instalar Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-  - Mamba es más rápido y recomendado: [Instalar Mamba](https://mamba.readthedocs.io/en/latest/installation.html)
-
-### Dependencias del Pipeline (instaladas automáticamente)
-
-- **Python** 3.10+
-- **Snakemake** 7.32+
-- **R** 4.3.2+ (instalado via conda)
-- **Paquetes R:** ggplot2, dplyr, pheatmap, patchwork, ggrepel, viridis, y más
-
-**Nota:** Todas las dependencias se instalan automáticamente al crear el ambiente conda/mamba.
-
-## 📊 Input Format
+## 📊 Input Data Format
 
 The pipeline expects a CSV file with the following structure:
 
@@ -103,9 +85,38 @@ hsa-miR-1-1,2:G>A,2,95,1,75,...
 ```
 
 **Required columns:**
-- `miRNA name`: miRNA identifier
-- `pos:mut`: Position and mutation (format: `position:mutation`)
+- `miRNA name` (or `miRNA_name`): miRNA identifier
+- `pos:mut` (or `pos.mut`): Position and mutation (format: `position:mutation`)
 - Sample columns: `SampleName_SNV` and `SampleName (PM+1MM+2MM)` pairs
+
+**See:** [Data Format Documentation](docs/DATA_FORMAT_AND_FLEXIBILITY.md) for detailed format specifications.
+
+### 🎯 Flexible Group Assignment
+
+The pipeline supports **any group names** (not just "ALS" and "Control") through a metadata file:
+
+**Option 1: Metadata File (Recommended)**
+```yaml
+# config.yaml
+paths:
+  data:
+    metadata: "sample_metadata.tsv"
+```
+
+```tsv
+# sample_metadata.tsv
+sample_id	group	batch	age	sex
+Sample1	Disease	Batch1	65	M
+Sample2	Control	Batch1	62	F
+```
+
+**Option 2: Pattern Matching (Fallback)**
+- If no metadata file provided, pipeline uses pattern matching
+- Searches for "ALS" → Disease group
+- Searches for "control" → Control group
+- Works automatically with existing data
+
+**See:** [Flexible Group System Documentation](docs/FLEXIBLE_GROUP_SYSTEM.md) for details.
 
 ## 📈 Pipeline Steps
 
@@ -116,28 +127,124 @@ hsa-miR-1-1,2:G>A,2,95,1,75,...
 - Seed region analysis
 
 **Outputs:**
-- 6 figures (PNG)
+- 6 figures (PNG, 300 DPI)
 - 6 tables (CSV)
-- HTML viewer
 
 ### Step 1.5: VAF Quality Control
 - VAF calculation and filtering
-- Technical artifact removal
+- Technical artifact removal (VAF ≥ 0.5)
 - Diagnostic visualizations
 
 **Outputs:**
-- 11 figures (PNG)
+- 11 figures (PNG, 300 DPI)
 - 7 tables (CSV)
-- HTML viewer
 
-### Step 2: Group Comparisons *(Coming Soon)*
-- ALS vs Control comparisons
-- Statistical testing
+### Step 2: Statistical Comparisons
+- **Statistical assumptions validation** (normality, variance homogeneity)
+- **Batch effect analysis** (PCA, statistical testing, correction)
+- **Confounder analysis** (group balance assessment: age, sex)
+- Group comparisons (t-test, Wilcoxon) with automatic test selection
 - Effect size calculations
+- Volcano plots
+- **Position-specific analysis** (NEW: Step 2.5)
+
+**Outputs:**
+- 4 figures (PNG, 300 DPI)
+- Statistical results tables (CSV)
+
+### Step 3: Clustering Analysis (Structure Discovery)
+- Hierarchical clustering of miRNAs
+- Cluster identification (k=6)
+- Pattern-based grouping
+- Discovers groups with similar oxidation patterns
+- **Runs FIRST after Step 2** to provide structure for subsequent analyses
+
+**Outputs:**
+- 2 figures (PNG, 300 DPI)
+- 2 tables (CSV)
+
+### Step 4: miRNA Family Analysis
+- Family identification and grouping
+- Family-level oxidation patterns
+- Group comparison by family
+- Compares data-driven clusters (from Step 3) with biological families
+- **Runs after Step 3**, in parallel with Steps 5 and 6
+
+**Outputs:**
+- 2 figures (PNG, 300 DPI)
+- 2 tables (CSV)
+
+### Step 5: Expression vs Oxidation Correlation
+- Correlation between RPM and G>T mutations
+- Expression category analysis
+- Examines relationship between expression and oxidation
+- Can use clustering context from Step 3
+- **Runs after Step 3**, in parallel with Steps 4 and 6
+
+**Outputs:**
+- 2 figures (PNG, 300 DPI)
+- 2 tables (CSV)
+
+### Step 6: Functional Analysis
+- Target prediction for oxidized miRNAs
+- GO and KEGG pathway enrichment
+- Disease-relevant genes impact
+- Analyzes functional implications with clustering context from Step 3
+- **Runs after Step 3**, in parallel with Steps 4 and 5
+
+**Outputs:**
+- 5 figures (PNG, 300 DPI)
+- 6 tables (CSV)
+
+### Step 7: Biomarker Analysis (Final Integration)
+- ROC curve analysis
+- AUC calculation
+- Multi-miRNA diagnostic signatures
+- Integrates all previous analyses (statistical, clustering, families, expression, functional)
+- **Runs LAST**, after Step 6 completes
+
+**Outputs:**
+- 2 figures (PNG, 300 DPI)
+- 2 tables (CSV)
+
+**Note:** Step 3 (Clustering) runs FIRST after Step 2 to discover data structure. Then Steps 4, 5, and 6 run in parallel using clustering results. Step 7 depends on Step 6 and runs last.
+
+## 📁 Output Structure
+
+```
+results/
+├── step1/final/
+│   ├── figures/      # 6 PNG figures
+│   └── tables/        # 6 CSV tables
+├── step1_5/final/
+│   ├── figures/      # 11 PNG figures
+│   └── tables/        # Filtered data and reports
+├── step2/final/
+│   ├── figures/      # 4 PNG figures (including position-specific)
+│   └── tables/        # Statistical results
+├── step3/final/
+│   ├── figures/      # Clustering analysis figures
+│   └── tables/        # Clustering analysis tables
+├── step4/final/
+│   ├── figures/      # Family analysis figures
+│   └── tables/        # Family analysis tables
+├── step5/final/
+│   ├── figures/      # Expression-oxidation correlation figures
+│   └── tables/        # Expression-oxidation correlation tables
+├── step6/final/
+│   ├── figures/      # Functional analysis figures
+│   └── tables/        # Functional analysis tables
+├── step7/final/
+│   ├── figures/      # Biomarker analysis figures
+│   └── tables/        # Biomarker analysis tables
+├── summary/          # Consolidated summary reports
+└── validation/        # Validation reports
+```
 
 ## 🎯 Usage
 
 ### Basic Usage
+
 ```bash
 # Run complete pipeline
 snakemake -j 4
@@ -148,11 +255,15 @@ snakemake -j 4 all_step1
 # Run only Step 1.5
 snakemake -j 1 all_step1_5
 
+# Run only Step 2
+snakemake -j 4 all_step2
+
 # Dry-run (see what would execute)
 snakemake -j 4 -n
 ```
 
 ### Using the wrapper script
+
 ```bash
 # Make executable (first time)
 chmod +x run.sh
@@ -161,53 +272,11 @@ chmod +x run.sh
 ./run.sh /path/to/your/data.csv
 ```
 
-## 📁 Project Structure
+### Configuration
 
-```
-snakemake_pipeline/
-├── README.md                 # This file
-├── Snakefile                 # Main pipeline orchestrator
-├── setup.sh                  # ⚡ Automated setup script
-├── config/
-│   ├── config.yaml.example   # Configuration template
-│   └── config.yaml           # Your configuration (edit with your data path)
-├── scripts/                  # R analysis scripts
-│   ├── step1/               # Step 1 analysis scripts
-│   ├── step1_5/             # Step 1.5 VAF QC scripts
-│   ├── step2/               # Step 2 statistical scripts
-│   └── utils/                # Shared utilities & validations
-├── rules/                    # Snakemake rule files
-│   ├── output_structure.smk  # ⚡ Auto-creates output directories
-│   ├── step1.smk
-│   ├── step1_5.smk
-│   ├── step2.smk
-│   ├── viewers.smk
-│   ├── validation.smk       # Output validation
-│   └── ...
-├── envs/                     # Conda environment files
-│   ├── r_base.yaml
-│   └── r_analysis.yaml
-└── results/                  # 📊 Generated outputs (auto-organized)
-    ├── step1/final/         # Figures + Tables
-    ├── step1_5/final/       # Figures + Tables
-    ├── step2/final/         # Figures + Tables
-    ├── viewers/             # HTML interactive reports
-    ├── summary/             # Consolidated summaries
-    └── validation/          # Validation reports
-```
+Edit `config/config.yaml` to customize:
 
-**📊 Output Organization:**
-- **Figures**: Automatically organized by step in `results/stepX/final/figures/`
-- **Tables**: Automatically organized by step in `results/stepX/final/tables/`
-- **Viewers**: HTML reports in `results/viewers/` and `viewers/`
-- **All directories created automatically** - no manual setup needed!
-
-## ⚙️ Configuration
-
-Edit `config/config.yaml` to specify:
-
-- **Input data paths**: Location of your data files
-- **Output directories**: Where to save results
+- **Data paths**: Input data files, metadata file
 - **Analysis parameters**: VAF thresholds, significance levels, etc.
 - **Visualization settings**: Colors, figure dimensions, etc.
 
@@ -215,87 +284,102 @@ See `config/config.yaml.example` for detailed documentation.
 
 ## 📚 Documentation
 
-### Para Empezar
-* **⚡ Inicio Rápido**: `QUICK_START.md` - Empieza aquí (5 minutos)
-* **🛠️ Setup Completo**: `SETUP.md` - Guía detallada de instalación
-* **📖 Guía Paso a Paso**: `GUIA_USO_PASO_A_PASO.md`
+### Getting Started
+* **[Quick Start Guide](QUICK_START.md)** - Get running in 5 minutes
+* **[User Guide](docs/USER_GUIDE.md)** - Comprehensive usage instructions
+* **[Pipeline Overview](docs/PIPELINE_OVERVIEW.md)** - Scientific background and step descriptions
+* **[Documentation Index](docs/INDEX.md)** - Complete documentation index
 
-### Documentación Técnica
-* **📊 Estado de Viewers**: `ESTADO_VIEWERS.md`
-* **👁️ Guía de Viewers**: `GUIA_VIEWERS.md`
-* **⚙️ Optimizaciones**: `OPTIMIZACIONES_RENDIMIENTO.md`
-* **📈 Análisis de Estado**: `ANALISIS_OBJETIVO_vs_REALIDAD.md`
+### Core Documentation
+* **🔄 Flexible Group System**: [docs/FLEXIBLE_GROUP_SYSTEM.md](docs/FLEXIBLE_GROUP_SYSTEM.md) - How to use any group names via metadata file
+* **🔧 How It Works**: [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) - Technical explanation of the flexible group system
+* **📊 Data Format**: [docs/DATA_FORMAT_AND_FLEXIBILITY.md](docs/DATA_FORMAT_AND_FLEXIBILITY.md) - Input data format and parsing details
+* **📊 Statistical Methodology**: [docs/METHODOLOGY.md](docs/METHODOLOGY.md) - Comprehensive documentation of statistical methods, assumptions validation, batch effects, and confounders
+
+### Reference Documents
+* **🧪 Testing Plan**: [TESTING_PLAN.md](TESTING_PLAN.md) - Step-by-step testing plan
+* **🔧 Software Versions**: [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) - All software and package versions
+* **🔬 Critical Expert Review**: [CRITICAL_EXPERT_REVIEW.md](CRITICAL_EXPERT_REVIEW.md) - Expert bioinformatics and statistical review
+* **📋 Comprehensive Review**: [COMPREHENSIVE_PIPELINE_REVIEW.md](COMPREHENSIVE_PIPELINE_REVIEW.md) - Complete pipeline review with missing elements identified
 
 ## 🔧 Troubleshooting
 
+### Error: "Configuration validation failed"
+- Run `Rscript scripts/utils/validate_config.R config/config.yaml` to see detailed errors
+- Check that all paths in `config/config.yaml` are correct
+- Verify that input data files exist
+- See `config/config.yaml.example` for reference format
+
+### Error: "Package validation failed"
+- Run `Rscript scripts/utils/validate_package_versions.R` to see missing packages
+- Recreate conda environment: `conda env create -f environment.yml`
+- Or install missing packages manually: `conda install -c conda-forge -c bioconda r-<package-name>`
+
 ### Error: "File not found"
 - Verify paths in `config/config.yaml`
-- Use absolute paths or paths relative to `snakemake_dir`
+- Check that input data file exists
+- Ensure metadata file path is correct (if using)
 
-### Error: "R package not found"
-- Activate conda environment: `conda activate als_mirna_pipeline`
-- Reinstall: `conda env update -f environment.yaml --prune`
+### Error: "No groups found"
+- Check metadata file format (must have `sample_id` and `group` columns)
+- Verify sample names match between data and metadata
+- If using pattern matching, ensure sample names contain group identifiers
 
-### Error: "Snakemake not found"
+### Error: "Environment not found"
+- Activate conda environment: `conda activate mirna_oxidation_pipeline`
+- Or recreate environment: `conda env create -f environment.yml`
 
-* Verifica que el ambiente esté activado: `conda activate als_mirna_pipeline`
-* Si aún no está instalado:
-  ```bash
-  conda install -c bioconda -c conda-forge snakemake
-  # o con mamba (más rápido):
-  mamba install -c bioconda -c conda-forge snakemake
-  ```
+### Low Signal Warnings
+- If you see "LOW SIGNAL DETECTED" warnings, check:
+  - Data quality (VAF filter rate should be <90%)
+  - Sample sizes (at least 10 samples per group recommended)
+  - Group assignments (verify metadata file)
 
-### Error: "Conda/Mamba not found"
+## 🧪 Requirements
 
-**Instalar Miniconda (recomendado):**
-* **macOS**: `curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh && bash Miniconda3-latest-MacOSX-arm64.sh`
-* **Linux**: `wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && bash Miniconda3-latest-Linux-x86_64.sh`
-* Reinicia tu terminal después de la instalación
+### Required Software
 
-**Instalar Mamba (opcional, más rápido):**
-```bash
-conda install mamba -n base -c conda-forge
-```
+- **Conda** (Miniconda or Anaconda) or **Mamba**
+- **Python** 3.10+
+- **Snakemake** 7.32+
+- **R** 4.3.2+ (installed via conda)
 
-### Verificar Instalación
+### Pipeline Dependencies (installed automatically)
 
-```bash
-# Ejecutar script de verificación
-bash setup.sh --check
+All dependencies are installed automatically when creating the conda/mamba environment from `environment.yml`.
 
-# O manualmente
-conda activate als_mirna_pipeline
-snakemake --version
-R --version
-Rscript -e "library(ggplot2); library(dplyr); cat('✅ OK\n')"
+**R packages:** ggplot2, dplyr, pheatmap, patchwork, ggrepel, viridis, and more
+
+See [SOFTWARE_VERSIONS.md](SOFTWARE_VERSIONS.md) for detailed version requirements.
+
+## 📖 Citation
+
+If you use this pipeline in your research, please cite:
+
+```bibtex
+@software{miRNA_oxidation_pipeline,
+  title = {miRNA Oxidation Analysis Pipeline},
+  author = {Esparza, Cesar},
+  year = {2025},
+  url = {https://github.com/cesparza2022/miRNA-oxidation-pipeline}
+}
 ```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-analysis`)
-3. Commit your changes (`git commit -am 'Add new analysis'`)
-4. Push to the branch (`git push origin feature/new-analysis`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
+## 📝 License
 
-[Add your license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Citation
+## 🙏 Acknowledgments
 
-If you use this pipeline in your research, please cite:
-
-```
-[Citation information to be added]
-```
-
-## 📧 Contact
-
-[Add contact information]
+- Snakemake workflow management system
+- R statistical computing environment
+- All package developers and maintainers
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-01
+**Last Updated:** 2025-01-21  
+**Pipeline Version:** 1.0.0

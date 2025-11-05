@@ -1,0 +1,38 @@
+
+---
+title: 'Step 1: Test Figure Inclusion'
+output: html_document
+---
+
+# Test Figure Inclusion
+
+## Test 1: Simple Plot
+```{r test-plot, fig.cap='Test plot to verify figure inclusion works'}
+library(ggplot2)
+data <- data.frame(x = 1:10, y = rnorm(10))
+p <- ggplot(data, aes(x = x, y = y)) +
+  geom_point() +
+  labs(title = 'Test Plot', x = 'X', y = 'Y') +
+  theme_minimal()
+print(p)
+```
+
+## Test 2: Include Existing PDF Figure
+```{r test-pdf, fig.cap='Test including an existing PDF figure'}
+# Let's try to include one of our existing figures
+if (file.exists('Rplots.pdf')) {
+  knitr::include_graphics('Rplots.pdf')
+} else {
+  cat('Figure not found')
+}
+```
+
+## Test 3: List Available Figures
+```{r list-figures}
+pdf_files <- list.files('.', pattern = '\\.pdf$')
+cat('Available PDF figures:\n')
+for (f in head(pdf_files, 10)) {
+  cat('  ', f, '\n')
+}
+```
+

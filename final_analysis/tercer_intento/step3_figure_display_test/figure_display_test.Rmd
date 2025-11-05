@@ -1,0 +1,261 @@
+---
+title: 'Figure Display Test'
+author: 'AI Assistant'
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.align = 'center')
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
+
+# Figure Display Test
+
+This document tests the display of representative figures from our miRNA SNV analysis.
+
+## Test Results
+
+```{r test-results}
+test_figures <- data.frame(
+  Figure_Name = c(
+    "01_enhanced_preprocessing_pipeline.png",
+    "02_enhanced_data_quality_metrics.png",
+    "01_boxplot_edad_grupo.png",
+    "01_boxplot_oxidative_score.png",
+    "01_pca_scatter_pc1_pc2.png",
+    "02_pca_scatter_pc1_pc3.png",
+    "01_family_contributions_heatmap.png",
+    "02_position_contributions.png"
+  ),
+  Analysis_Type = c(
+    "Enhanced Styling",
+    "Enhanced Styling",
+    "General Analysis",
+    "General Analysis",
+    "PCA Analysis",
+    "PCA Analysis",
+    "Pathway Analysis",
+    "Pathway Analysis"
+  ),
+  File_Exists = file.exists(file.path('test_figures', c(
+    "01_enhanced_preprocessing_pipeline.png",
+    "02_enhanced_data_quality_metrics.png",
+    "01_boxplot_edad_grupo.png",
+    "01_boxplot_oxidative_score.png",
+    "01_pca_scatter_pc1_pc2.png",
+    "02_pca_scatter_pc1_pc3.png",
+    "01_family_contributions_heatmap.png",
+    "02_position_contributions.png"
+  ))),
+  stringsAsFactors = FALSE
+)
+
+knitr::kable(test_figures, caption = 'Test Figure Status')
+```
+
+## 1. Enhanced Styling - 01_enhanced_preprocessing_pipeline.png
+
+**File Type:** PNG
+
+**Description:** Data preprocessing pipeline visualization
+
+```{r fig-
+1
+, fig.cap='
+01_enhanced_preprocessing_pipeline.png
+'}
+fig_path <- file.path('test_figures', '
+01_enhanced_preprocessing_pipeline.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+01_enhanced_preprocessing_pipeline.png
+</div>')
+}
+```
+
+## 2. Enhanced Styling - 02_enhanced_data_quality_metrics.png
+
+**File Type:** PNG
+
+**Description:** Analysis visualization
+
+```{r fig-
+2
+, fig.cap='
+02_enhanced_data_quality_metrics.png
+'}
+fig_path <- file.path('test_figures', '
+02_enhanced_data_quality_metrics.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+02_enhanced_data_quality_metrics.png
+</div>')
+}
+```
+
+## 3. General Analysis - 01_boxplot_edad_grupo.png
+
+**File Type:** PNG
+
+**Description:** Boxplot comparison between groups
+
+```{r fig-
+3
+, fig.cap='
+01_boxplot_edad_grupo.png
+'}
+fig_path <- file.path('test_figures', '
+01_boxplot_edad_grupo.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+01_boxplot_edad_grupo.png
+</div>')
+}
+```
+
+## 4. General Analysis - 01_boxplot_oxidative_score.png
+
+**File Type:** PNG
+
+**Description:** Oxidative load comparison between groups
+
+```{r fig-
+4
+, fig.cap='
+01_boxplot_oxidative_score.png
+'}
+fig_path <- file.path('test_figures', '
+01_boxplot_oxidative_score.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+01_boxplot_oxidative_score.png
+</div>')
+}
+```
+
+## 5. PCA Analysis - 01_pca_scatter_pc1_pc2.png
+
+**File Type:** PNG
+
+**Description:** Principal Component Analysis visualization
+
+```{r fig-
+5
+, fig.cap='
+01_pca_scatter_pc1_pc2.png
+'}
+fig_path <- file.path('test_figures', '
+01_pca_scatter_pc1_pc2.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+01_pca_scatter_pc1_pc2.png
+</div>')
+}
+```
+
+## 6. PCA Analysis - 02_pca_scatter_pc1_pc3.png
+
+**File Type:** PNG
+
+**Description:** Principal Component Analysis visualization
+
+```{r fig-
+6
+, fig.cap='
+02_pca_scatter_pc1_pc3.png
+'}
+fig_path <- file.path('test_figures', '
+02_pca_scatter_pc1_pc3.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+02_pca_scatter_pc1_pc3.png
+</div>')
+}
+```
+
+## 7. Pathway Analysis - 01_family_contributions_heatmap.png
+
+**File Type:** PNG
+
+**Description:** Heatmap visualization of data patterns
+
+```{r fig-
+7
+, fig.cap='
+01_family_contributions_heatmap.png
+'}
+fig_path <- file.path('test_figures', '
+01_family_contributions_heatmap.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+01_family_contributions_heatmap.png
+</div>')
+}
+```
+
+## 8. Pathway Analysis - 02_position_contributions.png
+
+**File Type:** PNG
+
+**Description:** Analysis visualization
+
+```{r fig-
+8
+, fig.cap='
+02_position_contributions.png
+'}
+fig_path <- file.path('test_figures', '
+02_position_contributions.png
+')
+if (file.exists(fig_path)) {
+  knitr::include_graphics(fig_path)
+} else {
+  cat('<div class="alert alert-danger">Figure not found: 
+02_position_contributions.png
+</div>')
+}
+```
+
+# Test Summary
+
+This test validates that figures can be properly displayed in HTML format.
+
+## Next Steps
+
+1. Verify all figures display correctly
+2. Create working presentation with verified figures
+3. Validate all figures display correctly in final presentation
+
+---
+
+*Generated on: `r format(Sys.Date(), "%Y-%m-%d")`*

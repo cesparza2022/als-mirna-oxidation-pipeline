@@ -1,47 +1,86 @@
-# Configuration file for Snakemake Pipeline
-# ALS miRNA Oxidation Analysis Pipeline
+# ============================================================================
+# CONFIGURACIÓN DEL PIPELINE - TEMPLATE
+# ============================================================================
+# miRNA Oxidation Analysis Pipeline
 #
-# COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
+# INSTRUCCIONES:
+# 1. Copia este archivo a config.yaml: cp config.yaml.example config.yaml
+# 2. Edita config.yaml con los paths a tus datos
+# 3. Usa paths RELATIVOS desde snakemake_pipeline/ cuando sea posible
+# 4. O usa variables de entorno: ${HOME}/data/file.csv
+# ============================================================================
 
 # Project information
 project:
-  name: "ALS miRNA Oxidation Analysis"
+  name: "miRNA Oxidation Analysis"
   version: "1.0.0"
   description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
 
-# Paths (update these to your data locations)
+# ============================================================================
+# PATHS - CONFIGURAR SEGÚN TU SISTEMA
+# ============================================================================
 paths:
-  project_root: "/path/to/your/project"
-  snakemake_dir: "/path/to/your/project/snakemake_pipeline"
+  # IMPORTANTE: snakemake_dir debe ser "." (directorio actual)
+  # project_root es relativo desde snakemake_pipeline/ hacia arriba
+  project_root: "../.."  # Ajusta según tu estructura de directorios
+  snakemake_dir: "."  # Siempre "." (directorio donde está Snakefile)
   
-  # Input data - UPDATE THESE PATHS
+  # Input data - ACTUALIZA ESTOS PATHS
   data:
     # Raw data file (original miRNA_count.Q33.txt format)
-    raw: "/path/to/your/data/miRNA_count.Q33.txt"
+    # Ejemplo con path relativo (ajusta según tu estructura):
+    raw: "../../../organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt"
+    # O si tus datos están en otra ubicación, usa path absoluto:
+    # raw: "/absolute/path/to/your/data/miRNA_count.Q33.txt"
+    # Ejemplo con path absoluto (si es necesario):
+    # raw: "/absolute/path/to/your/data/miRNA_count.Q33.txt"
+    # Ejemplo con variable de entorno:
+    # raw: "${DATA_DIR}/miRNA_count.Q33.txt"
     
     # Processed data (after split-collapse, for Step 1)
-    processed_clean: "/path/to/your/processed_data.csv"
+    # Si es el mismo archivo que raw, usa el mismo path
+    processed_clean: "../../../organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt"
     
     # Original data for Step 1.5 (VAF filtering - needs SNV + total counts)
-    step1_original: "/path/to/your/step1_original_data.csv"
+    # Si es el mismo archivo, usa el mismo path
+    step1_original: "../../../organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt"
+    
+    # Sample metadata file (OPTIONAL but RECOMMENDED)
+    # Format: TSV with columns: sample_id, group (and optionally: batch, age, sex, etc.)
+    # If null, pipeline will use pattern matching on column names as fallback
+    # See: sample_metadata_template.tsv for format
+    metadata: null  # e.g., "../../metadata/sample_metadata.tsv"
   
-  # Output directories (relative to snakemake_dir - usually no need to change)
+  # Output directories (relative to snakemake_dir)
+  # IMPORTANTE: Cambiado de "outputs/" a "results/" para consistencia
   outputs:
-    step1: "outputs/step1"
-    step1_5: "outputs/step1_5"
-    step2: "outputs/step2"
+    step1: "results/step1"
+    step1_5: "results/step1_5"
+    step2: "results/step2"
+    step3: "results/step3"
+    step4: "results/step4"
+    step5: "results/step5"
+    step6: "results/step6"
+    step7: "results/step7"
   
   # Scripts directories (relative to snakemake_dir - usually no need to change)
   scripts:
     step1: "scripts/step1"
     step1_5: "scripts/step1_5"
     step2: "scripts/step2"
+    step3: "scripts/step3"
+    step4: "scripts/step4"
+    step5: "scripts/step5"
+    step6: "scripts/step6"
+    step7: "scripts/step7"
     utils: "scripts/utils"
   
   # Viewers directory (relative to snakemake_dir)
   viewers: "viewers"
 
-# Analysis parameters
+# ============================================================================
+# PARÁMETROS DE ANÁLISIS
+# ============================================================================
 analysis:
   # VAF filtering threshold (VAFs >= this value are filtered as technical artifacts)
   vaf_filter_threshold: 0.5  # Filter VAFs > 50%
@@ -49,6 +88,29 @@ analysis:
   # Statistical parameters
   alpha: 0.05  # Significance threshold
   fdr_method: "BH"  # FDR correction method (Benjamini-Hochberg)
+  log2fc_threshold: 0.58  # Log2 fold change threshold (1.5x fold change)
+  
+  # Seed region definition (miRNA positions 2-8)
+  seed_region:
+    start: 2
+    end: 8
+  
+  # Statistical assumptions validation
+  assumptions:
+    check_normality: true  # Perform normality tests (Shapiro-Wilk, KS)
+    check_variance_homogeneity: true  # Perform variance homogeneity tests (Levene's, Bartlett's)
+    generate_diagnostic_plots: true  # Generate Q-Q plots and histograms
+    auto_select_test: true  # Automatically select parametric vs non-parametric test
+  
+  # Batch effect analysis and correction
+  batch_correction:
+    method: "none"  # Options: "none", "mean_centering", "combat", "limma"
+    pvalue_threshold: 0.05  # p-value threshold for detecting batch effects
+  
+  # Confounder analysis and control
+  confounders:
+    adjust: true  # Whether to adjust for confounders in models
+    variables: ["age", "sex"]  # List of confounders to analyze/adjust for
   
   # Visualization colors
   colors:
@@ -56,14 +118,16 @@ analysis:
     control: "grey60"  # Grey for control
     als: "#D62728"  # Red for ALS
   
-  # Figure settings
+  # Figure settings (for publication-quality figures)
   figure:
-    dpi: 300
-    width: 10
-    height: 8
+    dpi: 300  # High resolution for publications
+    width: 12  # Default width in inches
+    height: 10  # Default height in inches
     units: "in"
 
-# Resources
+# ============================================================================
+# RECURSOS DEL SISTEMA
+# ============================================================================
 resources:
   # Number of threads for parallel execution
   threads: 4
@@ -71,162 +135,9 @@ resources:
   # Memory requirements (in GB)
   memory_gb: 8
 
-# Conda environments (usually no need to change)
+# ============================================================================
+# AMBIENTES CONDA (usually no need to change)
+# ============================================================================
 conda_envs:
   r_base: "envs/r_base.yaml"
   r_analysis: "envs/r_analysis.yaml"
-
-# ALS miRNA Oxidation Analysis Pipeline
-#
-# COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
-
-# Project information
-project:
-  name: "ALS miRNA Oxidation Analysis"
-  version: "1.0.0"
-  description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
-
-# Paths (update these to your data locations)
-paths:
-  project_root: "/path/to/your/project"
-  snakemake_dir: "/path/to/your/project/snakemake_pipeline"
-  
-  # Input data - UPDATE THESE PATHS
-  data:
-    # Raw data file (original miRNA_count.Q33.txt format)
-    raw: "/path/to/your/data/miRNA_count.Q33.txt"
-    
-    # Processed data (after split-collapse, for Step 1)
-    processed_clean: "/path/to/your/processed_data.csv"
-    
-    # Original data for Step 1.5 (VAF filtering - needs SNV + total counts)
-    step1_original: "/path/to/your/step1_original_data.csv"
-  
-  # Output directories (relative to snakemake_dir - usually no need to change)
-  outputs:
-    step1: "outputs/step1"
-    step1_5: "outputs/step1_5"
-    step2: "outputs/step2"
-  
-  # Scripts directories (relative to snakemake_dir - usually no need to change)
-  scripts:
-    step1: "scripts/step1"
-    step1_5: "scripts/step1_5"
-    step2: "scripts/step2"
-    utils: "scripts/utils"
-  
-  # Viewers directory (relative to snakemake_dir)
-  viewers: "viewers"
-
-# Analysis parameters
-analysis:
-  # VAF filtering threshold (VAFs >= this value are filtered as technical artifacts)
-  vaf_filter_threshold: 0.5  # Filter VAFs > 50%
-  
-  # Statistical parameters
-  alpha: 0.05  # Significance threshold
-  fdr_method: "BH"  # FDR correction method (Benjamini-Hochberg)
-  
-  # Visualization colors
-  colors:
-    gt: "#D62728"  # Red for G>T (oxidation)
-    control: "grey60"  # Grey for control
-    als: "#D62728"  # Red for ALS
-  
-  # Figure settings
-  figure:
-    dpi: 300
-    width: 10
-    height: 8
-    units: "in"
-
-# Resources
-resources:
-  # Number of threads for parallel execution
-  threads: 4
-  
-  # Memory requirements (in GB)
-  memory_gb: 8
-
-# Conda environments (usually no need to change)
-conda_envs:
-  r_base: "envs/r_base.yaml"
-  r_analysis: "envs/r_analysis.yaml"
-
-# ALS miRNA Oxidation Analysis Pipeline
-#
-# COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
-
-# Project information
-project:
-  name: "ALS miRNA Oxidation Analysis"
-  version: "1.0.0"
-  description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
-
-# Paths (update these to your data locations)
-paths:
-  project_root: "/path/to/your/project"
-  snakemake_dir: "/path/to/your/project/snakemake_pipeline"
-  
-  # Input data - UPDATE THESE PATHS
-  data:
-    # Raw data file (original miRNA_count.Q33.txt format)
-    raw: "/path/to/your/data/miRNA_count.Q33.txt"
-    
-    # Processed data (after split-collapse, for Step 1)
-    processed_clean: "/path/to/your/processed_data.csv"
-    
-    # Original data for Step 1.5 (VAF filtering - needs SNV + total counts)
-    step1_original: "/path/to/your/step1_original_data.csv"
-  
-  # Output directories (relative to snakemake_dir - usually no need to change)
-  outputs:
-    step1: "outputs/step1"
-    step1_5: "outputs/step1_5"
-    step2: "outputs/step2"
-  
-  # Scripts directories (relative to snakemake_dir - usually no need to change)
-  scripts:
-    step1: "scripts/step1"
-    step1_5: "scripts/step1_5"
-    step2: "scripts/step2"
-    utils: "scripts/utils"
-  
-  # Viewers directory (relative to snakemake_dir)
-  viewers: "viewers"
-
-# Analysis parameters
-analysis:
-  # VAF filtering threshold (VAFs >= this value are filtered as technical artifacts)
-  vaf_filter_threshold: 0.5  # Filter VAFs > 50%
-  
-  # Statistical parameters
-  alpha: 0.05  # Significance threshold
-  fdr_method: "BH"  # FDR correction method (Benjamini-Hochberg)
-  
-  # Visualization colors
-  colors:
-    gt: "#D62728"  # Red for G>T (oxidation)
-    control: "grey60"  # Grey for control
-    als: "#D62728"  # Red for ALS
-  
-  # Figure settings
-  figure:
-    dpi: 300
-    width: 10
-    height: 8
-    units: "in"
-
-# Resources
-resources:
-  # Number of threads for parallel execution
-  threads: 4
-  
-  # Memory requirements (in GB)
-  memory_gb: 8
-
-# Conda environments (usually no need to change)
-conda_envs:
-  r_base: "envs/r_base.yaml"
-  r_analysis: "envs/r_analysis.yaml"
-

@@ -46,9 +46,13 @@ rule create_output_structure:
             mkdir -p results/step2/intermediate
             mkdir -p results/step3/final/{figures,tables/functional,logs,logs/benchmarks}
             mkdir -p results/step3/intermediate
-            mkdir -p results/step4/final/{figures,tables/biomarkers,logs,logs/benchmarks}
-            mkdir -p results/step4/intermediate
-            mkdir -p results/{pipeline_info,summary,validation,viewers}
+                mkdir -p results/step4/final/{figures,tables/biomarkers,logs,logs/benchmarks}
+                mkdir -p results/step4/intermediate
+                mkdir -p results/step5/final/{figures,tables/families,logs,logs/benchmarks}
+                mkdir -p results/step5/intermediate
+                mkdir -p results/step6/final/{figures,tables/correlation,logs,logs/benchmarks}
+                mkdir -p results/step6/intermediate
+                mkdir -p results/{pipeline_info,summary,validation,viewers}
         fi
         touch {output.structure_created}
         echo "✅ Output structure created successfully"

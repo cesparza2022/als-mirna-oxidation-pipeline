@@ -1,0 +1,485 @@
+---
+title: "Análisis Inicial del Dataset de miRNAs - SNVs"
+subtitle: "Pipeline Definitivo - Paso 1: Exploración de Datos Crudos"
+author: "César Esparza"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+    theme: flatly
+    highlight: tango
+    fig_width: 10
+    fig_height: 6
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.width = 10, fig.height = 6, dpi = 300)
+```
+
+# Objetivos del Análisis Inicial
+
+Este análisis tiene como objetivo:
+
+1. **Cargar y explorar** el dataset crudo de miRNAs
+2. **Aplicar split-collapse** para separar mutaciones múltiples
+3. **Calcular VAFs** (Variant Allele Frequency)
+4. **Filtrar VAFs > 50%** y cuantificar NaNs
+5. **Identificar patrones** en SNVs, miRNAs y posiciones
+6. **Comparaciones ALS vs Control** en datos crudos
+7. **Establecer baseline** para análisis posteriores
+
+---
+
+# 1. Carga de Datos y Configuración
+
+```{r load-libraries}
+# Cargar librerías necesarias
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(stringr)
+library(reshape2)
+library(corrplot)
+library(RColorBrewer)
+library(pheatmap)
+library(VennDiagram)
+library(gridExtra)
+library(knitr)
+library(DT)
+
+# Configurar tema para gráficas
+theme_set(theme_minimal() + 
+          theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.title = element_text(size = 14, face = "bold"),
+                plot.subtitle = element_text(size = 12),
+                legend.position = "bottom"))
+
+# Crear directorio para outputs
+dir.create("outputs", showWarnings = FALSE)
+dir.create("figures", showWarnings = FALSE)
+dir.create("tables", showWarnings = FALSE)
+
+# Cargar funciones del pipeline
+source("functions_pipeline.R")
+```
+
+```{r load-data}
+# Cargar datos originales usando la configuración
+source("../config_pipeline.R")
+raw_data <- read_tsv(config$data_paths$raw_data, 
+                     col_types = cols(.default = "c"))
+
+# Mostrar estructura inicial
+cat("=== ESTRUCTURA INICIAL DEL DATASET ===\n")
+cat("Dimensiones:", dim(raw_data), "\n")
+cat("Columnas:", ncol(raw_data), "\n")
+cat("Filas:", nrow(raw_data), "\n\n")
+
+# Identificar estructura del dataset
+meta_cols <- c("miRNA.name", "pos.mut")
+count_cols <- names(raw_data)[!grepl("(PM\\+1MM\\+2MM|\\.\\.PM\\.1MM\\.2MM\\.)$", names(raw_data)) & 
+                              !names(raw_data) %in% meta_cols]
+total_cols <- names(raw_data)[grepl("(PM\\+1MM\\+2MM|\\.\\.PM\\.1MM\\.2MM\\.)$", names(raw_data))]
+
+cat("Estructura del dataset:\n")
+cat("  - Columnas de metadatos:", length(meta_cols), "\n")
+cat("  - Columnas de cuentas SNV:", length(count_cols), "\n")
+cat("  - Columnas de totales miRNA:", length(total_cols), "\n")
+cat("  - Total de muestras:", length(count_cols), "\n\n")
+
+# Mostrar primeras filas
+kable(head(raw_data, 5), caption = "Primeras 5 filas del dataset crudo")
+```
+
+```{r explore-structure}
+# Explorar estructura de datos
+cat("=== EXPLORACIÓN DE ESTRUCTURA ===\n")
+
+# Verificar columnas
+col_names <- colnames(raw_data)
+cat("Columnas del dataset:\n")
+print(col_names)
+
+# Identificar columnas de muestras (asumiendo que son numéricas)
+sample_cols <- col_names[!col_names %in% c("miRNA.name", "pos.mut", "total")]
+cat("\nColumnas de muestras identificadas:", length(sample_cols), "\n")
+
+# Verificar tipos de datos
+cat("\nTipos de datos:\n")
+str(raw_data)
+```
+
+---
+
+# 2. Aplicar Split-Collapse
+
+```{r split-collapse}
+cat("=== APLICANDO SPLIT-COLLAPSE ===\n")
+
+# Aplicar split-collapse usando la función del pipeline
+processed_data <- apply_split_collapse(raw_data)
+
+# Guardar datos procesados
+write_tsv(processed_data, "outputs/01_data_after_split_collapse.tsv")
+
+cat("\n=== RESUMEN POST SPLIT-COLLAPSE ===\n")
+cat("Dimensiones finales:", dim(processed_data), "\n")
+cat("SNVs únicos:", nrow(processed_data), "\n")
+cat("miRNAs únicos:", length(unique(processed_data$miRNA.name)), "\n")
+```
+
+```{r explore-mutations}
+# Explorar tipos de mutaciones
+cat("=== EXPLORACIÓN DE TIPOS DE MUTACIONES ===\n")
+
+# Extraer tipos de mutación
+mutation_types <- processed_data %>%
+  mutate(mutation_type = str_extract(pos.mut, ":[A-Z]{2}")) %>%
+  count(mutation_type, sort = TRUE)
+
+kable(mutation_types, caption = "Distribución de tipos de mutación")
+
+# Gráfica de tipos de mutación
+p1 <- ggplot(mutation_types, aes(x = reorder(mutation_type, -n), y = n)) +
+  geom_col(fill = "steelblue", alpha = 0.7) +
+  labs(title = "Distribución de Tipos de Mutación",
+       x = "Tipo de Mutación", y = "Número de SNVs") +
+  theme_minimal()
+
+print(p1)
+ggsave("figures/01_mutation_types_distribution.png", p1, width = 10, height = 6, dpi = 300)
+```
+
+---
+
+# 3. Cálculo de VAFs y Filtrado
+
+```{r calculate-vafs}
+cat("=== CÁLCULO DE VAFs ===\n")
+
+# Calcular VAFs usando la función del pipeline
+vaf_data <- calculate_vafs(processed_data)
+
+# Mostrar ejemplo de VAFs
+cat("Ejemplo de VAFs calculadas:\n")
+vaf_cols <- colnames(vaf_data)[str_detect(colnames(vaf_data), "^VAF_")]
+kable(head(select(vaf_data, miRNA.name, pos.mut, all_of(vaf_cols[1:5])), 5),
+      caption = "Ejemplo de VAFs calculadas")
+```
+
+```{r filter-high-vafs}
+cat("=== FILTRADO DE VAFs > 50% ===\n")
+
+# Aplicar filtro usando la función del pipeline
+filtered_data <- filter_high_vafs(vaf_data, threshold = 0.5)
+
+# Cuantificar NaNs
+nan_summary <- filtered_data %>%
+  summarise(
+    across(all_of(vaf_cols), 
+           ~sum(is.na(.x)), 
+           .names = "NaN_{str_remove(.col, 'VAF_')}")
+  ) %>%
+  pivot_longer(everything(), names_to = "sample", values_to = "n_nans") %>%
+  mutate(sample = str_remove(sample, "NaN_"))
+
+cat("Resumen de NaNs por muestra:\n")
+kable(head(nan_summary, 10), caption = "Número de NaNs por muestra (primeras 10)")
+
+# Estadísticas generales de NaNs
+cat("\nEstadísticas de NaNs:\n")
+cat("Total de NaNs:", sum(nan_summary$n_nans), "\n")
+cat("Promedio de NaNs por muestra:", mean(nan_summary$n_nans), "\n")
+cat("Mediana de NaNs por muestra:", median(nan_summary$n_nans), "\n")
+cat("Máximo de NaNs en una muestra:", max(nan_summary$n_nans), "\n")
+
+# Gráfica de distribución de NaNs
+p2 <- ggplot(nan_summary, aes(x = n_nans)) +
+  geom_histogram(bins = 30, fill = "coral", alpha = 0.7) +
+  labs(title = "Distribución de NaNs por Muestra",
+       subtitle = "Después de filtrar VAFs > 50%",
+       x = "Número de NaNs", y = "Frecuencia") +
+  theme_minimal()
+
+print(p2)
+ggsave("figures/02_nans_distribution.png", p2, width = 10, height = 6, dpi = 300)
+```
+
+---
+
+# 4. Análisis de SNVs Más Representativos
+
+```{r top-snvs}
+cat("=== ANÁLISIS DE SNVs MÁS REPRESENTATIVOS ===\n")
+
+# SNVs con más muestras (menos NaNs)
+snv_coverage <- filtered_data %>%
+  mutate(
+    n_samples = rowSums(!is.na(select(., all_of(vaf_cols)))),
+    coverage_pct = (n_samples / length(vaf_cols)) * 100
+  ) %>%
+  select(miRNA.name, pos.mut, n_samples, coverage_pct) %>%
+  arrange(desc(n_samples))
+
+cat("Top 10 SNVs con mayor cobertura:\n")
+kable(head(snv_coverage, 10), 
+      caption = "SNVs con mayor número de muestras (menos NaNs)")
+
+# Gráfica de cobertura de SNVs
+p3 <- ggplot(snv_coverage, aes(x = coverage_pct)) +
+  geom_histogram(bins = 30, fill = "lightgreen", alpha = 0.7) +
+  labs(title = "Distribución de Cobertura de SNVs",
+       subtitle = "Porcentaje de muestras sin NaNs",
+       x = "Cobertura (%)", y = "Número de SNVs") +
+  theme_minimal()
+
+print(p3)
+ggsave("figures/03_snv_coverage_distribution.png", p3, width = 10, height = 6, dpi = 300)
+```
+
+---
+
+# 5. Análisis de miRNAs Más Mutados
+
+```{r top-mirnas}
+cat("=== ANÁLISIS DE miRNAs MÁS MUTADOS ===\n")
+
+# miRNAs con más SNVs
+mirna_snv_count <- filtered_data %>%
+  count(miRNA.name, sort = TRUE) %>%
+  head(20)
+
+cat("Top 20 miRNAs con más SNVs:\n")
+kable(mirna_snv_count, caption = "miRNAs con mayor número de SNVs")
+
+# miRNAs con más mutaciones G>T
+mirna_gt_count <- filtered_data %>%
+  filter(str_detect(pos.mut, ":GT")) %>%
+  count(miRNA.name, sort = TRUE) %>%
+  head(20)
+
+cat("\nTop 20 miRNAs con más mutaciones G>T:\n")
+kable(mirna_gt_count, caption = "miRNAs con mayor número de mutaciones G>T")
+
+# Gráfica comparativa
+p4 <- ggplot(mirna_snv_count, aes(x = reorder(miRNA.name, n), y = n)) +
+  geom_col(fill = "steelblue", alpha = 0.7) +
+  coord_flip() +
+  labs(title = "Top 20 miRNAs con Más SNVs",
+       x = "miRNA", y = "Número de SNVs") +
+  theme_minimal()
+
+p5 <- ggplot(mirna_gt_count, aes(x = reorder(miRNA.name, n), y = n)) +
+  geom_col(fill = "red", alpha = 0.7) +
+  coord_flip() +
+  labs(title = "Top 20 miRNAs con Más Mutaciones G>T",
+       x = "miRNA", y = "Número de Mutaciones G>T") +
+  theme_minimal()
+
+grid.arrange(p4, p5, ncol = 2)
+ggsave("figures/04_top_mirnas_comparison.png", 
+       grid.arrange(p4, p5, ncol = 2), width = 15, height = 8, dpi = 300)
+```
+
+---
+
+# 6. Análisis por Posiciones
+
+```{r position-analysis}
+cat("=== ANÁLISIS POR POSICIONES ===\n")
+
+# Extraer posiciones
+position_data <- filtered_data %>%
+  mutate(position = as.numeric(str_extract(pos.mut, "^\\d+"))) %>%
+  filter(!is.na(position))
+
+# Posiciones más mutadas
+position_counts <- position_data %>%
+  count(position, sort = TRUE) %>%
+  head(20)
+
+cat("Top 20 posiciones más mutadas:\n")
+kable(position_counts, caption = "Posiciones con mayor número de SNVs")
+
+# Posiciones con más mutaciones G>T
+position_gt_counts <- position_data %>%
+  filter(str_detect(pos.mut, ":GT")) %>%
+  count(position, sort = TRUE) %>%
+  head(20)
+
+cat("\nTop 20 posiciones con más mutaciones G>T:\n")
+kable(position_gt_counts, caption = "Posiciones con mayor número de mutaciones G>T")
+
+# Gráfica de posiciones
+p6 <- ggplot(position_counts, aes(x = position, y = n)) +
+  geom_col(fill = "purple", alpha = 0.7) +
+  labs(title = "Distribución de SNVs por Posición",
+       x = "Posición en miRNA", y = "Número de SNVs") +
+  theme_minimal()
+
+p7 <- ggplot(position_gt_counts, aes(x = position, y = n)) +
+  geom_col(fill = "orange", alpha = 0.7) +
+  labs(title = "Distribución de Mutaciones G>T por Posición",
+       x = "Posición en miRNA", y = "Número de Mutaciones G>T") +
+  theme_minimal()
+
+grid.arrange(p6, p7, ncol = 2)
+ggsave("figures/05_position_analysis.png", 
+       grid.arrange(p6, p7, ncol = 2), width = 15, height = 6, dpi = 300)
+```
+
+---
+
+# 7. Análisis por Posición y miRNA
+
+```{r position-mirna-analysis}
+cat("=== ANÁLISIS POR POSICIÓN Y miRNA ===\n")
+
+# Para cada posición, identificar miRNAs con más mutaciones
+position_mirna_analysis <- position_data %>%
+  group_by(position) %>%
+  count(miRNA.name, sort = TRUE) %>%
+  slice_head(n = 5) %>%
+  ungroup()
+
+# Mostrar para posiciones más importantes (1-10)
+top_positions <- position_mirna_analysis %>%
+  filter(position <= 10) %>%
+  group_by(position) %>%
+  slice_head(n = 3)
+
+cat("Top miRNAs por posición (posiciones 1-10):\n")
+kable(top_positions, caption = "miRNAs con más mutaciones por posición")
+
+# Análisis específico para mutaciones G>T por posición
+position_gt_mirna <- position_data %>%
+  filter(str_detect(pos.mut, ":GT")) %>%
+  group_by(position) %>%
+  count(miRNA.name, sort = TRUE) %>%
+  slice_head(n = 3) %>%
+  ungroup() %>%
+  filter(position <= 10)
+
+cat("\nTop miRNAs con mutaciones G>T por posición (posiciones 1-10):\n")
+kable(position_gt_mirna, caption = "miRNAs con más mutaciones G>T por posición")
+```
+
+---
+
+# 8. Comparaciones ALS vs Control
+
+```{r als-vs-control}
+cat("=== COMPARACIONES ALS vs CONTROL ===\n")
+
+# NOTA: Necesitamos información de metadatos para identificar grupos
+# Por ahora, asumiremos que tenemos esta información
+
+# Función para identificar grupos (ajustar según metadatos reales)
+identify_groups <- function(sample_names) {
+  # Esta función debe ser ajustada según los metadatos reales
+  # Por ahora, creamos grupos ficticios para demostración
+  groups <- ifelse(str_detect(sample_names, "ALS|als"), "ALS", "Control")
+  return(groups)
+}
+
+# Aplicar identificación de grupos
+sample_groups <- data.frame(
+  sample = str_remove(vaf_cols, "VAF_"),
+  group = identify_groups(str_remove(vaf_cols, "VAF_"))
+)
+
+# Calcular estadísticas por grupo
+group_stats <- filtered_data %>%
+  select(miRNA.name, pos.mut, all_of(vaf_cols)) %>%
+  pivot_longer(cols = all_of(vaf_cols), 
+               names_to = "sample", 
+               values_to = "vaf") %>%
+  mutate(sample = str_remove(sample, "VAF_")) %>%
+  left_join(sample_groups, by = "sample") %>%
+  group_by(miRNA.name, pos.mut, group) %>%
+  summarise(
+    mean_vaf = mean(vaf, na.rm = TRUE),
+    median_vaf = median(vaf, na.rm = TRUE),
+    n_samples = sum(!is.na(vaf)),
+    .groups = "drop"
+  )
+
+# Mostrar ejemplo de comparaciones
+comparison_example <- group_stats %>%
+  filter(miRNA.name %in% head(unique(miRNA.name), 5)) %>%
+  pivot_wider(names_from = group, 
+              values_from = c(mean_vaf, median_vaf, n_samples),
+              names_sep = "_")
+
+cat("Ejemplo de comparaciones ALS vs Control:\n")
+kable(head(comparison_example, 10), caption = "Comparación de VAFs por grupo")
+```
+
+---
+
+# 9. Resumen y Próximos Pasos
+
+```{r summary}
+cat("=== RESUMEN DEL ANÁLISIS INICIAL ===\n")
+
+# Crear resumen ejecutivo
+summary_stats <- list(
+  "Datos originales" = list(
+    "SNVs" = nrow(raw_data),
+    "miRNAs" = length(unique(raw_data$miRNA.name))
+  ),
+  "Después de split-collapse" = list(
+    "SNVs" = nrow(processed_data),
+    "miRNAs" = length(unique(processed_data$miRNA.name))
+  ),
+  "Después de filtrado VAF" = list(
+    "SNVs" = nrow(filtered_data),
+    "Total NaNs" = sum(nan_summary$n_nans),
+    "Promedio NaNs/muestra" = round(mean(nan_summary$n_nans), 2)
+  )
+)
+
+# Mostrar resumen
+for (stage in names(summary_stats)) {
+  cat("\n", stage, ":\n")
+  for (stat in names(summary_stats[[stage]])) {
+    cat("  ", stat, ":", summary_stats[[stage]][[stat]], "\n")
+  }
+}
+
+cat("\n=== PRÓXIMOS PASOS ===\n")
+cat("1. Análisis de calidad de datos\n")
+cat("2. Filtrado por cobertura mínima\n")
+cat("3. Análisis de batch effects\n")
+cat("4. Normalización de datos\n")
+cat("5. Análisis estadístico comparativo\n")
+```
+
+---
+
+# 10. Guardar Datos Procesados
+
+```{r save-data}
+# Guardar datos procesados para siguientes pasos
+write_tsv(filtered_data, "outputs/02_data_after_vaf_filtering.tsv")
+write_tsv(nan_summary, "outputs/03_nan_summary.tsv")
+write_tsv(snv_coverage, "outputs/04_snv_coverage.tsv")
+write_tsv(mirna_snv_count, "outputs/05_mirna_snv_counts.tsv")
+write_tsv(position_counts, "outputs/06_position_counts.tsv")
+write_tsv(group_stats, "outputs/07_group_comparisons.tsv")
+
+cat("=== ARCHIVOS GUARDADOS ===\n")
+cat("Datos procesados guardados en carpeta 'outputs/'\n")
+cat("Figuras guardadas en carpeta 'figures/'\n")
+cat("Tablas guardadas en carpeta 'tables/'\n")
+```
+
+---
+
+**Fin del Análisis Inicial**
+
+Este análisis proporciona la base para todos los análisis posteriores del pipeline definitivo.

@@ -1,0 +1,23 @@
+{
+  "candidates": {
+    "mirnas": ["hsa-miR-196a-5p", "hsa-miR-9-5p", "hsa-miR-142-5p"],
+    "n_candidates": [3]
+  },
+  "thresholds": {
+    "target_score_targetscan": [0.7],
+    "target_score_mirdb": [80],
+    "pathway_pvalue": [0.05],
+    "pathway_qvalue": [0.05],
+    "min_databases": [2]
+  },
+  "databases": {
+    "targetscan": [true],
+    "mirtarbase": [true],
+    "mirdb": [true]
+  },
+  "analysis": {
+    "go_ontology": ["BP", "MF", "CC"],
+    "kegg": [true],
+    "reactome": [false]
+  }
+}

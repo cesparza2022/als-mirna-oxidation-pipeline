@@ -8,14 +8,22 @@ library(yaml)
 library(jsonlite)
 library(dplyr)
 
-# Get command line arguments
-args <- commandArgs(trailingOnly = TRUE)
-config_file <- args[1]
-output_dir <- args[2]
-snakemake_dir <- args[3]
-
-if (is.na(config_file) || is.na(output_dir)) {
-  stop("Usage: Rscript generate_summary_report.R <config.yaml> <output_dir> <snakemake_dir>")
+# Check if running in Snakemake context
+if (exists("snakemake")) {
+  # Snakemake context: use snakemake object
+  config_file <- snakemake@params[["config_file"]]
+  output_dir <- snakemake@params[["output_dir"]]
+  snakemake_dir <- snakemake@params[["snakemake_dir"]]
+} else {
+  # Command-line context: use commandArgs
+  args <- commandArgs(trailingOnly = TRUE)
+  config_file <- args[1]
+  output_dir <- args[2]
+  snakemake_dir <- args[3]
+  
+  if (is.na(config_file) || is.na(output_dir)) {
+    stop("Usage: Rscript generate_summary_report.R <config.yaml> <output_dir> <snakemake_dir>")
+  }
 }
 
 # Create output directory
@@ -216,14 +224,14 @@ html_lines <- c(
   '<head>',
   '  <meta charset="UTF-8">',
   '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-  sprintf('  <title>%s - Summary Report</title>', config$project$name %||% "ALS miRNA Oxidation Analysis"),
+  sprintf('  <title>%s - Summary Report</title>', config$project$name %||% "miRNA Oxidation Analysis"),
   css_styles,
   '</head>',
   '<body>',
-  '  <h1>🧬 ALS miRNA Oxidation Analysis - Summary Report</h1>',
+  '  <h1>🧬 miRNA Oxidation Analysis - Summary Report</h1>',
   '',
   '  <div class="summary-box">',
-  sprintf('    <p><strong>Pipeline:</strong> %s</p>', config$project$name %||% "ALS miRNA Oxidation Analysis"),
+    sprintf('    <p><strong>Pipeline:</strong> %s</p>', config$project$name %||% "miRNA Oxidation Analysis"),
   sprintf('    <p><strong>Version:</strong> %s</p>', config$project$version %||% "1.0.0"),
   if (!is.null(execution_info)) {
     sprintf('    <p><strong>Execution Date:</strong> %s</p>', execution_info$execution$date %||% "Unknown")
@@ -395,7 +403,7 @@ cat("Generating summary_statistics.json...\n")
 
 summary_stats <- list(
   pipeline = list(
-    name = config$project$name %||% "ALS miRNA Oxidation Analysis",
+    name = config$project$name %||% "miRNA Oxidation Analysis",
     version = config$project$version %||% "1.0.0",
     execution_date = if (!is.null(execution_info)) execution_info$execution$date else as.character(Sys.Date()),
     status = if (!is.null(execution_info)) execution_info$execution$status else "unknown"
@@ -419,22 +427,56 @@ summary_stats <- list(
   )
 )
 
+# Helper function to clean Inf/-Inf values
+clean_inf_values <- function(x, max_value = 10, min_value = -10) {
+  if (is.numeric(x)) {
+    if (is.infinite(x) && x > 0) return(max_value)
+    if (is.infinite(x) && x < 0) return(min_value)
+    return(x)
+  }
+  return(x)
+}
+
 # Add top findings if available
 if (!is.null(top_effect_sizes) && nrow(top_effect_sizes) > 0) {
   summary_stats$top_findings <- lapply(1:nrow(top_effect_sizes), function(i) {
     row <- top_effect_sizes[i, ]
+    
+    # Clean log2_fold_change: replace Inf with max_value, -Inf with min_value
+    log2fc_cleaned <- clean_inf_values(row$log2_fold_change, max_value = 10, min_value = -10)
+    
     list(
       rank = row$rank,
       miRNA_name = row$miRNA_name,
       position = as.character(row$pos.mut),
-      log2_fold_change = round(row$log2_fold_change, 4),
+      log2_fold_change = ifelse(is.na(log2fc_cleaned), NA, round(log2fc_cleaned, 4)),
       fdr = ifelse(is.na(row$t_test_fdr), NA, round(row$t_test_fdr, 4))
     )
   })
 }
 
-write_json(summary_stats, file.path(output_dir, "summary_statistics.json"), pretty = TRUE, auto_unbox = TRUE)
-cat("✅ summary_statistics.json created\n")
+# Clean all numeric values in summary_stats before writing JSON
+summary_stats_cleaned <- jsonlite::fromJSON(
+  jsonlite::toJSON(summary_stats, auto_unbox = TRUE, null = "null", na = "null"),
+  simplifyVector = TRUE
+)
+
+# Recursively clean Inf/-Inf values in the cleaned structure
+clean_structure <- function(x) {
+  if (is.list(x)) {
+    return(lapply(x, clean_structure))
+  } else if (is.numeric(x)) {
+    if (is.infinite(x) && x > 0) return(10)  # Cap Inf at 10
+    if (is.infinite(x) && x < 0) return(-10)  # Cap -Inf at -10
+    return(x)
+  }
+  return(x)
+}
+
+summary_stats_cleaned <- clean_structure(summary_stats_cleaned)
+
+write_json(summary_stats_cleaned, file.path(output_dir, "summary_statistics.json"), pretty = TRUE, auto_unbox = TRUE, null = "null", na = "null")
+cat("✅ summary_statistics.json created (Inf/-Inf values cleaned)\n")
 
 # ============================================================================
 # GENERATE KEY FINDINGS MARKDOWN
@@ -443,7 +485,7 @@ cat("✅ summary_statistics.json created\n")
 cat("Generating key_findings.md...\n")
 
 key_findings_lines <- c(
-  "# 🔑 Key Findings - ALS miRNA Oxidation Analysis",
+  "# 🔑 Key Findings - miRNA Oxidation Analysis",
   "",
   sprintf("**Generated:** %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
   "",

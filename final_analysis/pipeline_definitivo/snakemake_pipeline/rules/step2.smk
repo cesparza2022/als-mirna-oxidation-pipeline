@@ -19,6 +19,9 @@ INPUT_DATA_VAF_FILTERED = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATION
 # Alternative: use processed clean data if VAF filtered not available
 INPUT_DATA_FALLBACK = config["paths"]["data"]["processed_clean"]
 
+# Sample metadata file (optional - for flexible group assignment)
+METADATA_FILE = config["paths"]["data"].get("metadata", None)
+
 # Output directories
 OUTPUT_STEP2 = config["paths"]["outputs"]["step2"]
 OUTPUT_FIGURES = OUTPUT_STEP2 + "/figures"
@@ -28,27 +31,84 @@ OUTPUT_TABLES_SUMMARY = OUTPUT_TABLES + "/summary"
 OUTPUT_LOGS = OUTPUT_STEP2 + "/logs"
 
 # Scripts directories
-SCRIPTS_STEP2 = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["step2"]
-SCRIPTS_UTILS = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["utils"]
+# Note: In Snakemake, when using include: to include rules from rules/ directory,
+# paths in script: directive are resolved relative to the INCLUDED file's directory (rules/),
+# not the main Snakefile directory. So we need to go up one level.
+SCRIPTS_STEP2 = "../scripts/step2"  # For script: (resolved from rules/)
+SCRIPTS_UTILS = "../scripts/utils"  # For script: (resolved from rules/)
 
 # Common parameters
-FUNCTIONS_COMMON = SCRIPTS_UTILS + "/functions_common.R"
-GROUP_FUNCTIONS = SCRIPTS_UTILS + "/group_comparison.R"
+# For input: use path relative to Snakefile (pipeline root)
+FUNCTIONS_COMMON = "scripts/utils/functions_common.R"  # For input: (resolved from Snakefile)
+GROUP_FUNCTIONS = "scripts/utils/group_comparison.R"  # For input: (resolved from Snakefile)
 
 # ============================================================================
-# RULE: Statistical Comparisons
+# RULE: Batch Effect Analysis (Step 2.0)
+# ============================================================================
+
+rule step2_batch_effect_analysis:
+    input:
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
+        fallback_data = INPUT_DATA_FALLBACK,
+        functions = FUNCTIONS_COMMON,
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
+    output:
+        batch_corrected = OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
+        report = OUTPUT_LOGS + "/batch_effect_report.txt",
+        pca_before = OUTPUT_FIGURES + "/step2_batch_effect_pca_before.png"
+    params:
+        functions = FUNCTIONS_COMMON,
+        group_functions = GROUP_FUNCTIONS,
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
+    log:
+        OUTPUT_LOGS + "/batch_effect_analysis.log"
+    script:
+        SCRIPTS_STEP2 + "/00_batch_effect_analysis.R"
+
+# ============================================================================
+# RULE: Confounder Analysis (Step 2.0b)
+# ============================================================================
+
+rule step2_confounder_analysis:
+    input:
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
+        fallback_data = INPUT_DATA_FALLBACK,
+        functions = FUNCTIONS_COMMON,
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
+    output:
+        report = OUTPUT_LOGS + "/confounder_analysis_report.txt",
+        group_balance = OUTPUT_TABLES_STATISTICAL + "/S2_group_balance.json",
+        balance_plot = OUTPUT_FIGURES + "/step2_group_balance.png"
+    params:
+        functions = FUNCTIONS_COMMON,
+        group_functions = GROUP_FUNCTIONS,
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
+    log:
+        OUTPUT_LOGS + "/confounder_analysis.log"
+    script:
+        SCRIPTS_STEP2 + "/00_confounder_analysis.R"
+
+# ============================================================================
+# RULE: Statistical Comparisons (Step 2.1) - Updated with assumptions validation
 # ============================================================================
 
 rule step2_statistical_comparisons:
     input:
-        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Try VAF filtered first
-        fallback_data = INPUT_DATA_FALLBACK,  # Fallback to processed clean
-        functions = FUNCTIONS_COMMON
+        # Batch effect analysis output (optional - script will check if exists)
+        batch_corrected = rules.step2_batch_effect_analysis.output.batch_corrected,
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Fallback: Try VAF filtered
+        fallback_data = INPUT_DATA_FALLBACK,  # Fallback: processed clean
+        functions = FUNCTIONS_COMMON,
+        assumptions_functions = "scripts/utils/statistical_assumptions.R",  # For input: (resolved from Snakefile)
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
     output:
-        table = OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv"
+        table = OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
+        assumptions_report = OUTPUT_LOGS + "/statistical_assumptions_report.txt"
     params:
         functions = FUNCTIONS_COMMON,
-        group_functions = GROUP_FUNCTIONS
+        group_functions = GROUP_FUNCTIONS,
+        assumptions_functions = "scripts/utils/statistical_assumptions.R",  # For params: (resolved from Snakefile)
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
     log:
         OUTPUT_LOGS + "/statistical_comparisons.log"
     script:
@@ -110,14 +170,48 @@ rule step2_generate_summary_tables:
         SCRIPTS_STEP2 + "/04_generate_summary_tables.R"
 
 # ============================================================================
+# RULE: Position-Specific Analysis (Step 2.5)
+# ============================================================================
+
+rule step2_position_specific_analysis:
+    input:
+        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
+        fallback_data = INPUT_DATA_FALLBACK,
+        functions = FUNCTIONS_COMMON,
+        metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
+    output:
+        table = OUTPUT_TABLES_STATISTICAL + "/S2_position_specific_statistics.csv",
+        figure = OUTPUT_FIGURES + "/step2_position_specific_distribution.png"
+    params:
+        functions = FUNCTIONS_COMMON,
+        group_functions = GROUP_FUNCTIONS,
+        metadata_file = METADATA_FILE if METADATA_FILE else ""
+    log:
+        OUTPUT_LOGS + "/position_specific_analysis.log"
+    script:
+        SCRIPTS_STEP2 + "/05_position_specific_analysis.R"
+
+# ============================================================================
 # AGGREGATE RULE: All Step 2 outputs
 # ============================================================================
 
 rule all_step2:
     input:
+        # DEPENDENCY: Step 1.5 must complete before Step 2
+        rules.all_step1_5.output,
+        # Pre-analysis (new critical steps)
+        OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
+        OUTPUT_LOGS + "/batch_effect_report.txt",
+        OUTPUT_FIGURES + "/step2_batch_effect_pca_before.png",
+        OUTPUT_LOGS + "/confounder_analysis_report.txt",
+        OUTPUT_TABLES_STATISTICAL + "/S2_group_balance.json",
+        OUTPUT_FIGURES + "/step2_group_balance.png",
         # Statistical results (complete)
         OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
         OUTPUT_TABLES_STATISTICAL + "/S2_effect_sizes.csv",
+        # NEW: Position-specific analysis
+        OUTPUT_TABLES_STATISTICAL + "/S2_position_specific_statistics.csv",
+        OUTPUT_FIGURES + "/step2_position_specific_distribution.png",
         # Figures
         OUTPUT_FIGURES + "/step2_volcano_plot.png",
         OUTPUT_FIGURES + "/step2_effect_size_distribution.png",

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# SETUP SCRIPT - ALS miRNA Oxidation Pipeline
+# SETUP SCRIPT - miRNA Oxidation Pipeline
 # ============================================================================
 # Purpose: Automated setup of the pipeline environment
 # Usage: bash setup.sh [--conda|--mamba]
@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}  🧬 ALS miRNA Oxidation Pipeline - Setup${NC}"
+echo -e "${BLUE}  🧬 miRNA Oxidation Pipeline - Setup${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════════${NC}"
 echo ""
 
@@ -46,7 +46,7 @@ elif [[ "${1:-}" == "--mamba" ]]; then
     PACKAGE_MANAGER="mamba"
 fi
 
-ENV_NAME="als_mirna_pipeline"
+ENV_NAME="mirna_oxidation_pipeline"
 ENV_FILE="envs/r_analysis.yaml"
 
 echo -e "${BLUE}📦 Package Manager: ${PACKAGE_MANAGER}${NC}"
@@ -71,7 +71,7 @@ fi
 
 # Check if envs/r_base.yaml exists and create base environment too
 if [[ -f "envs/r_base.yaml" ]]; then
-    BASE_ENV_NAME="als_mirna_pipeline_base"
+    BASE_ENV_NAME="mirna_oxidation_pipeline_base"
     if ! ${PACKAGE_MANAGER} env list | grep -q "^${BASE_ENV_NAME} "; then
         echo -e "${BLUE}📦 Creating base environment...${NC}"
         ${PACKAGE_MANAGER} env create -f "envs/r_base.yaml" --name "${BASE_ENV_NAME}"

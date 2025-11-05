@@ -1,0 +1,125 @@
+# ============================================================================
+# SNAKEMAKE RULES: STEP 2 - CORRECT FIGURES (16 figures)
+# ============================================================================
+# Rules for generating the 16 correct Step 2 figures using original scripts
+# ============================================================================
+
+# Load configuration
+configfile: "config/config.yaml"
+
+# ============================================================================
+# COMMON PATHS AND PARAMETERS
+# ============================================================================
+
+# Input data (from Step 1.5 - VAF filtered)
+STEP1_5_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step1_5"]
+INPUT_DATA_VAF_FILTERED = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATIONS_VAF_FILTERED.csv"
+
+# Alternative: use processed clean data if VAF filtered not available
+INPUT_DATA_FALLBACK = config["paths"]["data"]["processed_clean"]
+
+# Output directories
+OUTPUT_STEP2 = config["paths"]["outputs"]["step2"]
+OUTPUT_FIGURES = OUTPUT_STEP2 + "/figures"
+OUTPUT_TABLES = OUTPUT_STEP2 + "/tables"
+OUTPUT_LOGS = OUTPUT_STEP2 + "/logs"
+
+# Scripts directories
+SCRIPTS_STEP2_FIGURES = "../scripts/step2_figures"  # For script: (resolved from rules/)
+# Path to original scripts (relative to snakemake_pipeline/)
+# From snakemake_pipeline/ to step2/scripts is ../step2/scripts
+ORIGINAL_SCRIPTS_DIR = "../step2/scripts"
+
+# Common parameters
+FUNCTIONS_COMMON = "scripts/utils/functions_common.R"  # For input: (resolved from Snakefile)
+
+# ============================================================================
+# RULE: Generate Metadata (required for all Step 2 figures)
+# ============================================================================
+
+rule step2_generate_metadata:
+    input:
+        data = INPUT_DATA_VAF_FILTERED,
+        fallback = INPUT_DATA_FALLBACK
+    output:
+        metadata = OUTPUT_TABLES + "/S2_metadata.csv"
+    params:
+        data_file = lambda wildcards: INPUT_DATA_VAF_FILTERED if os.path.exists(INPUT_DATA_VAF_FILTERED) else INPUT_DATA_FALLBACK
+    log:
+        OUTPUT_LOGS + "/generate_metadata.log"
+    shell:
+        """
+        Rscript scripts/utils/generate_metadata.R \
+            {params.data_file} \
+            {output.metadata} \
+            > {log} 2>&1
+        """
+
+# ============================================================================
+# RULE: Run All Step 2 Figures (using original scripts)
+# ============================================================================
+
+rule step2_generate_all_figures:
+    input:
+        data = INPUT_DATA_VAF_FILTERED,
+        fallback = INPUT_DATA_FALLBACK,
+        metadata = OUTPUT_TABLES + "/S2_metadata.csv"
+    output:
+        # All 15 figures (2.7 is optional - will be handled separately if needed)
+        fig_2_1 = OUTPUT_FIGURES + "/FIG_2.1_VAF_GLOBAL_CLEAN.png",
+        fig_2_2 = OUTPUT_FIGURES + "/FIG_2.2_DISTRIBUTIONS_CLEAN.png",
+        fig_2_3 = OUTPUT_FIGURES + "/FIG_2.3_VOLCANO_PER_SAMPLE_METHOD.png",
+        fig_2_4 = OUTPUT_FIGURES + "/FIG_2.4_HEATMAP_TOP50_CLEAN.png",
+        fig_2_5 = OUTPUT_FIGURES + "/FIG_2.5_HEATMAP_ZSCORE_CLEAN.png",
+        fig_2_6 = OUTPUT_FIGURES + "/FIG_2.6_POSITIONAL_CLEAN.png",
+        fig_2_8 = OUTPUT_FIGURES + "/FIG_2.8_CLUSTERING_CLEAN.png",
+        fig_2_9 = OUTPUT_FIGURES + "/FIG_2.9_CV_CLEAN.png",
+        fig_2_10 = OUTPUT_FIGURES + "/FIG_2.10_RATIO_CLEAN.png",
+        fig_2_11 = OUTPUT_FIGURES + "/FIG_2.11_MUTATION_TYPES_CLEAN.png",
+        fig_2_12 = OUTPUT_FIGURES + "/FIG_2.12_ENRICHMENT_CLEAN.png",
+        fig_2_13 = OUTPUT_FIGURES + "/FIG_2.13_DENSITY_HEATMAP_ALS.png",
+        fig_2_14 = OUTPUT_FIGURES + "/FIG_2.14_DENSITY_HEATMAP_CONTROL.png",
+        fig_2_15 = OUTPUT_FIGURES + "/FIG_2.15_DENSITY_COMBINED.png"
+    params:
+        data_file = lambda wildcards: INPUT_DATA_VAF_FILTERED if os.path.exists(INPUT_DATA_VAF_FILTERED) else INPUT_DATA_FALLBACK,
+        metadata_file = OUTPUT_TABLES + "/S2_metadata.csv",
+        output_dir = OUTPUT_FIGURES,
+        scripts_dir = ORIGINAL_SCRIPTS_DIR
+    log:
+        OUTPUT_LOGS + "/generate_all_figures.log"
+    shell:
+        """
+        Rscript scripts/step2_figures/run_all_step2_figures.R \
+            {params.data_file} \
+            {params.metadata_file} \
+            {params.output_dir} \
+            {params.scripts_dir} \
+            > {log} 2>&1
+        """
+
+# ============================================================================
+# AGGREGATE RULE: All Step 2 Correct Figures
+# ============================================================================
+
+rule all_step2_figures:
+    input:
+        # DEPENDENCY: Step 1.5 must complete before Step 2
+        rules.all_step1_5.output,
+        # Metadata
+        OUTPUT_TABLES + "/S2_metadata.csv",
+        # All 14 figures (2.7 will be handled separately if needed)
+        OUTPUT_FIGURES + "/FIG_2.1_VAF_GLOBAL_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.2_DISTRIBUTIONS_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.3_VOLCANO_PER_SAMPLE_METHOD.png",
+        OUTPUT_FIGURES + "/FIG_2.4_HEATMAP_TOP50_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.5_HEATMAP_ZSCORE_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.6_POSITIONAL_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.8_CLUSTERING_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.9_CV_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.10_RATIO_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.11_MUTATION_TYPES_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.12_ENRICHMENT_CLEAN.png",
+        OUTPUT_FIGURES + "/FIG_2.13_DENSITY_HEATMAP_ALS.png",
+        OUTPUT_FIGURES + "/FIG_2.14_DENSITY_HEATMAP_CONTROL.png",
+        OUTPUT_FIGURES + "/FIG_2.15_DENSITY_COMBINED.png"
+

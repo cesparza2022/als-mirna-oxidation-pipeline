@@ -45,7 +45,7 @@ rule validate_step1_outputs:
     params:
         step_name = "Step 1",
         output_dir = STEP1_FINAL,
-        script = SCRIPTS_UTILS + "/validate_step_outputs.R"
+        script = SCRIPTS_UTILS + "/verify_outputs.R"
     log:
         OUTPUT_VALIDATION + "/step1_validation.log"
     shell:
@@ -83,7 +83,7 @@ rule validate_step1_5_outputs:
     params:
         step_name = "Step 1.5",
         output_dir = STEP1_5_FINAL,
-        script = SCRIPTS_UTILS + "/validate_step_outputs.R",
+        script = SCRIPTS_UTILS + "/verify_outputs.R",
         quality_script = SCRIPTS_UTILS + "/validate_data_quality.R"
     log:
         OUTPUT_VALIDATION + "/step1_5_validation.log"
@@ -134,7 +134,7 @@ rule validate_step2_outputs:
     params:
         step_name = "Step 2",
         output_dir = STEP2_FINAL,
-        script = SCRIPTS_UTILS + "/validate_step_outputs.R",
+        script = SCRIPTS_UTILS + "/verify_outputs.R",
         quality_script = SCRIPTS_UTILS + "/validate_data_quality.R"
     log:
         OUTPUT_VALIDATION + "/step2_validation.log"

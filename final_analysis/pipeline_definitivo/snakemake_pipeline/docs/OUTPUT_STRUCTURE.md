@@ -1,6 +1,6 @@
 # 📊 Estructura de Output - Guía de Usuario
 
-**Repositorio:** https://github.com/cesparza2022/als-mirna-oxidation-pipeline
+**Repository:** https://github.com/cesparza2022/miRNA-oxidation-pipeline
 
 ---
 

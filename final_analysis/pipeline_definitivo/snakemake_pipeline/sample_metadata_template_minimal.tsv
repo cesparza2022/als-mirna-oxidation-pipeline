@@ -1,0 +1,19 @@
+# Sample Metadata Template - Minimal Version
+# ============================================================================
+# This is the minimal required format for sample metadata
+# 
+# REQUIRED:
+# - sample_id: Must exactly match column names in your data CSV
+# - group: Any condition/group name (minimum 2 groups, each with 2+ samples)
+#
+# OPTIONAL (for advanced analyses):
+# - batch, age, sex, etc.
+# ============================================================================
+
+sample_id	group
+# Example: Replace with your actual sample IDs and groups
+# Sample-001	Disease
+# Sample-002	Control
+# Sample-003	Disease
+# Sample-004	Control
+

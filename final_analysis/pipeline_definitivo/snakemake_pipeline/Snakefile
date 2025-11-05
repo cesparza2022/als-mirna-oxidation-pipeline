@@ -1,5 +1,5 @@
 # ============================================================================
-# SNAKEMAKE PIPELINE: ALS miRNA Oxidation Analysis
+# SNAKEMAKE PIPELINE: miRNA Oxidation Analysis
 # ============================================================================
 # Main orchestrator for the complete analysis pipeline
 #
@@ -13,16 +13,64 @@
 configfile: "config/config.yaml"
 
 # Include step-specific rule files
-include: "rules/output_structure.smk"  # Auto-create output directories
+include: "rules/output_structure.smk"
 include: "rules/step1.smk"
-include: "rules/step1_5.smk"  # VAF Quality Control
-include: "rules/step2.smk"    # Statistical Comparisons (ALS vs Control)
-include: "rules/step3.smk"    # NEW: Functional Analysis (targets, pathways)
-include: "rules/step4.smk"    # NEW: Biomarker Analysis (ROC, signatures)
-include: "rules/viewers.smk"  # HTML viewers
-include: "rules/pipeline_info.smk"  # FASE 2: Pipeline metadata generation
-include: "rules/summary.smk"  # FASE 3: Consolidated summary reports
-include: "rules/validation.smk"  # Output validation and final checks
+include: "rules/step1_5.smk"
+include: "rules/step2.smk"
+include: "rules/step2_figures.smk"  # Step 2 correct figures (16 figures)
+# Step 3 (clustering) runs first after step2 to discover structure
+include: "rules/step3.smk"
+# Steps 4, 5, 6 can run in parallel after step3 (depend on both step2 and step3)
+include: "rules/step4.smk"
+include: "rules/step5.smk"
+include: "rules/step6.smk"
+# Step 7 depends on step6, so it runs after the parallel steps
+include: "rules/step7.smk"
+include: "rules/pipeline_info.smk"
+include: "rules/summary.smk"
+include: "rules/validation.smk"
+
+# ============================================================================
+# CONFIGURATION VALIDATION (runs first)
+# ============================================================================
+
+rule validate_configuration:
+    input:
+        config_file = "config/config.yaml"
+    output:
+        validation_report = "results/validation/config_validation.txt"
+    params:
+        script = "scripts/utils/validate_config.R"
+    log:
+        "results/validation/config_validation.log"
+    shell:
+        """
+        mkdir -p results/validation
+        Rscript {params.script} {input.config_file} > {output} 2>&1 || (cat {output} && exit 1)
+        echo "" >> {output}
+        echo "Configuration validation completed at $(date)" >> {output}
+        """
+
+# ============================================================================
+# PACKAGE VALIDATION (runs after config validation)
+# ============================================================================
+
+rule validate_packages:
+    input:
+        rules.validate_configuration.output,
+        rules.prepare_validation_dir.output
+    output:
+        validation_report = "results/validation/package_validation.txt"
+    params:
+        script = "scripts/utils/validate_package_versions.R"
+    log:
+        "results/validation/package_validation.log"
+    shell:
+        """
+        mkdir -p results/validation
+        Rscript {params.script} > {output} 2>&1 || (cat {output} && exit 1)
+        echo "Package validation completed at $(date)" >> {output}
+        """
 
 # ============================================================================
 # DEFAULT TARGET (when running just 'snakemake')
@@ -30,17 +78,25 @@ include: "rules/validation.smk"  # Output validation and final checks
 
 rule all:
     input:
-        rules.create_output_structure.output,  # Ensure output directories exist
+        # Validation (runs first - must pass before pipeline execution)
+        rules.validate_configuration.output,
+        rules.validate_packages.output,
+        # Pipeline execution
+        rules.prepare_validation_dir.output,
+        rules.create_output_structure.output,
         rules.all_step1.output,
-        rules.all_step1_5.output,  # VAF Quality Control
-        rules.all_step2.output,    # Statistical Comparisons
-        rules.all_step3.output,    # NEW: Functional Analysis
-        rules.all_step4.output,    # NEW: Biomarker Analysis
-        rules.generate_step1_viewer.output,  # HTML viewer Step 1
-        rules.generate_step1_5_viewer.output,  # HTML viewer Step 1.5
-        rules.generate_step2_viewer.output,  # HTML viewer Step 2
-        rules.generate_pipeline_info.output,  # FASE 2: Pipeline metadata
-        rules.generate_summary_report.output,  # FASE 3: Summary reports
-        rules.validate_pipeline_completion.output  # Final validation report
+        rules.all_step1_5.output,
+        rules.all_step2.output,
+        # Step 3 (clustering) runs first after step2
+        rules.all_step3.output,
+        # Steps 4, 5, 6 run in parallel after step3
+        rules.all_step4.output,
+        rules.all_step5.output,
+        rules.all_step6.output,
+        # Step 7 depends on step6
+        rules.all_step7.output,
+        rules.generate_pipeline_info.output,
+        rules.generate_summary_report.output,
+        rules.validate_pipeline_completion.output
 
 

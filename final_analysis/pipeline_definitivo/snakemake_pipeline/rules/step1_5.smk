@@ -24,8 +24,16 @@ OUTPUT_TABLES_FILTER_REPORT = OUTPUT_TABLES + "/filter_report"
 OUTPUT_TABLES_SUMMARY = OUTPUT_TABLES + "/summary"
 OUTPUT_LOGS = OUTPUT_STEP1_5 + "/logs"
 
-# Scripts directory
-SCRIPTS_STEP1_5 = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["step1_5"]
+# Scripts directory 
+# Note: In Snakemake, when using include: to include rules from rules/ directory,
+# paths in script: directive are resolved relative to the INCLUDED file's directory (rules/),
+# not the main Snakefile directory. So we need to go up one level.
+SCRIPTS_STEP1_5 = "../scripts/step1_5"  # For script: (resolved from rules/)
+SCRIPTS_UTILS = "../scripts/utils"       # For script: (resolved from rules/)
+
+# Common parameters
+# For input: use path relative to Snakefile (pipeline root)
+FUNCTIONS_COMMON = "scripts/utils/functions_common.R"  # For input: (resolved from Snakefile)
 
 # ============================================================================
 # RULE 1: Apply VAF Filter
@@ -61,7 +69,8 @@ rule generate_diagnostic_figures:
         filtered_data = rules.apply_vaf_filter.output.filtered_data,
         filter_report = rules.apply_vaf_filter.output.filter_report,
         stats_by_type = rules.apply_vaf_filter.output.stats_by_type,
-        stats_by_mirna = rules.apply_vaf_filter.output.stats_by_mirna
+        stats_by_mirna = rules.apply_vaf_filter.output.stats_by_mirna,
+        functions = FUNCTIONS_COMMON
     output:
         # QC Figures (4)
         qc_fig1 = OUTPUT_FIGURES_QC + "/QC_FIG1_VAF_DISTRIBUTION.png",
@@ -80,6 +89,8 @@ rule generate_diagnostic_figures:
         sample_metrics = OUTPUT_TABLES_SUMMARY + "/S1.5_sample_metrics.csv",
         position_metrics = OUTPUT_TABLES_SUMMARY + "/S1.5_position_metrics.csv",
         mutation_summary = OUTPUT_TABLES_SUMMARY + "/S1.5_mutation_type_summary.csv"
+    params:
+        functions = FUNCTIONS_COMMON
     log:
         OUTPUT_LOGS + "/generate_diagnostic_figures.log"
     # conda:

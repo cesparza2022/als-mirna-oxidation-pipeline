@@ -7,14 +7,22 @@
 library(yaml)
 library(jsonlite)
 
-# Get command line arguments
-args <- commandArgs(trailingOnly = TRUE)
-config_file <- args[1]  # Path to config.yaml
-output_dir <- args[2]   # Path to results/pipeline_info/
-snakemake_dir <- args[3] # Path to snakemake directory
-
-if (is.na(config_file) || is.na(output_dir)) {
-  stop("Usage: Rscript generate_pipeline_info.R <config.yaml> <output_dir> <snakemake_dir>")
+# Check if running in Snakemake context
+if (exists("snakemake")) {
+  # Snakemake context: use snakemake object
+  config_file <- snakemake@params[["config_file"]]
+  output_dir <- snakemake@params[["output_dir"]]
+  snakemake_dir <- snakemake@params[["snakemake_dir"]]
+} else {
+  # Command-line context: use commandArgs
+  args <- commandArgs(trailingOnly = TRUE)
+  config_file <- args[1]  # Path to config.yaml
+  output_dir <- args[2]   # Path to results/pipeline_info/
+  snakemake_dir <- args[3] # Path to snakemake directory
+  
+  if (is.na(config_file) || is.na(output_dir)) {
+    stop("Usage: Rscript generate_pipeline_info.R <config.yaml> <output_dir> <snakemake_dir>")
+  }
 }
 
 # Create output directory if it doesn't exist
@@ -46,30 +54,43 @@ count_files <- function(pattern, dirs) {
   return(total)
 }
 
-step1_dir <- file.path(snakemake_dir, "results/step1/final")
-step1_5_dir <- file.path(snakemake_dir, "results/step1_5/final")
-step2_dir <- file.path(snakemake_dir, "results/step2/final")
+# Define all step directories
+# ORDER: Sequential (1, 1.5, 2) → Parallel discovery (7, 5, 6, 3) → Integration (4)
+all_steps <- c("step1", "step1_5", "step2", "step3", "step4", "step5", "step6", "step7")
+step_dirs <- sapply(all_steps, function(step) {
+  file.path(snakemake_dir, "results", step, "final")
+}, simplify = FALSE)
 
-num_figures <- count_files("\\.png$", c(step1_dir, step1_5_dir, step2_dir))
-num_tables <- count_files("\\.csv$", c(step1_dir, step1_5_dir, step2_dir))
-num_logs <- count_files("\\.log$", c(
-  file.path(step1_dir, "logs"),
-  file.path(step1_5_dir, "logs"),
-  file.path(step2_dir, "logs")
-))
+# Count outputs across all steps
+all_step_dirs <- unlist(step_dirs)
+num_figures <- count_files("\\.png$", all_step_dirs)
+num_tables <- count_files("\\.csv$", all_step_dirs)
 
-# Determine pipeline status (check if key outputs exist)
+# Count logs (check logs subdirectories)
+log_dirs <- sapply(all_steps, function(step) {
+  file.path(snakemake_dir, "results", step, "final", "logs")
+}, simplify = FALSE)
+num_logs <- count_files("\\.log$", unlist(log_dirs))
+
+# Determine pipeline status (check if key outputs exist for each step)
 steps_completed <- c()
-if (file.exists(step1_dir) && file.info(step1_dir)$isdir) steps_completed <- c(steps_completed, "step1")
-if (file.exists(step1_5_dir) && file.info(step1_5_dir)$isdir) steps_completed <- c(steps_completed, "step1_5")
-if (file.exists(step2_dir) && file.info(step2_dir)$isdir) steps_completed <- c(steps_completed, "step2")
+for (step in all_steps) {
+  step_dir <- step_dirs[[step]]
+  if (file.exists(step_dir) && file.info(step_dir)$isdir) {
+    # Check if step has any outputs (figures or tables)
+    has_outputs <- length(list.files(step_dir, recursive = TRUE)) > 0
+    if (has_outputs) {
+      steps_completed <- c(steps_completed, step)
+    }
+  }
+}
 
 # Helper function for NULL coalescing
 `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
 
 execution_info <- list(
   pipeline = list(
-    name = config$project$name %||% "ALS miRNA Oxidation Analysis",
+    name = config$project$name %||% "miRNA Oxidation Analysis",
     version = config$project$version %||% "1.0.0",
     description = config$project$description %||% "Reproducible pipeline for analyzing G>T oxidation patterns"
   ),
@@ -77,7 +98,7 @@ execution_info <- list(
     date = as.character(execution_date),
     time = execution_time,
     datetime = execution_datetime,
-    status = ifelse(length(steps_completed) == 3, "completed", "partial"),
+    status = ifelse(length(steps_completed) == length(all_steps), "completed", "partial"),
     steps_completed = steps_completed
   ),
   parameters = list(
@@ -96,15 +117,22 @@ execution_info <- list(
     step1 = config$paths$outputs$step1,
     step1_5 = config$paths$outputs$step1_5,
     step2 = config$paths$outputs$step2,
+    step3 = config$paths$outputs$step3 %||% "results/step3",
+    step4 = config$paths$outputs$step4 %||% "results/step4",
+    step5 = config$paths$outputs$step5 %||% "results/step5",
+    step6 = config$paths$outputs$step6 %||% "results/step6",
+    step7 = config$paths$outputs$step7 %||% "results/step7",
     total_figures = num_figures,
     total_tables = num_tables,
-    total_logs = num_logs
+    total_logs = num_logs,
+    steps_completed_count = length(steps_completed),
+    total_steps = length(all_steps)
   )
 )
 
 # Write execution_info.yaml
 write_yaml(execution_info, file.path(output_dir, "execution_info.yaml"))
-cat("✅ execution_info.yaml created\n")
+cat("execution_info.yaml created\n")
 
 # ============================================================================
 # 2. GENERATE software_versions.yml
@@ -158,7 +186,7 @@ software_versions <- list(
 
 # Write software_versions.yml
 write_yaml(software_versions, file.path(output_dir, "software_versions.yml"))
-cat("✅ software_versions.yml created\n")
+cat("software_versions.yml created\n")
 
 # ============================================================================
 # 3. COPY config_used.yaml
@@ -166,7 +194,7 @@ cat("✅ software_versions.yml created\n")
 
 cat("Copying config_used.yaml...\n")
 file.copy(config_file, file.path(output_dir, "config_used.yaml"), overwrite = TRUE)
-cat("✅ config_used.yaml created\n")
+cat("config_used.yaml created\n")
 
 # ============================================================================
 # 4. GENERATE provenance.json
@@ -181,7 +209,7 @@ if (!exists("%||%")) {
 
 provenance <- list(
   pipeline = list(
-    name = config$project$name %||% "ALS miRNA Oxidation Analysis",
+    name = config$project$name %||% "miRNA Oxidation Analysis",
     version = config$project$version %||% "1.0.0",
     execution_date = as.character(execution_date)
   ),
@@ -212,24 +240,55 @@ provenance <- list(
       path = file.path(snakemake_dir, config$paths$outputs$step2),
       description = "Step 2: Statistical comparisons",
       exists = file.exists(file.path(snakemake_dir, config$paths$outputs$step2))
+    ),
+    step3 = list(
+      path = file.path(snakemake_dir, config$paths$outputs$step3 %||% "results/step3"),
+      description = "Step 3: Clustering analysis (Structure Discovery)",
+      exists = file.exists(file.path(snakemake_dir, config$paths$outputs$step3 %||% "results/step3"))
+    ),
+    step4 = list(
+      path = file.path(snakemake_dir, config$paths$outputs$step4 %||% "results/step4"),
+      description = "Step 4: miRNA family analysis",
+      exists = file.exists(file.path(snakemake_dir, config$paths$outputs$step4 %||% "results/step4"))
+    ),
+    step5 = list(
+      path = file.path(snakemake_dir, config$paths$outputs$step5 %||% "results/step5"),
+      description = "Step 5: Expression vs oxidation correlation",
+      exists = file.exists(file.path(snakemake_dir, config$paths$outputs$step5 %||% "results/step5"))
+    ),
+    step6 = list(
+      path = file.path(snakemake_dir, config$paths$outputs$step6 %||% "results/step6"),
+      description = "Step 6: Functional analysis",
+      exists = file.exists(file.path(snakemake_dir, config$paths$outputs$step6 %||% "results/step6"))
+    ),
+    step7 = list(
+      path = file.path(snakemake_dir, config$paths$outputs$step7 %||% "results/step7"),
+      description = "Step 7: Biomarker analysis (Final Integration)",
+      exists = file.exists(file.path(snakemake_dir, config$paths$outputs$step7 %||% "results/step7"))
     )
   ),
   processing = list(
     step1_uses = "processed_clean",
     step1_5_uses = "step1_original",
-    step2_uses = "step1_5_filtered_data"
+    step2_uses = "step1_5_filtered_data",
+    step7_uses = "step2_statistical_comparisons",
+    step5_uses = "step2_statistical_comparisons",
+    step6_uses = "step2_statistical_comparisons",
+    step3_uses = "step2_statistical_comparisons",
+    step4_uses = "step3_functional_analysis",
+    logical_order = "1 → 1.5 → 2 → [7,5,6,3 parallel] → 4"
   )
 )
 
 # Write provenance.json
 write_json(provenance, file.path(output_dir, "provenance.json"), pretty = TRUE, auto_unbox = TRUE)
-cat("✅ provenance.json created\n")
+cat("provenance.json created\n")
 
-cat("\n✅ Pipeline info generation completed!\n")
-cat(sprintf("   Output directory: %s\n", output_dir))
-cat(sprintf("   Files created:\n"))
-cat(sprintf("     - execution_info.yaml\n"))
-cat(sprintf("     - software_versions.yml\n"))
-cat(sprintf("     - config_used.yaml\n"))
-cat(sprintf("     - provenance.json\n"))
+cat("\nPipeline info generation completed.\n")
+cat(sprintf("Output directory: %s\n", output_dir))
+cat(sprintf("Files created:\n"))
+cat(sprintf("  - execution_info.yaml\n"))
+cat(sprintf("  - software_versions.yml\n"))
+cat(sprintf("  - config_used.yaml\n"))
+cat(sprintf("  - provenance.json\n"))
 

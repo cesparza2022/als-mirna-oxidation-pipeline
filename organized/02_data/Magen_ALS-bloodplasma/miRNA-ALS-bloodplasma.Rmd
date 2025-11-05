@@ -1,0 +1,780 @@
+---
+title: "miRNA-ALS-bloodplasma-2"
+author: "César Esparza"
+date: "2025-05-13"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(pheatmap)
+library(readr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(scales)
+library(UpSetR)
+```
+
+```{r}
+# 2) Read the table
+df <- read_tsv("/Users/cesaresparza/New_Desktop/UCSD/8OG/results/Magen_ALS-bloodplasma/miRNA_count.Q33.txt", col_types = cols())
+
+# 3) Identify metadata vs. data columns
+meta_cols   <- c("miRNA name", "pos:mut")
+data_cols   <- setdiff(names(df), meta_cols)
+
+#  - Total‐count columns have "(PM+1MM+2MM)" in their names
+total_cols  <- grep("\\(PM\\+1MM\\+2MM\\)", data_cols, value = TRUE)
+#  - SNV‐specific columns are the rest
+snv_cols    <- setdiff(data_cols, total_cols)
+
+```
+
+```{r}
+#Chunk 3
+# 1. split_mutations: expande variantes en filas separadas
+split_mutations <- function(df, mut_col = "mut") {
+  df %>%
+    separate_rows(.data[[mut_col]], sep = ",") %>%
+    mutate(!!mut_col := str_trim(.data[[mut_col]]))
+}
+
+# 2. collapse_after_split: suma sólo las columnas SNV (snv_cols)
+collapse_after_split <- function(df, mut_col = "mut", count_cols = snv_cols) {
+  df %>%
+    group_by(.data[["miRNA"]], .data[[mut_col]]) %>%
+    summarise(across(all_of(count_cols), sum), .groups = "drop") %>%
+    rename(miRNA_name = `miRNA name`)
+}
+
+
+# 3. convert_to_edgeR: arma featureID y matriz entera para edgeR
+convert_to_edgeR <- function(df_collapsed, mut_col = "pos:mut", count_cols = snv_cols) {
+  df_DE <- df_collapsed %>%
+    mutate(
+      clean_mut  = str_replace_all(.data[[mut_col]], ":", "_"),
+      featureID  = paste(miRNA_name, clean_mut, sep = "_")
+    ) %>%
+    select(featureID, all_of(count_cols))
+  
+  count_mat <- as.matrix(df_DE[count_cols])
+  rownames(count_mat) <- df_DE$featureID
+  mode(count_mat) <- "integer"
+  
+  stopifnot(exists("count_mat"))
+  stopifnot(!any(is.na(count_mat)))
+  cat("Dimensions of count_mat:", dim(count_mat), 
+      "(rows = variants, cols = samples)\n")
+  
+  return(count_mat)
+}
+
+
+```
+
+```{r}
+## Chunk_4 {RPM_Functions}
+
+# 1) Annotate_total_counts:
+#    From your full df, grab just the PM rows (one per miRNA) and keep only
+#    the miRNA name + the “(PM+1MM+2MM)” columns -> a wide table of raw counts.
+
+#Annotate_total_counts <- function(df,
+ #                                 cols = total_cols,
+  #                              miRNA_col = "miRNA name",
+   #                               mut_col   = "pos:mut") {
+  #df %>%
+   # filter(.data[[mut_col]] == "PM") %>%
+    #select(miRNA = .data[[miRNA_col]], all_of(cols))
+#}
+
+Annotate_total_counts <- function(df,
+                                  cols      = total_cols,
+                                  miRNA_col = "miRNA name",
+                                  mut_col   = "pos:mut") {
+  df %>%
+    filter(.data[[mut_col]] == "PM") %>%
+    # selecciona el miRNA y las columnas de totales
+    select(all_of(c(miRNA_col, cols))) %>%
+    # renómbralo a "miRNA"
+    rename(miRNA = !!rlang::sym(miRNA_col))
+}
+
+Annotate_SNV_counts <- function(df,
+                                  cols = snv_cols,
+                                  miRNA_col = "miRNA name",
+                                  mut_col   = "pos:mut") {
+  df %>%
+    filter(.data[[mut_col]] == "PM") %>%
+    select(miRNA = .data[[miRNA_col]], all_of(cols))
+}
+
+Annotate_SNV_presence <- function(df,
+                                  cols = snv_cols,
+                                  miRNA_col = "miRNA name",
+                                  mut_col   = "pos:mut") {
+  df %>%
+    filter(.data[[mut_col]] != "PM") %>%
+    select(miRNA = .data[[miRNA_col]], mut = .data[[mut_col]], all_of(cols))
+}
+
+
+
+
+
+# 2) Calculate_total_per_sample:
+#    Take that counts table, sum each sample‐column, and append a final row
+#    named “totals” (so you can use it as the denominator later).
+
+Calculate_total_per_sample <- function(count_df) {
+  totals <- count_df %>%
+    select(-miRNA) %>%
+    summarise(across(everything(), ~ sum(.x, na.rm = TRUE))) %>%
+    mutate(miRNA = "totals") %>%
+    select(miRNA, everything())
+  
+  bind_rows(count_df, totals)
+}
+
+
+# 3) Calculate_RPM:
+#    Using the “totals” row as denominator, divide every miRNA count by its
+#    sample’s total, multiply by 1e6, and return a table of the same shape
+#    (minus the totals row).
+Calculate_RPM <- function(count_df,
+                          miRNA_col = "miRNA",
+                          factor     = 1e6) {
+  # pull out denominators as named numeric vector
+  denom <- count_df %>%
+    filter(.data[[miRNA_col]] == "totals") %>%
+    select(-all_of(miRNA_col)) %>%
+    unlist(use.names = TRUE)
+  
+  # drop totals row, then normalize
+  count_df %>%
+    filter(.data[[miRNA_col]] != "totals") %>%
+    mutate(across(-all_of(miRNA_col),
+                  ~ .x / denom[cur_column()] * factor))
+}
+
+
+
+
+# 5) Threshold_binary_and_select:
+#    Turn any RPM table into 0/1 by a given threshold, then pull out the miRNAs
+#    that have “1” in at least a given fraction of samples.
+Threshold_binary_and_select <- function(rpm_df,
+                                       threshold     = 1,
+                                       min_fraction  = 0.10,
+                                       miRNA_col     = "miRNA") {
+  samp_cols <- setdiff(names(rpm_df), miRNA_col)
+  # 0/1 matrix
+  binary <- rpm_df %>%
+    mutate(across(all_of(samp_cols),
+                  ~ as.integer(.x >= threshold)))
+  
+  # count 1’s per miRNA
+  n_samps <- length(samp_cols)
+  min_samps <- ceiling(n_samps * min_fraction)
+  keep <- binary %>%
+    mutate(n_ones = rowSums(select(., all_of(samp_cols)))) %>%
+    filter(n_ones >= min_samps) %>%
+    pull(all_of(miRNA_col))
+  
+  list(
+    binary_matrix   = binary %>% select(miRNA, all_of(samp_cols)),
+    selected_miRNAs = keep
+  )
+}
+
+
+```
+
+```{r}
+#En este chunk vamos a comenzar con la exploración incial de los datos, para esto lo primero es definir las características inicales. lo que nos interesa ver qué muestras tenemos, cuatnas de cada qué, cuántas cuentas totales en promedio por tipo de muestra, cuatnos SNVs por miRNA en promedio por tipo de muestra, en cuántas muestras está en promedio cada SNV, otra sería seguir por el camino de las cuentas, que me parece el importante para justificar la parte del RPM, entonces lo que tenemos que ver es jsutamente la diferencia en promedio de cuentas por tipo de muestra pero muy bien definido, con un scatter yo creo para poder ver si hay outliers y las características de los outliers en terminos de expresión. 
+
+
+
+# para esto vamos a dividir y usar las fuciones que tenemos, entonces el primer paso es ver cuántas muestras por tipo, no? eso está fácil, creo que lo fácil es contar en la lista que tenemos de snv_cols cuantos nombres de columnas hay (422), y de esos cuantos tienen "ALS-longitudnial" cuantos "ALS-enrolment" y pues el resto ya sabemos que van a ser controles, y con esto hacer un pie chart para ver cauntos de cada tipo hay, pero creo que algo que me puede servir para el resto del script sería tener estas muestras anotadas por grupo en un df, o sea, tener columna, ALS, longitudinal, y control y llenar este df poniendno de forma correspondiente el nombre de cada muestra, entonces un df de 3 columnas llenado con los nombres de las columnas, y un df de snv y otro de totales.
+
+#lo siguiente es usar la lista de total_cols, y primero filtrar por "PM", luego por columnas en totales, para esto usar la función que ya tenemos. ya que tenemos ese df con las cuentas totales por muestra, lo que podemos hacer es sacar el promedio por columna, y ya que tenemos el total  de cuentas con Calculate_total_per_sample en el que se agrega un último row con las cuentas totales, luego de eso lo que hago es dividir por grupo con el df que saqué para totales y ya que los tengo con una etiqueta de grupo (puede ser otro row) lo que hago es tomar el grupo y el promedio para hacer box plot y un violin plot. 
+
+# lo siguiente es ver cuántos SNVs por miRNA por tipo de muestra hay. para esto lo que hago es tomar mi df y eliminar las total_cols, ya que tengo este df con solo los metadatos y snv_cols, lo que hago es quitar los "PM", esto lo hago con la función Annotate_SNV_presence, ya que tengo ese lo que puedo hacer es contar por row en cuantas muestras de cada tipo apararece, para esto lo que se me ocurre es crear tres columnas al final de este mismo df  que sean los grupos, entonces una columna ALS, longitudinal y control, ya con estas lo que hago es recorrer la matriz por row y si en una columna hay un numero difrente a cero, reviso a qué grupo pertenece viendo el nombre de la columna y lo sumo a su grupo correspondiente en las columnas que agregué al final del mismo df, ahora, esta revisión no sé si sea más fácil ahorrarla aplicando una función que detecte el grupo, o buscando el nombre de esa columna en mi df de snv_grupo. pero el chiste es que ya que tengo en cuántas por grupo aparece cada SNV, lo primero que puedo hacer es un diagrama de venn con SNVs, ya que tengo tres condiciones y SNVs que se reparten entre estás. ya que tengo el diagrama de venn lo siguiente que puedo hacer es una columna que sea el total de en cuántas muestras se encuentra no importando el grupo y hacer un histograma en el que el eje x sea el número de muestras (1-415) y el número de SNVs, para ver cómo se reparten los SNVs en general, y si se puede tambien por grupo 
+
+# Otra cosa que puedo hacer es revisar los miRNAs más mutados. para esto lo que hago es dividir los valores de las columnas snv_cols, entre total_cols, (hay que recordar que aquí lo que que tengo son los nombres de las columnas, no los valores) para cada row y multiplicar por 100, o sea, ver la frecuencia de cada SNV para cada muestra. ese valor quiero que se guarde en un df que tenga los metadatos igual pero que se guarde la freceuncia para cada muestra. y con esto lo que puedo hacer es sumar las frecuencias por SNV por grupo, para esto lo que puedo hacer son tres promedios por SNV, uno por grupo. con esta tabla se pueden hacer dos cosas, análisis de SNV y análisis de miRNA, para la parte de SNV lo que podemos ver son los top SNVs para cada grupo, y luego el promedio de frecuencia en boxplots para ver cómo se ve la distribución de los SNVs (con los G>T en rojo), de ahí lo que se puede hacer también es el análisis por miRNA, en el que por cada miRNA (valores únicos en el "miRNA name") se suman los promedios de las frecuencias por SNV de ese miRNA como para ver la frecuencia total del perfil mutagénico de cada miRNA pero en este punto sigue siendo un estado exploratorio, entonces lo que puedo hacer es un histograma en el que el x sea el número de miRNAs y el eje Y  la frecuencia de mutaciones, así veo cuántos miRNAs tienen cuantas mutaciones, pero aquí también hay que tomar en cuenta que lo quiero hacer por grupo, entonces son tres gráficas. ahora, otra cosa que se puede hacer para no caer bajo el sesgo de la freceuncia, es graficar otra vez la parte de los conteos totales, para entender el contexto de las frecuencias, lo que podemos hacer para esto es un histograma en el que las muestras sean el eje x y el eje Y sea los conteos, y se vean como un broken Y para poder diferenciar entre cada grupo (o tres histogramas) como está la parte de la expresión. 
+
+```
+
+```{r}
+# ---- SNV samples ----
+# Identify samples by group
+snv_long  <- snv_cols[str_detect(snv_cols, "ALS[-_]longitudinal")]
+snv_enrol <- snv_cols[str_detect(snv_cols, "ALS[-_]enrolment")]
+snv_ctrl  <- snv_cols[str_detect(snv_cols, "-control-")]
+```
+
+
+
+```{r}
+# Build df_snv_groups: 3 columns, padded with NA
+max_len_snv <- max(length(snv_long), length(snv_enrol), length(snv_ctrl))
+df_snv_groups <- data.frame(
+  ALS_longitudinal = c(snv_long,  rep(NA, max_len_snv - length(snv_long))),
+  ALS_enrolment    = c(snv_enrol, rep(NA, max_len_snv - length(snv_enrol))),
+  control          = c(snv_ctrl,  rep(NA, max_len_snv - length(snv_ctrl))),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r}
+# ---- Total‐count samples ----
+tot_long  <- total_cols[str_detect(total_cols, "ALS[-_]longitudinal")]
+tot_enrol <- total_cols[str_detect(total_cols, "ALS[-_]enrolment")]
+tot_ctrl  <- total_cols[str_detect(total_cols, "-control-")]
+```
+
+```{r}
+max_len_tot <- max(length(tot_long), length(tot_enrol), length(tot_ctrl))
+df_total_groups <- data.frame(
+  ALS_longitudinal = c(tot_long,  rep(NA, max_len_tot - length(tot_long))),
+  ALS_enrolment    = c(tot_enrol, rep(NA, max_len_tot - length(tot_enrol))),
+  control          = c(tot_ctrl,  rep(NA, max_len_tot - length(tot_ctrl))),
+  stringsAsFactors = FALSE
+)
+
+# ---- Pie chart of sample distribution ----
+counts <- c(
+  "ALS-longitudinal" = length(snv_long),
+  "ALS-enrolment"    = length(snv_enrol),
+  "control"          = length(snv_ctrl)
+)
+pie(counts,
+    labels = paste0(names(counts), " (", counts, ")"),
+    main   = "Sample distribution by group")
+```
+
+```{r}
+# 1) Annotate only PM rows and calculate totals
+df_pm  <- Annotate_total_counts(df)
+df_tot <- Calculate_total_per_sample(df_pm)
+```
+
+```{r}
+# 2) Pivot to long, keeping only the totals row
+df_lng <- df_tot %>%
+  filter(miRNA == "totals") %>%
+  pivot_longer(
+    cols      = -miRNA,
+    names_to  = "sample",
+    values_to = "total_counts"
+  )
+
+# 3) Label each sample by group
+df_lng <- df_lng %>%
+  mutate(group = case_when(
+    str_detect(sample, "ALS[-_]longitudinal") ~ "ALS-Longitudinal",
+    str_detect(sample, "ALS[-_]enrolment")    ~ "ALS-Enrolment",
+    TRUE                                      ~ "Control"
+  ))
+
+# 4) Print summary stats (means included)
+stats_by_group <- df_lng %>%
+  group_by(group) %>%
+  summarise(
+    n            = n(),
+    mean_total   = mean(total_counts),
+    median_total = median(total_counts),
+    sd_total     = sd(total_counts)
+  )
+print(stats_by_group)
+
+# 5) Plot: violin + boxplot + mean point
+ggplot(df_lng, aes(x = group, y = total_counts, fill = group)) +
+  geom_violin(alpha = 0.4, color = NA) +
+  geom_boxplot(width = 0.3, outlier.size = 0.8, alpha = 0.6) +
+  stat_summary(
+    fun     = mean,
+    geom    = "point",
+    shape   = 23,
+    size    = 3,
+    color   = "black",
+    fill    = "yellow",
+    aes(group = group)
+  ) +
+  scale_y_continuous(
+    labels = comma,
+    breaks = pretty_breaks(n = 6)
+  ) +
+  labs(
+    title = "Distribution of Total Counts by Sample Group",
+    x     = "Sample Group",
+    y     = "Total Counts"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+```{r}
+library(data.table)
+
+# — Step 1: Build df_presence as before (only once) —
+# df_presence should already exist, but in case you rerun:
+df_presence <-
+  Annotate_SNV_presence(df, cols = snv_cols) %>%
+  mutate(
+    n_long  = rowSums(select(., matches("ALS[-_]longitudinal")) > 0),
+    n_enrol = rowSums(select(., matches("ALS[-_]enrolment"))    > 0),
+    n_ctrl  = rowSums(select(., matches("-control-"))          > 0)
+  ) %>%
+  mutate(
+    has_long  = n_long  > 0,
+    has_enrol = n_enrol > 0,
+    has_ctrl  = n_ctrl  > 0,
+    id        = paste(miRNA, mut, sep = "_")
+  )
+
+
+df_presence
+
+```
+
+```{r}
+
+# — Step 2: Make a named list of vectors of IDs —
+snv_lists <- list(
+  `ALS-Longitudinal` = df_presence$id[df_presence$has_long],
+  `ALS-Enrolment`    = df_presence$id[df_presence$has_enrol],
+  `Control`          = df_presence$id[df_presence$has_ctrl]
+)
+
+# Quick check
+sapply(snv_lists, length)
+# e.g. ALS-Longitudinal ALS-Enrolment         Control 
+#            150               200               180 
+
+# — Step 3: UpSet from the list —
+upset(
+  fromList(snv_lists),
+  nsets               = 3,
+  keep.order          = TRUE,
+  order.by            = "freq",
+  empty.intersections = "on"
+)
+
+# 2) Pivot the three counters to long form
+# ----------------------------------------
+df_counts_long <- df_presence %>%
+  select(miRNA, mut, n_long, n_enrol, n_ctrl) %>%
+  pivot_longer(
+    cols      = c(n_long, n_enrol, n_ctrl),
+    names_to  = "group_code",
+    values_to = "n_samples"
+  ) %>%
+  mutate(group = recode(
+    group_code,
+    n_long  = "ALS-Longitudinal",
+    n_enrol = "ALS-Enrolment",
+    n_ctrl  = "Control"
+  ))
+
+# 3) Combined overlaid histogram
+# --------------------------------
+ggplot(df_counts_long, aes(x = n_samples, fill = group)) +
+  geom_histogram(
+    position = "identity",  # overlay the three
+    alpha    = 0.4,
+    binwidth = 1
+  ) +
+  # highlight the “only in one sample” bar
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  annotate(
+    "text", x = 1.5, y = Inf, label = "Only in 1 sample",
+    vjust = 2, hjust = 0, size = 3
+  ) +
+  scale_x_continuous(
+    breaks = seq(0, max(df_counts_long$n_samples), by = 1)
+  ) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_brewer(type = "qual", palette = "Set1") +
+  labs(
+    title = "SNV Prevalence Distribution by Group",
+    subtitle = "How many samples (x) contain each SNV, colored by group",
+    x = "Number of Samples in Group Containing SNV",
+    y = "Number of SNVs",
+    fill = "Group"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    panel.grid.minor = element_blank()
+  )
+
+# — Step 4: Then the histograms as before — 
+
+# Global histogram of total presence
+ggplot(df_presence, aes(x = n_long + n_enrol + n_ctrl)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
+  scale_x_continuous(breaks = seq(0, max(df_presence$n_long + df_presence$n_enrol + df_presence$n_ctrl), by = 20)) +
+  labs(
+    title = "Distribution of SNV Presence Across All Samples",
+    x     = "Number of Samples Containing SNV",
+    y     = "Number of SNVs"
+  ) +
+  theme_minimal()
+
+# Faceted per-group histograms
+df_presence %>%
+  select(n_long, n_enrol, n_ctrl) %>%
+  pivot_longer(everything(), names_to = "group", values_to = "count") %>%
+  mutate(group = recode(group,
+                        n_long  = "ALS-Longitudinal",
+                        n_enrol = "ALS-Enrolment",
+                        n_ctrl  = "Control")) %>%
+  ggplot(aes(x = count, fill = group)) +
+    geom_histogram(binwidth = 5, color = "white", alpha = 0.7) +
+    facet_wrap(~ group, scales = "free_y") +
+    scale_x_continuous(breaks = pretty_breaks(10)) +
+    scale_y_continuous(labels = comma) +
+    labs(
+      title = "Per-Group SNV Frequency Distributions",
+      x     = "Number of Samples in Group Containing SNV",
+      y     = "Number of SNVs"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none")
+```
+
+```{r}
+set.seed(42)  # for reproducibility
+df_snv <- Annotate_SNV_presence(
+  df,
+  cols       = snv_cols,
+  miRNA_col  = "miRNA name",
+  mut_col    = "pos:mut"
+)
+# 1) Take a random sample of 5 SNVs from the original SNV table
+#    We assume df_snv is your Annotate_SNV_presence(...) result
+df_snv_with_id <- df_snv %>%
+  mutate(id = paste(miRNA, mut, sep = "_"))
+
+to_check <- df_snv_with_id %>%
+  slice_sample(n = 5)
+
+# 2) For each of these, recalculate the counts directly
+verification <- to_check %>%
+  rowwise() %>%
+  mutate(
+    calc_n_long  = sum(c_across(matches("ALS[-_]longitudinal")) > 0),
+    calc_n_enrol = sum(c_across(matches("ALS[-_]enrolment")) > 0),
+    calc_n_ctrl  = sum(c_across(matches("-control-")) > 0)
+  ) %>%
+  ungroup() %>%
+  # 3) Join back to df_presence to compare
+  left_join(
+    df_presence %>% select(id, n_long, n_enrol, n_ctrl),
+    by = "id"
+  ) %>%
+  select(id, miRNA, mut,
+         calc_n_long, n_long,
+         calc_n_enrol, n_enrol,
+         calc_n_ctrl, n_ctrl)
+
+print(verification)
+```
+
+```{r}
+# — 1) Totales y limpieza de sufijos —
+df_pm   <- Annotate_total_counts(df, cols = total_cols)
+df_tot  <- Calculate_total_per_sample(df_pm) %>% 
+           filter(miRNA == "totals")
+old_tot <- names(df_tot)[-1]
+new_tot <- str_remove(old_tot, " \\(PM\\+1MM\\+2MM\\)$")
+df_tot  <- setnames(df_tot, old = old_tot, new = new_tot)
+
+total_counts <- df_tot %>%
+  select(-miRNA) %>%
+  unlist(use.names = FALSE)
+names(total_counts) <- new_tot
+
+# — 2) Expande y colapsa SNVs —
+df_snv2 <- df_snv %>%
+  split_mutations(mut_col = "mut") %>%
+  collapse_after_split(mut_col = "mut", count_cols = snv_cols)
+
+# — 3) Calcula frecuencias (%) —
+counts_mat <- df_snv2 %>% select(all_of(snv_cols)) %>% as.matrix()
+freq_mat   <- sweep(counts_mat, 2, total_counts, "/") * 100
+
+df_freq <- bind_cols(
+  df_snv2 %>% select(miRNA, mut),
+  as.data.frame(freq_mat)
+)
+
+# — 4) Pivot largo y etiqueta de grupos —
+df_freq_long <- df_freq %>%
+  pivot_longer(all_of(snv_cols),
+               names_to  = "sample",
+               values_to = "freq_pct") %>%
+  mutate(group = case_when(
+    str_detect(sample, "ALS[-_]longitudinal") ~ "ALS-Longitudinal",
+    str_detect(sample, "ALS[-_]enrolment")    ~ "ALS-Enrolment",
+    TRUE                                      ~ "Control"
+  ))
+
+# — 5) Promedios por SNV × grupo —
+df_snv_means <- df_freq_long %>%
+  group_by(miRNA, mut, group) %>%
+  summarise(mean_freq = mean(freq_pct, na.rm = TRUE),
+            .groups   = "drop") %>%
+  pivot_wider(names_from   = group,
+              values_from  = mean_freq,
+              names_prefix = "mean_")
+
+# — 6) Top 5 SNVs en cada grupo —
+top_enrol <- df_snv_means %>% arrange(desc(mean_ALS.Enrolment))    %>% slice(1:5)
+top_long  <- df_snv_means %>% arrange(desc(mean_ALS.Longitudinal)) %>% slice(1:5)
+top_ctrl  <- df_snv_means %>% arrange(desc(mean_Control))          %>% slice(1:5)
+
+list(
+  enrolment = top_enrol,
+  longitudinal = top_long,
+  control = top_ctrl
+)
+```
+
+```{r}
+colnames(df_snv)
+```
+
+```{r}
+## Lo que sigue es la parte de aplicar los filtros para hacer todo esto. o sea, hacer la normalización RPM para ver verdaderamente la expresión de ese miRNA, después pues quitamos esos miRNAs que no pasen el umbral. para esto aplicamos las funciones que ya tenemos, pero en qué orden y cómo es la cuestión. mira, o prmero que podemos hacer es la parte del RPM, para esto que tenemos que hacer es seguir las funciones que ya tenemos, entonces es: Annotate_total_columns primero, que en esa vamos a tener un df con las columnas de totales y después lo que  podemos hacer es usar: Calculate_total_per_sample para agregar el último row que tenga los conteos totales de cada columna o sample en esta caso. después de eso solo tengo que aplicar la función de Calculate_RPM. después de eso es que puedo dividir por grupo y aplicar los primero umbrales, el primero es que paso esa matriz con RPM a una binaria y luego cuento los 1 y si tiene los suficientes, ese miRNA pasa, y para hacerse un 1 tiene que pasar primero el umbral de RPM y luego el de presencia. con esto nos quedamos con los miNRAs que más nos interesan. de aquí lo que sigue es filtrar los miRNA que no estén en nuestra lista resultante, tan sencillo como si en la columna de miRNA name no está uno de los nombres de la lista que tenemos, se elimina esa row.
+```
+
+```{r}
+### Chunk_5 {RPM_and_Filtering}
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+# Parámetros de filtrado
+rpm_threshold <- 10   # mínimo RPM
+min_frac      <- 0.50 # al menos el 50% de las muestras
+
+# 1) Anotar totales y añadir fila “totals”
+df_tot_counts <- Annotate_total_counts(df, cols = total_cols) %>%
+  Calculate_total_per_sample()
+
+# 2) Calcular RPM usando la columna "miRNA" como referencia
+rpm_df <- Calculate_RPM(
+  df_tot_counts,
+  miRNA_col = "miRNA",
+  factor     = 1e6
+)
+
+# 3) Binarizar y seleccionar miRNAs robustos (usa "miRNA" aquí también)
+thres_out <- Threshold_binary_and_select(
+  rpm_df,
+  threshold    = rpm_threshold,
+  min_fraction = min_frac,
+  miRNA_col    = "miRNA"
+)
+
+binary_matrix   <- thres_out$binary_matrix
+selected_miRNAs <- thres_out$selected_miRNAs
+
+message("Se seleccionaron ", length(selected_miRNAs), " miRNAs.")
+
+# 4) Filtrar el df original (que tiene columna "miRNA name")
+df_filtered <- df %>%
+  filter(`miRNA name` %in% selected_miRNAs)
+
+# 5) (Opcional) Quedarte solo con las filas PM de esos miRNAs
+df_filtered_PM <- df_filtered %>%
+  filter(`pos:mut` == "PM")
+
+```
+
+```{r}
+## Yo sí me pensaría un filtro para las muestras, pero no estoy seguro de cuál. tal vez algo para hacer más dsicreta la desviacion estandar, como ease the curve o algo así.
+```
+
+```{r}
+## Chunk_6 {Analysis_on_Selected_miRNAs}
+
+# — 0) Elige tu tabla filtrada —
+df_sel    <- df_filtered       # o df_filtered_PM
+
+# — 1) Totales por muestra y pivot a largo —
+df_pm_sel  <- Annotate_total_counts(df_sel, cols = total_cols)
+df_tot_sel <- Calculate_total_per_sample(df_pm_sel)
+
+df_lng_sel <- df_tot_sel %>%
+  filter(miRNA == "totals") %>%
+  pivot_longer(-miRNA, names_to = "sample", values_to = "total_counts") %>%
+  mutate(group = case_when(
+    str_detect(sample, "ALS[-_]longitudinal") ~ "ALS-Longitudinal",
+    str_detect(sample, "ALS[-_]enrolment")    ~ "ALS-Enrolment",
+    TRUE                                      ~ "Control"
+  ))
+
+# — 2) Estadísticas resumidas —
+stats_by_group_sel <- df_lng_sel %>%
+  group_by(group) %>%
+  summarise(
+    n            = n(),
+    mean_total   = mean(total_counts),
+    median_total = median(total_counts),
+    sd_total     = sd(total_counts),
+    .groups      = "drop"
+  )
+print(stats_by_group_sel)
+
+# — 3) Gráfico de totales —
+ggplot(df_lng_sel, aes(group, total_counts, fill = group)) +
+  geom_violin(alpha = .4, color = NA) +
+  geom_boxplot(width = .3, alpha = .6, outlier.size = .8) +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3,
+               color = "black", fill = "yellow") +
+  scale_y_continuous(labels = comma, breaks = pretty_breaks(6)) +
+  labs(
+    title = "Total Counts by Sample Group",
+    x     = "Group",
+    y     = "Total Counts"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# — 4) SNV presence y filtrado por ≥3% —
+df_presence_sel <- Annotate_SNV_presence(df_sel, cols = snv_cols) %>%
+  mutate(
+    n_long  = rowSums(select(., matches("ALS[-_]longitudinal")) > 0),
+    n_enrol = rowSums(select(., matches("ALS[-_]enrolment"))    > 0),
+    n_ctrl  = rowSums(select(., matches("-control-"))          > 0),
+    total_n = n_long + n_enrol + n_ctrl,
+    has_long  = n_long  > 0,
+    has_enrol = n_enrol > 0,
+    has_ctrl  = n_ctrl  > 0,
+    id        = paste(miRNA, mut, sep = "_")
+  ) %>%
+  # filtro SNVs en menos del 3% de las muestras
+  filter(total_n >= length(snv_cols) * 0.03)
+
+# — 5) UpSet —
+snv_lists_sel <- list(
+  `ALS-Longitudinal` = df_presence_sel$id[df_presence_sel$has_long],
+  `ALS-Enrolment`    = df_presence_sel$id[df_presence_sel$has_enrol],
+  `Control`          = df_presence_sel$id[df_presence_sel$has_ctrl]
+)
+
+upset(
+  fromList(snv_lists_sel),
+  nsets               = 3,
+  keep.order          = TRUE,
+  order.by            = "freq",
+  empty.intersections = "on"
+)
+
+# — 6) Histogramas de presencia —
+df_counts_long_sel <- df_presence_sel %>%
+  select(miRNA, mut, n_long, n_enrol, n_ctrl) %>%
+  pivot_longer(c(n_long, n_enrol, n_ctrl),
+               names_to = "group_code", values_to = "n_samples") %>%
+  mutate(group = recode(
+    group_code,
+    n_long  = "ALS-Longitudinal",
+    n_enrol = "ALS-Enrolment",
+    n_ctrl  = "Control"
+  ))
+
+# Overlaid
+ggplot(df_counts_long_sel, aes(n_samples, fill = group)) +
+  geom_histogram(position = "identity", alpha = .4, binwidth = 1) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  annotate("text", 1.5, Inf, label = "Only in 1", vjust = 2, hjust = 0, size = 3) +
+  scale_x_continuous(breaks = seq(0, max(df_counts_long_sel$n_samples), 1)) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_brewer(type = "qual", palette = "Set1") +
+  labs(
+    title    = "SNV Prevalence by Group (≥3% samples)",
+    x        = "Samples per SNV",
+    y        = "SNV Count",
+    fill     = "Group"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Global
+ggplot(df_presence_sel, aes(n_long + n_enrol + n_ctrl)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
+  scale_x_continuous(breaks = seq(0, max(df_presence_sel$n_long + df_presence_sel$n_enrol + df_presence_sel$n_ctrl), 20)) +
+  labs(
+    title = "Overall SNV Presence Distribution",
+    x     = "Number of Samples Containing SNV",
+    y     = "Number of SNVs"
+  ) +
+  theme_minimal()
+
+# Faceted
+df_presence_sel %>%
+  select(n_long, n_enrol, n_ctrl) %>%
+  pivot_longer(everything(), names_to = "group", values_to = "count") %>%
+  mutate(group = recode(group,
+                        n_long  = "ALS-Longitudinal",
+                        n_enrol = "ALS-Enrolment",
+                        n_ctrl  = "Control")) %>%
+  ggplot(aes(count, fill = group)) +
+    geom_histogram(binwidth = 5, alpha = .7, color = "white") +
+    facet_wrap(~ group, scales = "free_y") +
+    scale_x_continuous(breaks = pretty_breaks(10)) +
+    scale_y_continuous(labels = comma) +
+    labs(
+      title = "SNV Frequency per Group (Faceted)",
+      x     = "Samples per SNV",
+      y     = "Number of SNVs"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none")
+
+# — 7) Verificación aleatoria de 5 SNVs —
+set.seed(42)
+verification_sel <- df_presence_sel %>%
+  slice_sample(n = 5) %>%
+  rowwise() %>%
+  mutate(
+    calc_n_long  = sum(c_across(matches("ALS[-_]longitudinal")) > 0),
+    calc_n_enrol = sum(c_across(matches("ALS[-_]enrolment"))    > 0),
+    calc_n_ctrl  = sum(c_across(matches("-control-"))          > 0)
+  ) %>%
+  ungroup() %>%
+  left_join(
+    df_presence_sel %>% select(id, n_long, n_enrol, n_ctrl),
+    by = "id"
+  ) %>%
+  select(id, miRNA, mut,
+         calc_n_long, n_long,
+         calc_n_enrol, n_enrol,
+         calc_n_ctrl, n_ctrl)
+
+print(verification_sel)
+```
+
+```{r}
+## Ahora lo que sigue sería hacer la evaluación otra vez de cómo cambiaron los datos o qué tantos se eliminaron. 
+
+```
+
+```{r}
+## Para hacer el bubble plot lo primero es definir el objeto miRNA, o puedo hacer esto por OOP
+```
+
+```{r}
+## para esto creo que lo que se puede hacer es un bubble plot en el que el eje x sea el conteo normalizado del total del miRNA (con logs), luego para el eje y son las mutaciones, el color el grupo, y el tamaño a frecuencia  de SNVs en ese miRNA, y el color un gradiente que represente el G>T 
+
+```
+
+```{r}
+
+```

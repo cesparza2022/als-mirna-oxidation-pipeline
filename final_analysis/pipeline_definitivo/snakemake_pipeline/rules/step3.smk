@@ -1,96 +1,77 @@
 # ============================================================================
-# SNAKEMAKE RULES: STEP 3 - Functional Analysis
+# SNAKEMAKE RULES: STEP 3 - Clustering Analysis (Structure Discovery)
 # ============================================================================
-# Rules for functional target and pathway enrichment analysis
+# Purpose: Identify clusters of miRNAs with similar oxidation patterns
+# Execution: Runs FIRST after Step 2, before Steps 4, 5, 6
+#            Steps 4, 5, 6 depend on Step 3 to use clustering results
 # ============================================================================
 
 # Load configuration
 configfile: "config/config.yaml"
 
 # ============================================================================
-# COMMON PATHS AND PARAMETERS
+# COMMON PATHS
 # ============================================================================
 
-# Input data (from Step 2 - Statistical comparisons)
-STEP2_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step2"]
-INPUT_STATISTICAL = STEP2_DATA_DIR + "/tables/statistical_results/S2_statistical_comparisons.csv"
+# Scripts paths
+# For script: directive (resolved from rules/ directory), use relative path
+SCRIPTS_STEP3_SCRIPT = "../scripts/step3"  # For script: (resolved from rules/)
+SCRIPTS_UTILS_SCRIPT = "../scripts/utils"  # For script: (resolved from rules/)
+# For input: directive (resolved from Snakefile), use config path
+SCRIPTS_STEP3 = config["paths"]["scripts"]["step3"]  # For input: (resolved from Snakefile)
+SCRIPTS_UTILS = config["paths"]["scripts"]["utils"]  # For input: (resolved from Snakefile)
+FUNCTIONS_COMMON = SCRIPTS_UTILS + "/functions_common.R"  # For input: (resolved from Snakefile)
 
-# Output directories
+# Output directories (using full paths)
 OUTPUT_STEP3 = config["paths"]["outputs"]["step3"]
 OUTPUT_FIGURES = OUTPUT_STEP3 + "/figures"
-OUTPUT_TABLES = OUTPUT_STEP3 + "/tables"
-OUTPUT_TABLES_FUNCTIONAL = OUTPUT_TABLES + "/functional"
+OUTPUT_TABLES_CLUSTERS = OUTPUT_STEP3 + "/tables/clusters"
 OUTPUT_LOGS = OUTPUT_STEP3 + "/logs"
 
-# Scripts directories
-SCRIPTS_STEP3 = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["step3"]
-SCRIPTS_UTILS = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["utils"]
-
-# Common parameters
-FUNCTIONS_COMMON = SCRIPTS_UTILS + "/functions_common.R"
+# Inputs from previous steps (using full paths)
+STEP2_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step2"]
+STEP1_5_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step1_5"]
+INPUT_STEP2_STATS = STEP2_DATA_DIR + "/tables/statistical_results/S2_statistical_comparisons.csv"
+INPUT_STEP1_5_FILTERED_DATA = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATIONS_VAF_FILTERED.csv"
 
 # ============================================================================
-# RULE: Functional Target Analysis
+# RULE: Clustering Analysis
 # ============================================================================
 
-rule step3_functional_target_analysis:
+rule step3_clustering_analysis:
     input:
-        statistical_results = INPUT_STATISTICAL,
+        comparisons = INPUT_STEP2_STATS,
+        filtered_data = INPUT_STEP1_5_FILTERED_DATA,
         functions = FUNCTIONS_COMMON
     output:
-        targets = OUTPUT_TABLES_FUNCTIONAL + "/S3_target_analysis.csv",
-        als_genes = OUTPUT_TABLES_FUNCTIONAL + "/S3_als_relevant_genes.csv",
-        target_comparison = OUTPUT_TABLES_FUNCTIONAL + "/S3_target_comparison.csv"
+        cluster_assignments = OUTPUT_TABLES_CLUSTERS + "/S3_cluster_assignments.csv",
+        cluster_summary = OUTPUT_TABLES_CLUSTERS + "/S3_cluster_summary.csv"
     params:
         functions = FUNCTIONS_COMMON
     log:
-        OUTPUT_LOGS + "/functional_target_analysis.log"
+        OUTPUT_LOGS + "/clustering_analysis.log"
     script:
-        SCRIPTS_STEP3 + "/01_functional_target_analysis.R"
+        SCRIPTS_STEP3_SCRIPT + "/01_clustering_analysis.R"
 
 # ============================================================================
-# RULE: Pathway Enrichment Analysis
+# RULE: Clustering Visualization
 # ============================================================================
 
-rule step3_pathway_enrichment:
+rule step3_clustering_visualization:
     input:
-        targets = OUTPUT_TABLES_FUNCTIONAL + "/S3_target_analysis.csv",
+        cluster_assignments = OUTPUT_TABLES_CLUSTERS + "/S3_cluster_assignments.csv",
+        cluster_summary = OUTPUT_TABLES_CLUSTERS + "/S3_cluster_summary.csv",
+        filtered_data = INPUT_STEP1_5_FILTERED_DATA,
         functions = FUNCTIONS_COMMON
     output:
-        go_enrichment = OUTPUT_TABLES_FUNCTIONAL + "/S3_go_enrichment.csv",
-        kegg_enrichment = OUTPUT_TABLES_FUNCTIONAL + "/S3_kegg_enrichment.csv",
-        als_pathways = OUTPUT_TABLES_FUNCTIONAL + "/S3_als_pathways.csv",
-        heatmap = OUTPUT_FIGURES + "/step3_pathway_enrichment_heatmap.png"
+        figure_a = OUTPUT_FIGURES + "/step3_panelA_cluster_heatmap.png",
+        figure_b = OUTPUT_FIGURES + "/step3_panelB_cluster_dendrogram.png"
     params:
         functions = FUNCTIONS_COMMON
     log:
-        OUTPUT_LOGS + "/pathway_enrichment.log"
+        OUTPUT_LOGS + "/clustering_visualization.log"
     script:
-        SCRIPTS_STEP3 + "/02_pathway_enrichment_analysis.R"
-
-# ============================================================================
-# RULE: Complex Functional Visualization
-# ============================================================================
-
-rule step3_complex_functional_viz:
-    input:
-        targets = OUTPUT_TABLES_FUNCTIONAL + "/S3_target_analysis.csv",
-        go_enrichment = OUTPUT_TABLES_FUNCTIONAL + "/S3_go_enrichment.csv",
-        kegg_enrichment = OUTPUT_TABLES_FUNCTIONAL + "/S3_kegg_enrichment.csv",
-        als_genes = OUTPUT_TABLES_FUNCTIONAL + "/S3_als_relevant_genes.csv",
-        target_comparison = OUTPUT_TABLES_FUNCTIONAL + "/S3_target_comparison.csv",
-        functions = FUNCTIONS_COMMON
-    output:
-        figure_a = OUTPUT_FIGURES + "/step3_panelA_pathway_enrichment.png",
-        figure_b = OUTPUT_FIGURES + "/step3_panelB_als_genes_impact.png",
-        figure_c = OUTPUT_FIGURES + "/step3_panelC_target_comparison.png",
-        figure_d = OUTPUT_FIGURES + "/step3_panelD_position_impact.png"
-    params:
-        functions = FUNCTIONS_COMMON
-    log:
-        OUTPUT_LOGS + "/complex_functional_viz.log"
-    script:
-        SCRIPTS_STEP3 + "/03_complex_functional_visualization.R"
+        SCRIPTS_STEP3_SCRIPT + "/02_clustering_visualization.R"
 
 # ============================================================================
 # AGGREGATE RULE: All Step 3 outputs
@@ -98,17 +79,12 @@ rule step3_complex_functional_viz:
 
 rule all_step3:
     input:
-        # Functional analysis tables
-        OUTPUT_TABLES_FUNCTIONAL + "/S3_target_analysis.csv",
-        OUTPUT_TABLES_FUNCTIONAL + "/S3_als_relevant_genes.csv",
-        OUTPUT_TABLES_FUNCTIONAL + "/S3_target_comparison.csv",
-        OUTPUT_TABLES_FUNCTIONAL + "/S3_go_enrichment.csv",
-        OUTPUT_TABLES_FUNCTIONAL + "/S3_kegg_enrichment.csv",
-        OUTPUT_TABLES_FUNCTIONAL + "/S3_als_pathways.csv",
+        # DEPENDENCY: Step 3 requires Step 2 (statistical comparisons)
+        rules.all_step2.output,
+        # Clustering analysis tables
+        OUTPUT_TABLES_CLUSTERS + "/S3_cluster_assignments.csv",
+        OUTPUT_TABLES_CLUSTERS + "/S3_cluster_summary.csv",
         # Figures
-        OUTPUT_FIGURES + "/step3_pathway_enrichment_heatmap.png",
-        OUTPUT_FIGURES + "/step3_panelA_pathway_enrichment.png",
-        OUTPUT_FIGURES + "/step3_panelB_als_genes_impact.png",
-        OUTPUT_FIGURES + "/step3_panelC_target_comparison.png",
-        OUTPUT_FIGURES + "/step3_panelD_position_impact.png"
+        OUTPUT_FIGURES + "/step3_panelA_cluster_heatmap.png",
+        OUTPUT_FIGURES + "/step3_panelB_cluster_dendrogram.png"
 

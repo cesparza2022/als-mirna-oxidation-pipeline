@@ -1,8 +1,8 @@
 {
   "pipeline": {
-    "name": "ALS miRNA Oxidation Analysis",
+    "name": "miRNA Oxidation Analysis",
     "version": "1.0.0",
-    "execution_date": "2025-11-03",
+    "execution_date": "2025-11-04",
     "status": "completed"
   },
   "outputs": {
@@ -11,7 +11,7 @@
       "tables": 4
     },
     "total_figures": 19,
-    "total_tables": 13
+    "total_tables": 25
   },
   "statistical_results": {
     "total_mutations_analyzed": 5448,

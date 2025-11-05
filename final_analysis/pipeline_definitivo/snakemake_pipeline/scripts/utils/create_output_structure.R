@@ -45,13 +45,31 @@ output_structure <- list(
     "logs",
     "logs/benchmarks"
   ),
-  "step4" = c(
-    "figures",
-    "tables/biomarkers",
-    "logs",
-    "logs/benchmarks"
-  ),
-  "pipeline_info" = c(),
+      "step4" = c(
+        "figures",
+        "tables/biomarkers",
+        "logs",
+        "logs/benchmarks"
+      ),
+      "step5" = c(
+        "figures",
+        "tables/families",
+        "logs",
+        "logs/benchmarks"
+      ),
+      "step6" = c(
+        "figures",
+        "tables/correlation",
+        "logs",
+        "logs/benchmarks"
+      ),
+      "step7" = c(
+        "figures",
+        "tables/clusters",
+        "logs",
+        "logs/benchmarks"
+      ),
+      "pipeline_info" = c(),
   "summary" = c(),
   "validation" = c(),
   "viewers" = c()

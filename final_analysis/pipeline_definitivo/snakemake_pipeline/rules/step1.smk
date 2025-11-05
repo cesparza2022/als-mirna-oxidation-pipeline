@@ -21,13 +21,17 @@ OUTPUT_TABLES = OUTPUT_STEP1 + "/tables"
 OUTPUT_TABLES_SUMMARY = OUTPUT_TABLES + "/summary"
 OUTPUT_LOGS = OUTPUT_STEP1 + "/logs"
 
-# Scripts directory (already relative to snakemake_dir from config)
-# Note: In Snakemake, paths are resolved from the Snakefile directory
-SCRIPTS_STEP1 = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["step1"]
-SCRIPTS_UTILS = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["utils"]
+# Scripts directory 
+# Note: In Snakemake:
+# - Paths in script: directive are resolved relative to the INCLUDED file's directory (rules/)
+# - Paths in input: directive are resolved relative to the Snakefile directory (pipeline root)
+# So we need different paths for script: vs input:
+SCRIPTS_STEP1 = "../scripts/step1"  # For script: (resolved from rules/)
+SCRIPTS_UTILS = "../scripts/utils"   # For script: (resolved from rules/)
 
 # Common parameters
-FUNCTIONS_COMMON = SCRIPTS_UTILS + "/functions_common.R"
+# For input: use path relative to Snakefile (pipeline root)
+FUNCTIONS_COMMON = "scripts/utils/functions_common.R"  # For input: (resolved from Snakefile)
 
 # ============================================================================
 # RULE: Panel B - G>T Count by Position (uses CLEAN data)
@@ -36,12 +40,12 @@ FUNCTIONS_COMMON = SCRIPTS_UTILS + "/functions_common.R"
 rule panel_b_gt_count_by_position:
     input:
         data = INPUT_DATA_CLEAN,
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     output:
         figure = OUTPUT_FIGURES + "/step1_panelB_gt_count_by_position.png",
         table = OUTPUT_TABLES_SUMMARY + "/S1_B_gt_counts_by_position.csv"
     params:
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     benchmark:
         OUTPUT_LOGS + "/benchmarks/panel_b.txt"
     # conda:
@@ -58,12 +62,12 @@ rule panel_b_gt_count_by_position:
 rule panel_c_gx_spectrum:
     input:
         raw_data = INPUT_DATA_RAW,
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     output:
         figure = OUTPUT_FIGURES + "/step1_panelC_gx_spectrum.png",
         table = OUTPUT_TABLES_SUMMARY + "/S1_C_gx_spectrum_by_position.csv"
     params:
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     log:
         OUTPUT_LOGS + "/panel_c.log"
     # conda:
@@ -78,12 +82,12 @@ rule panel_c_gx_spectrum:
 rule panel_d_positional_fraction:
     input:
         raw_data = INPUT_DATA_RAW,
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     output:
         figure = OUTPUT_FIGURES + "/step1_panelD_positional_fraction.png",
         table = OUTPUT_TABLES_SUMMARY + "/S1_D_positional_fractions.csv"
     params:
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     log:
         OUTPUT_LOGS + "/panel_d.log"
     # conda:
@@ -98,12 +102,12 @@ rule panel_d_positional_fraction:
 rule panel_e_gcontent:
     input:
         data = INPUT_DATA_CLEAN,
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     output:
         figure = OUTPUT_FIGURES + "/step1_panelE_gcontent.png",
         table = OUTPUT_TABLES_SUMMARY + "/S1_E_gcontent_landscape.csv"
     params:
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     log:
         OUTPUT_LOGS + "/panel_e.log"
     # conda:
@@ -118,12 +122,12 @@ rule panel_e_gcontent:
 rule panel_f_seed_vs_nonseed:
     input:
         data = INPUT_DATA_CLEAN,
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     output:
         figure = OUTPUT_FIGURES + "/step1_panelF_seed_interaction.png",
         table = OUTPUT_TABLES_SUMMARY + "/S1_F_seed_vs_nonseed.csv"
     params:
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     log:
         OUTPUT_LOGS + "/panel_f.log"
     # conda:
@@ -138,12 +142,12 @@ rule panel_f_seed_vs_nonseed:
 rule panel_g_gt_specificity:
     input:
         data = INPUT_DATA_CLEAN,
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     output:
         figure = OUTPUT_FIGURES + "/step1_panelG_gt_specificity.png",
         table = OUTPUT_TABLES_SUMMARY + "/S1_G_gt_specificity.csv"
     params:
-        functions = FUNCTIONS_COMMON
+        functions = "scripts/utils/functions_common.R"
     log:
         OUTPUT_LOGS + "/panel_g.log"
     # conda:

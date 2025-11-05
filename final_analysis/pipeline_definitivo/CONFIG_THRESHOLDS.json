@@ -1,0 +1,91 @@
+{
+  "pipeline_version": "1.0.0",
+  "description": "Configuración de umbrales para selección de candidatos ALS",
+  "date_modified": "2025-10-17",
+  
+  "paso2_volcano_thresholds": {
+    "description": "Criterios para selección de candidatos del Volcano Plot",
+    
+    "presets": {
+      "strict": {
+        "description": "Muy estricto - Solo candidatos ultra-robustos",
+        "log2FC_threshold": 1.0,
+        "fc_threshold": 2.0,
+        "pvalue_threshold": 0.01,
+        "expected_candidates": "1-2 miRNAs"
+      },
+      
+      "moderate": {
+        "description": "Moderado - Balance entre robustez y cobertura (ACTUAL)",
+        "log2FC_threshold": 0.58,
+        "fc_threshold": 1.5,
+        "pvalue_threshold": 0.05,
+        "expected_candidates": "3-5 miRNAs"
+      },
+      
+      "permissive": {
+        "description": "Permisivo - Captura más candidatos para exploración",
+        "log2FC_threshold": 0.32,
+        "fc_threshold": 1.25,
+        "pvalue_threshold": 0.10,
+        "expected_candidates": "8-15 miRNAs"
+      },
+      
+      "exploratory": {
+        "description": "Exploratorio - Máxima cobertura para análisis inicial",
+        "log2FC_threshold": 0.0,
+        "fc_threshold": 1.0,
+        "pvalue_threshold": 0.20,
+        "expected_candidates": "20-40 miRNAs"
+      }
+    },
+    
+    "current_preset": "moderate",
+    
+    "custom": {
+      "description": "Personalizado - Ajusta manualmente",
+      "log2FC_threshold": 0.58,
+      "fc_threshold": 1.5,
+      "pvalue_threshold": 0.05,
+      "min_samples_per_group": 5,
+      "direction": "both"
+    }
+  },
+  
+  "paso3_analysis_scope": {
+    "description": "Configuración del alcance del análisis funcional",
+    
+    "target_prediction": {
+      "databases": ["targetscan", "mirtarbase", "mirdb"],
+      "min_databases": 2,
+      "include_predicted": true,
+      "include_validated": true,
+      "confidence_level": "high"
+    },
+    
+    "pathway_enrichment": {
+      "go_analysis": true,
+      "kegg_analysis": true,
+      "reactome_analysis": false,
+      "pvalue_cutoff": 0.05,
+      "qvalue_cutoff": 0.20,
+      "min_gene_set_size": 10,
+      "max_gene_set_size": 500
+    },
+    
+    "network_analysis": {
+      "include_pathways": false,
+      "min_degree_for_hub": 2,
+      "top_pathways_per_mirna": 50,
+      "visualize_top_n": 50
+    }
+  },
+  
+  "output_preferences": {
+    "save_intermediate_files": true,
+    "generate_html": true,
+    "figure_resolution_dpi": 300,
+    "figure_format": "png"
+  }
+}
+
