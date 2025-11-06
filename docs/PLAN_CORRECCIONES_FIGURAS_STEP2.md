@@ -21,6 +21,9 @@
 
 **Archivos modificados:**
 - `scripts/step2_figures/original_scripts/generate_FIG_2.4_HEATMAP_RAW.R` ✅
+- `scripts/utils/create_step2_viewer.py` ✅ (descripción actualizada)
+- `scripts/utils/create_step2_viewer_embed.py` ✅ (nuevo script para viewer con base64)
+- `viewers/step2_EMBED.html` ✅ (regenerado con descripción corregida)
 - `config/config.yaml` (ya tiene `heatmap_filtering` section)
 
 **Estado: COMPLETADO (2025-11-05)**
@@ -28,6 +31,7 @@
 - **Escala de colores:** Cambiada de `viridis` `plasma` a `colorRampPalette(c("white", "#FFE5E5", "#FF9999", "#FF6666", "#FF3333", "#D62728"))` para VAF (blanco→rojo, oxidación).
 - **Título actualizado:** Refleja el número de miRNAs filtrados y los criterios utilizados.
 - **Fallback:** Si `config.yaml` o `functions_common.R` no están disponibles, usa filtrado básico (G>T en seed region).
+- **Viewer HTML actualizado:** La descripción en el viewer HTML ahora refleja "Threshold-based Filtering" en lugar de "Top 50 miRNAs", y explica que usa umbrales configurables (RPM, VAF, seed region, significance).
 
 ---
 
