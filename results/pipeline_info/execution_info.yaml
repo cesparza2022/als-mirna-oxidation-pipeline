@@ -3,14 +3,18 @@ pipeline:
   version: 1.0.0
   description: Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs
 execution:
-  date: '2025-11-04'
-  time: '10:57:29'
-  datetime: 2025-11-04 10:57:29 PST
-  status: completed
+  date: '2025-11-13'
+  time: '12:45:06'
+  datetime: 2025-11-13 12:45:06 PST
+  status: partial
   steps_completed:
   - step1
   - step1_5
   - step2
+  - step3
+  - step4
+  - step5
+  - step6
 parameters:
   vaf_threshold: 0.5
   alpha: 0.05
@@ -19,12 +23,19 @@ parameters:
   threads: 4
   memory_gb: 8
 inputs:
-  raw_data: /Users/cesaresparza/New_Desktop/UCSD/8OG/organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt
-  processed_data: /Users/cesaresparza/New_Desktop/UCSD/8OG/organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt
+  raw_data: /Users/cesaresparza/New_Desktop/UCSD/8OG/data/processed/step1_original_data.csv
+  processed_data: /Users/cesaresparza/New_Desktop/UCSD/8OG/data/processed/processed_clean.csv
 outputs:
-  step1: outputs/step1
-  step1_5: outputs/step1_5
-  step2: outputs/step2
-  total_figures: 19.0
-  total_tables: 25.0
-  total_logs: 14.0
+  step1: results/step1/final
+  step1_5: results/step1_5/final
+  step2: results/step2/final
+  step3: results/step3/final
+  step4: results/step4/final
+  step5: results/step5/final
+  step6: results/step6/final
+  step7: results/step7/final
+  total_figures: 77.0
+  total_tables: 55.0
+  total_logs: 31.0
+  steps_completed_count: 7
+  total_steps: 8

@@ -26,33 +26,105 @@ rule create_output_structure:
         """
         # Create output structure using R script or fallback
         if command -v Rscript &> /dev/null; then
-            Rscript {params.script} results || {
+            if ! Rscript {params.script} results; then
                 echo "Rscript failed, using fallback method..."
-                mkdir -p results/step1/final/{figures,tables/summary,logs,logs/benchmarks}
-                mkdir -p results/step1/intermediate
-                mkdir -p results/step1_5/final/{figures,tables/filtered_data,tables/filter_report,tables/statistics,logs,logs/benchmarks}
-                mkdir -p results/step1_5/intermediate
-                mkdir -p results/step2/final/{figures,figures_clean,tables/statistical_results,tables/summary,logs,logs/benchmarks}
-                mkdir -p results/step2/intermediate
-                mkdir -p results/{pipeline_info,summary,validation,viewers}
-            }
+                bash -c '
+                    set -e
+                    mkdir -p results/step1/final/figures
+                    mkdir -p results/step1/final/tables/summary
+                    mkdir -p results/step1/final/logs/benchmarks
+                    mkdir -p results/step1/final/logs
+                    mkdir -p results/step1/intermediate
+                    mkdir -p results/step1_5/final/figures
+                    mkdir -p results/step1_5/final/tables/filtered_data
+                    mkdir -p results/step1_5/final/tables/filter_report
+                    mkdir -p results/step1_5/final/tables/statistics
+                    mkdir -p results/step1_5/final/logs/benchmarks
+                    mkdir -p results/step1_5/final/logs
+                    mkdir -p results/step1_5/intermediate
+                    mkdir -p results/step2/final/figures
+                    mkdir -p results/step2/final/figures_clean
+                    mkdir -p results/step2/final/tables/statistical_results
+                    mkdir -p results/step2/final/tables/summary
+                    mkdir -p results/step2/final/logs/benchmarks
+                    mkdir -p results/step2/final/logs
+                    mkdir -p results/step2/intermediate
+                    mkdir -p results/step3/final/figures
+                    mkdir -p results/step3/final/tables/functional
+                    mkdir -p results/step3/final/logs/benchmarks
+                    mkdir -p results/step3/final/logs
+                    mkdir -p results/step3/intermediate
+                    mkdir -p results/step4/final/figures
+                    mkdir -p results/step4/final/tables/biomarkers
+                    mkdir -p results/step4/final/logs/benchmarks
+                    mkdir -p results/step4/final/logs
+                    mkdir -p results/step4/intermediate
+                    mkdir -p results/step5/final/figures
+                    mkdir -p results/step5/final/tables/families
+                    mkdir -p results/step5/final/logs/benchmarks
+                    mkdir -p results/step5/final/logs
+                    mkdir -p results/step5/intermediate
+                    mkdir -p results/step6/final/figures
+                    mkdir -p results/step6/final/tables/correlation
+                    mkdir -p results/step6/final/tables/functional
+                    mkdir -p results/step6/final/logs/benchmarks
+                    mkdir -p results/step6/final/logs
+                    mkdir -p results/step6/intermediate
+                    mkdir -p results/pipeline_info
+                    mkdir -p results/summary
+                    mkdir -p results/validation
+                    mkdir -p results/viewers
+                '
+            fi
         else
             echo "Creating output structure manually..."
-            mkdir -p results/step1/final/{figures,tables/summary,logs,logs/benchmarks}
-            mkdir -p results/step1/intermediate
-            mkdir -p results/step1_5/final/{figures,tables/filtered_data,tables/filter_report,tables/statistics,logs,logs/benchmarks}
-            mkdir -p results/step1_5/intermediate
-            mkdir -p results/step2/final/{figures,figures_clean,tables/statistical_results,tables/summary,logs,logs/benchmarks}
-            mkdir -p results/step2/intermediate
-            mkdir -p results/step3/final/{figures,tables/functional,logs,logs/benchmarks}
-            mkdir -p results/step3/intermediate
-                mkdir -p results/step4/final/{figures,tables/biomarkers,logs,logs/benchmarks}
+            bash -c '
+                set -e
+                mkdir -p results/step1/final/figures
+                mkdir -p results/step1/final/tables/summary
+                mkdir -p results/step1/final/logs/benchmarks
+                mkdir -p results/step1/final/logs
+                mkdir -p results/step1/intermediate
+                mkdir -p results/step1_5/final/figures
+                mkdir -p results/step1_5/final/tables/filtered_data
+                mkdir -p results/step1_5/final/tables/filter_report
+                mkdir -p results/step1_5/final/tables/statistics
+                mkdir -p results/step1_5/final/logs/benchmarks
+                mkdir -p results/step1_5/final/logs
+                mkdir -p results/step1_5/intermediate
+                mkdir -p results/step2/final/figures
+                mkdir -p results/step2/final/figures_clean
+                mkdir -p results/step2/final/tables/statistical_results
+                mkdir -p results/step2/final/tables/summary
+                mkdir -p results/step2/final/logs/benchmarks
+                mkdir -p results/step2/final/logs
+                mkdir -p results/step2/intermediate
+                mkdir -p results/step3/final/figures
+                mkdir -p results/step3/final/tables/functional
+                mkdir -p results/step3/final/logs/benchmarks
+                mkdir -p results/step3/final/logs
+                mkdir -p results/step3/intermediate
+                mkdir -p results/step4/final/figures
+                mkdir -p results/step4/final/tables/biomarkers
+                mkdir -p results/step4/final/logs/benchmarks
+                mkdir -p results/step4/final/logs
                 mkdir -p results/step4/intermediate
-                mkdir -p results/step5/final/{figures,tables/families,logs,logs/benchmarks}
+                mkdir -p results/step5/final/figures
+                mkdir -p results/step5/final/tables/families
+                mkdir -p results/step5/final/logs/benchmarks
+                mkdir -p results/step5/final/logs
                 mkdir -p results/step5/intermediate
-                mkdir -p results/step6/final/{figures,tables/correlation,logs,logs/benchmarks}
+                mkdir -p results/step6/final/figures
+                mkdir -p results/step6/final/tables/correlation
+                mkdir -p results/step6/final/tables/functional
+                mkdir -p results/step6/final/logs/benchmarks
+                mkdir -p results/step6/final/logs
                 mkdir -p results/step6/intermediate
-                mkdir -p results/{pipeline_info,summary,validation,viewers}
+                mkdir -p results/pipeline_info
+                mkdir -p results/summary
+                mkdir -p results/validation
+                mkdir -p results/viewers
+            '
         fi
         touch {output.structure_created}
         echo "✅ Output structure created successfully"

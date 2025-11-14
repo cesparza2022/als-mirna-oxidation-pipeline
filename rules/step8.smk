@@ -16,8 +16,8 @@ configfile: "config/config.yaml"
 # ============================================================================
 
 # Input data
-STEP1_5_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step1_5"]
-STEP2_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step2"]
+STEP1_5_DATA_DIR = config["paths"]["outputs"]["step1_5"]
+STEP2_DATA_DIR = config["paths"]["outputs"]["step2"]
 INPUT_VAF_FILTERED = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATIONS_VAF_FILTERED.csv"
 INPUT_STATISTICAL = STEP2_DATA_DIR + "/tables/statistical_results/S2_statistical_comparisons.csv"
 

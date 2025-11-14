@@ -16,7 +16,7 @@ import os
 # ============================================================================
 
 # Input data (from Step 1.5 - VAF filtered)
-STEP1_5_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step1_5"]
+STEP1_5_DATA_DIR = config["paths"]["outputs"]["step1_5"]
 INPUT_DATA_VAF_FILTERED = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATIONS_VAF_FILTERED.csv"
 
 # Alternative: use processed clean data if VAF filtered not available
@@ -30,9 +30,8 @@ OUTPUT_LOGS = OUTPUT_STEP2 + "/logs"
 
 # Scripts directories
 SCRIPTS_STEP2_FIGURES = "../scripts/step2_figures"  # For script: (resolved from rules/)
-# Path to original scripts (relative to snakemake_pipeline/)
-# From snakemake_pipeline/ to step2/scripts is ../step2/scripts
-ORIGINAL_SCRIPTS_DIR = "../step2/scripts"
+# Path to original figure scripts (relative to repository root)
+ORIGINAL_SCRIPTS_DIR = "scripts/step2_figures/original_scripts"
 
 # Common parameters
 FUNCTIONS_COMMON = "scripts/utils/functions_common.R"  # For input: (resolved from Snakefile)

@@ -16,26 +16,31 @@ comparisons_file <- snakemake@input[["comparisons"]]
 effect_size_table <- snakemake@input[["effect_sizes"]]
 
 # All Step 2 figures
-fig_2_1 <- snakemake@input[["fig_2_1"]]
-fig_2_2 <- snakemake@input[["fig_2_2"]]
-fig_2_3 <- snakemake@input[["fig_2_3"]]
-fig_2_4 <- snakemake@input[["fig_2_4"]]
-fig_2_5 <- snakemake@input[["fig_2_5"]]
-fig_2_6 <- snakemake@input[["fig_2_6"]]
-fig_2_8 <- snakemake@input[["fig_2_8"]]
-fig_2_9 <- snakemake@input[["fig_2_9"]]
-fig_2_10 <- snakemake@input[["fig_2_10"]]
-fig_2_11 <- snakemake@input[["fig_2_11"]]
-fig_2_12 <- snakemake@input[["fig_2_12"]]
-fig_2_13 <- snakemake@input[["fig_2_13"]]
-fig_2_14 <- snakemake@input[["fig_2_14"]]
-fig_2_15 <- snakemake@input[["fig_2_15"]]
-fig_2_16 <- snakemake@input[["fig_2_16"]]
-fig_2_17 <- snakemake@input[["fig_2_17"]]
+normalize_input <- function(x) if (is.null(x)) "" else x
+
+# All Step 2 figures (keep original absolute paths)
+fig_paths <- list(
+  fig_2_1 = normalize_input(snakemake@input[["fig_2_1"]]),
+  fig_2_2 = normalize_input(snakemake@input[["fig_2_2"]]),
+  fig_2_3 = normalize_input(snakemake@input[["fig_2_3"]]),
+  fig_2_4 = normalize_input(snakemake@input[["fig_2_4"]]),
+  fig_2_5 = normalize_input(snakemake@input[["fig_2_5"]]),
+  fig_2_6 = normalize_input(snakemake@input[["fig_2_6"]]),
+  fig_2_8 = normalize_input(snakemake@input[["fig_2_8"]]),
+  fig_2_9 = normalize_input(snakemake@input[["fig_2_9"]]),
+  fig_2_10 = normalize_input(snakemake@input[["fig_2_10"]]),
+  fig_2_11 = normalize_input(snakemake@input[["fig_2_11"]]),
+  fig_2_12 = normalize_input(snakemake@input[["fig_2_12"]]),
+  fig_2_13 = normalize_input(snakemake@input[["fig_2_13"]]),
+  fig_2_14 = normalize_input(snakemake@input[["fig_2_14"]]),
+  fig_2_15 = normalize_input(snakemake@input[["fig_2_15"]]),
+  fig_2_16 = normalize_input(snakemake@input[["fig_2_16"]]),
+  fig_2_17 = normalize_input(snakemake@input[["fig_2_17"]])
+)
 
 # Clustering summaries
-clustering_all_summary <- snakemake@input[["clustering_all_summary"]]
-clustering_seed_summary <- snakemake@input[["clustering_seed_summary"]]
+clustering_all_summary <- normalize_input(snakemake@input[["clustering_all_summary"]])
+clustering_seed_summary <- normalize_input(snakemake@input[["clustering_seed_summary"]])
 
 output_html <- snakemake@output[["viewer"]]
 
@@ -58,73 +63,26 @@ if (file.exists(clustering_seed_summary)) {
   clustering_seed_info <- read_csv(clustering_seed_summary, show_col_types = FALSE)
 }
 
-# Get relative path from viewer to image
-get_relative_path <- function(image_path, viewer_path) {
-  if (!file.exists(image_path)) {
+# Copy figures to viewer assets directory to avoid browser security issues
+viewer_dir <- dirname(output_html)
+assets_dir <- file.path(viewer_dir, "step2_assets")
+if (dir.exists(assets_dir)) {
+  unlink(assets_dir, recursive = TRUE)
+}
+dir.create(assets_dir, showWarnings = FALSE, recursive = TRUE)
+
+copy_to_assets <- function(path) {
+  if (path == "" || !file.exists(path)) {
     return("")
   }
-  
-  # Get absolute paths
-  image_abs <- normalizePath(image_path, mustWork = FALSE)
-  viewer_dir <- normalizePath(dirname(viewer_path), mustWork = FALSE)
-  
-  # Split paths
-  image_parts <- strsplit(image_abs, "/")[[1]]
-  viewer_parts <- strsplit(viewer_dir, "/")[[1]]
-  
-  # Find common prefix
-  min_len <- min(length(image_parts), length(viewer_parts))
-  common_len <- 0
-  for (i in 1:min_len) {
-    if (image_parts[i] == viewer_parts[i]) {
-      common_len <- i
-    } else {
-      break
-    }
-  }
-  
-  # Build relative path
-  if (common_len > 0) {
-    # Go up from viewer directory
-    up_levels <- length(viewer_parts) - common_len
-    up_path <- if (up_levels > 0) paste(rep("..", up_levels), collapse = "/") else ""
-    
-    # Get remaining image path
-    remaining <- image_parts[(common_len + 1):length(image_parts)]
-    remaining_path <- paste(remaining, collapse = "/")
-    
-    # Combine
-    if (up_path != "") {
-      return(paste0(up_path, "/", remaining_path))
-    } else {
-      return(remaining_path)
-    }
-  } else {
-    # No common path, use absolute as fallback
-    return(image_abs)
-  }
+  dest <- file.path(assets_dir, basename(path))
+  file.copy(path, dest, overwrite = TRUE)
+  file.path("step2_assets", basename(path))
 }
 
 # Get relative paths for all images
 cat("📸 Getting relative paths...\n")
-all_figures <- list(
-  fig_2_1 = get_relative_path(fig_2_1, output_html),
-  fig_2_2 = get_relative_path(fig_2_2, output_html),
-  fig_2_3 = get_relative_path(fig_2_3, output_html),
-  fig_2_4 = get_relative_path(fig_2_4, output_html),
-  fig_2_5 = get_relative_path(fig_2_5, output_html),
-  fig_2_6 = get_relative_path(fig_2_6, output_html),
-  fig_2_8 = get_relative_path(fig_2_8, output_html),
-  fig_2_9 = get_relative_path(fig_2_9, output_html),
-  fig_2_10 = get_relative_path(fig_2_10, output_html),
-  fig_2_11 = get_relative_path(fig_2_11, output_html),
-  fig_2_12 = get_relative_path(fig_2_12, output_html),
-  fig_2_13 = get_relative_path(fig_2_13, output_html),
-  fig_2_14 = get_relative_path(fig_2_14, output_html),
-  fig_2_15 = get_relative_path(fig_2_15, output_html),
-  fig_2_16 = get_relative_path(fig_2_16, output_html),
-  fig_2_17 = get_relative_path(fig_2_17, output_html)
-)
+all_figures <- lapply(fig_paths, copy_to_assets)
 cat("   ✅ Relative paths resolved\n")
 
 # Helper function to generate image HTML

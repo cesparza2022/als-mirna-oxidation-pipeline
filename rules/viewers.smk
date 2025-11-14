@@ -45,6 +45,40 @@ OUTPUT_STEP7_TABLES = OUTPUT_STEP7 + "/tables"
 
 SCRIPTS_UTILS = config["paths"]["snakemake_dir"] + "/" + config["paths"]["scripts"]["utils"]
 
+OUTPUT_STEP0 = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step0"]
+OUTPUT_STEP0_FIGURES = OUTPUT_STEP0 + "/figures"
+OUTPUT_STEP0_TABLES = OUTPUT_STEP0 + "/tables"
+
+# ============================================================================
+# RULE: Generate Step 0 HTML Viewer
+# ============================================================================
+
+rule generate_step0_viewer:
+    input:
+        fig_samples = OUTPUT_STEP0_FIGURES + "/step0_fig_samples_snv_counts.png",
+        fig_samples_box = OUTPUT_STEP0_FIGURES + "/step0_fig_samples_snv_boxplot.png",
+        fig_samples_group = OUTPUT_STEP0_FIGURES + "/step0_fig_samples_group_pie.png",
+        fig_miRNA = OUTPUT_STEP0_FIGURES + "/step0_fig_miRNA_snv_counts.png",
+        fig_top_miRNA = OUTPUT_STEP0_FIGURES + "/step0_fig_top_miRNA.png",
+        fig_mutation_bar = OUTPUT_STEP0_FIGURES + "/step0_fig_mutation_type_distribution.png",
+        fig_mutation_pie_snvs = OUTPUT_STEP0_FIGURES + "/step0_fig_mutation_type_pie_snvs.png",
+        fig_mutation_pie_counts = OUTPUT_STEP0_FIGURES + "/step0_fig_mutation_type_pie_counts.png",
+        fig_position = OUTPUT_STEP0_FIGURES + "/step0_fig_position_density.png",
+        table_samples = OUTPUT_STEP0_TABLES + "/step0_sample_summary.csv",
+        table_sample_group = OUTPUT_STEP0_TABLES + "/step0_sample_group_summary.csv",
+        table_miRNA = OUTPUT_STEP0_TABLES + "/step0_miRNA_summary.csv",
+        table_top_miRNA = OUTPUT_STEP0_TABLES + "/step0_top_miRNA.csv",
+        table_mutation = OUTPUT_STEP0_TABLES + "/step0_mutation_type_counts.csv"
+    output:
+        html = OUTPUT_VIEWERS + "/step0.html"
+    params:
+        figures_dir = OUTPUT_STEP0_FIGURES,
+        tables_dir = OUTPUT_STEP0_TABLES
+    log:
+        OUTPUT_STEP0 + "/logs/viewer_step0.log"
+    script:
+        SCRIPTS_UTILS + "/build_step0_viewer.R"
+
 # ============================================================================
 # RULE: Generate Step 1 HTML Viewer
 # ============================================================================
@@ -106,7 +140,24 @@ rule generate_step2_viewer:
         comparisons = OUTPUT_STEP2_TABLES + "/statistical_results/S2_statistical_comparisons.csv",
         volcano = OUTPUT_STEP2_FIGURES + "/step2_volcano_plot.png",
         effect_sizes = OUTPUT_STEP2_TABLES + "/statistical_results/S2_effect_sizes.csv",
-        effect_size_plot = OUTPUT_STEP2_FIGURES + "/step2_effect_size_distribution.png"
+        effect_size_plot = OUTPUT_STEP2_FIGURES + "/step2_effect_size_distribution.png",
+        fig_2_1 = OUTPUT_STEP2_FIGURES + "/FIG_2.1_VAF_GLOBAL_CLEAN.png",
+        fig_2_2 = OUTPUT_STEP2_FIGURES + "/FIG_2.2_DISTRIBUTIONS_CLEAN.png",
+        fig_2_3 = OUTPUT_STEP2_FIGURES + "/FIG_2.3_VOLCANO_PER_SAMPLE_METHOD.png",
+        fig_2_4 = OUTPUT_STEP2_FIGURES + "/FIG_2.4_HEATMAP_TOP50_CLEAN.png",
+        fig_2_5 = OUTPUT_STEP2_FIGURES + "/FIG_2.5_HEATMAP_ZSCORE_CLEAN.png",
+        fig_2_6 = OUTPUT_STEP2_FIGURES + "/FIG_2.6_POSITIONAL_CLEAN.png",
+        fig_2_9 = OUTPUT_STEP2_FIGURES + "/FIG_2.9_CV_CLEAN.png",
+        fig_2_10 = OUTPUT_STEP2_FIGURES + "/FIG_2.10_RATIO_CLEAN.png",
+        fig_2_11 = OUTPUT_STEP2_FIGURES + "/FIG_2.11_MUTATION_TYPES_CLEAN.png",
+        fig_2_12 = OUTPUT_STEP2_FIGURES + "/FIG_2.12_ENRICHMENT_CLEAN.png",
+        fig_2_13 = OUTPUT_STEP2_FIGURES + "/FIG_2.13_DENSITY_HEATMAP_ALS.png",
+        fig_2_14 = OUTPUT_STEP2_FIGURES + "/FIG_2.14_DENSITY_HEATMAP_CONTROL.png",
+        fig_2_15 = OUTPUT_STEP2_FIGURES + "/FIG_2.15_DENSITY_COMBINED.png",
+        fig_2_16 = OUTPUT_STEP2_FIGURES + "/FIG_2.16_CLUSTERING_ALL_GT.png",
+        fig_2_17 = OUTPUT_STEP2_FIGURES + "/FIG_2.17_CLUSTERING_SEED_GT.png",
+        clustering_all_summary = OUTPUT_STEP2_TABLES + "/S2_clustering_all_gt_summary.csv",
+        clustering_seed_summary = OUTPUT_STEP2_TABLES + "/S2_clustering_seed_gt_summary.csv"
     output:
         viewer = OUTPUT_VIEWERS + "/step2.html"
     log:
@@ -120,11 +171,8 @@ rule generate_step2_viewer:
 
 rule generate_step3_viewer:
     input:
-        figure_a = OUTPUT_STEP3_FIGURES + "/step3_panelA_pathway_enrichment.png",
-        figure_b = OUTPUT_STEP3_FIGURES + "/step3_panelB_als_genes_impact.png",
-        figure_c = OUTPUT_STEP3_FIGURES + "/step3_panelC_target_comparison.png",
-        figure_d = OUTPUT_STEP3_FIGURES + "/step3_panelD_position_impact.png",
-        pathway_heatmap = OUTPUT_STEP3_FIGURES + "/step3_pathway_enrichment_heatmap.png"
+        cluster_heatmap = OUTPUT_STEP3_FIGURES + "/step3_panelA_cluster_heatmap.png",
+        cluster_dendrogram = OUTPUT_STEP3_FIGURES + "/step3_panelB_cluster_dendrogram.png"
     output:
         html = OUTPUT_VIEWERS + "/step3.html"
     params:
@@ -141,8 +189,11 @@ rule generate_step3_viewer:
 
 rule generate_step4_viewer:
     input:
-        roc_figure = OUTPUT_STEP4_FIGURES + "/step4_roc_curves.png",
-        heatmap_figure = OUTPUT_STEP4_FIGURES + "/step4_biomarker_signature_heatmap.png"
+        pathway_heatmap = OUTPUT_STEP4_FIGURES + "/step4_pathway_enrichment_heatmap.png",
+        functional_panel_a = OUTPUT_STEP4_FIGURES + "/step4_functional_panelA_target_network.png",
+        functional_panel_b = OUTPUT_STEP4_FIGURES + "/step4_functional_panelB_go_enrichment.png",
+        functional_panel_c = OUTPUT_STEP4_FIGURES + "/step4_functional_panelC_kegg_enrichment.png",
+        functional_panel_d = OUTPUT_STEP4_FIGURES + "/step4_functional_panelD_als_pathways.png"
     output:
         html = OUTPUT_VIEWERS + "/step4.html"
     params:
@@ -195,8 +246,8 @@ rule generate_step6_viewer:
 
 rule generate_step7_viewer:
     input:
-        figure_a = OUTPUT_STEP7_FIGURES + "/step7_panelA_cluster_heatmap.png",
-        figure_b = OUTPUT_STEP7_FIGURES + "/step7_panelB_cluster_dendrogram.png"
+        roc_figure = OUTPUT_STEP7_FIGURES + "/step7_roc_curves.png",
+        heatmap_figure = OUTPUT_STEP7_FIGURES + "/step7_biomarker_signature_heatmap.png"
     output:
         html = OUTPUT_VIEWERS + "/step7.html"
     params:

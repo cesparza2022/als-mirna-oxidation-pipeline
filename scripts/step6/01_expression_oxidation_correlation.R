@@ -89,6 +89,37 @@ if ("pos:mut" %in% names(vaf_data)) {
   vaf_data <- vaf_data %>% rename(pos.mut = `pos:mut`)
 }
 
+# CRITICAL: Filter to only SNV count columns BEFORE any dplyr operations
+# This avoids the "variable names are limited to 10000 bytes" error
+source("scripts/utils/data_loading_helpers.R", local = TRUE)
+if (exists("identify_snv_count_columns")) {
+  snv_cols <- identify_snv_count_columns(vaf_data)
+  log_info(paste("Identified", length(snv_cols), "SNV count columns"))
+  metadata_cols <- c("miRNA_name", "pos.mut")
+  metadata_cols <- intersect(metadata_cols, names(vaf_data))
+  # Use column indices to avoid variable name limit
+  keep_cols <- c(metadata_cols, snv_cols)
+  keep_indices <- which(names(vaf_data) %in% keep_cols)
+  vaf_data <- as.data.frame(vaf_data[, keep_indices, drop = FALSE])
+  log_info(paste("Filtered to", length(snv_cols), "SNV count columns (excluded total count columns)"))
+  log_info(paste("Final vaf_data columns:", ncol(vaf_data)))
+} else {
+  log_warning("identify_snv_count_columns function not found, using fallback")
+  # Fallback: try to exclude total columns manually
+  total_pattern <- "\\(PM\\+1MM\\+2MM\\)$"
+  all_cols <- names(vaf_data)
+  metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut")
+  metadata_cols <- intersect(metadata_cols, names(vaf_data))
+  sample_cols <- setdiff(all_cols, metadata_cols)
+  total_cols <- sample_cols[grepl(total_pattern, sample_cols)]
+  if (length(total_cols) > 0) {
+    # Use column indices to avoid variable name limit
+    total_indices <- which(names(vaf_data) %in% total_cols)
+    vaf_data <- as.data.frame(vaf_data[, -total_indices, drop = FALSE])
+    log_info(paste("Fallback: Excluded", length(total_cols), "total count columns"))
+  }
+}
+
 # Load expression data (raw miRNA counts)
 # Try to load from primary location, fallback to alt
 expression_data <- NULL
@@ -120,10 +151,17 @@ if (is.null(expression_data)) {
   sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
   
   # Estimate expression as sum of all mutations per miRNA (rough approximation)
+  # Use column indices to avoid variable name limit
+  sample_col_indices <- which(names(vaf_data) %in% sample_cols)
+  vaf_matrix <- as.matrix(vaf_data[, sample_col_indices, drop = FALSE])
+  
   expression_data <- vaf_data %>%
+    mutate(
+      total_reads = rowSums(vaf_matrix, na.rm = TRUE)
+    ) %>%
     group_by(miRNA_name) %>%
     summarise(
-      estimated_total_reads = sum(across(all_of(sample_cols), ~ sum(.x, na.rm = TRUE)), na.rm = TRUE),
+      estimated_total_reads = sum(total_reads, na.rm = TRUE),
       n_samples = length(sample_cols),
       estimated_rpm = estimated_total_reads / n_samples,  # Rough RPM estimate
       .groups = "drop"
@@ -137,37 +175,97 @@ if (is.null(expression_data)) {
   sample_cols_raw <- sample_cols_raw[!grepl("\\(PM\\+1MM\\+2MM\\)", sample_cols_raw)]
   total_cols <- names(expression_data)[grep("\\(PM\\+1MM\\+2MM\\)", names(expression_data))]
   
-  # Normalize miRNA name column
+  # Normalize miRNA name column - use base R to avoid variable name limit
   if ("miRNA name" %in% names(expression_data)) {
     # Already correct
+    mirna_col_name <- "miRNA name"
   } else if ("miRNA_name" %in% names(expression_data)) {
-    expression_data <- expression_data %>% rename(`miRNA name` = miRNA_name)
+    names(expression_data)[names(expression_data) == "miRNA_name"] <- "miRNA name"
+    mirna_col_name <- "miRNA name"
   } else if (any(grepl("miRNA|mirna", names(expression_data), ignore.case = TRUE))) {
     mirna_col <- names(expression_data)[grepl("miRNA|mirna", names(expression_data), ignore.case = TRUE)][1]
-    expression_data <- expression_data %>% rename(`miRNA name` = !!mirna_col)
+    names(expression_data)[names(expression_data) == mirna_col] <- "miRNA name"
+    mirna_col_name <- "miRNA name"
+  } else {
+    stop("Could not find miRNA name column in expression data")
   }
   
   # Calculate RPM per miRNA
+  # Use base R to avoid variable name limit - filter columns first
+  # mirna_col_name is already set above
+  
   if (length(total_cols) > 0) {
-    expression_data <- expression_data %>%
-      group_by(`miRNA name`) %>%
-      summarise(
-        total_reads = sum(across(all_of(total_cols), ~ sum(.x, na.rm = TRUE))),
-        n_samples = length(sample_cols_raw),
-        estimated_rpm = total_reads / n_samples,
-        .groups = "drop"
-      )
-    log_info("Calculated RPM from total read columns")
+    # Filter to only miRNA name and total columns before processing
+    keep_cols <- c(mirna_col_name, total_cols)
+    keep_indices <- which(names(expression_data) %in% keep_cols)
+    expr_filtered <- as.data.frame(expression_data[, keep_indices, drop = FALSE])
+    
+    # Verify total_cols exist in filtered data
+    total_cols_in_filtered <- intersect(total_cols, names(expr_filtered))
+    if (length(total_cols_in_filtered) == 0) {
+      # Fallback: no total columns, use sample columns instead
+      log_warning("No total columns found, falling back to sample columns")
+      # Recalculate with sample columns
+      keep_cols <- c(mirna_col_name, sample_cols_raw)
+      keep_indices <- which(names(expression_data) %in% keep_cols)
+      expr_filtered <- as.data.frame(expression_data[, keep_indices, drop = FALSE])
+      sample_matrix <- as.matrix(expr_filtered[, sample_cols_raw, drop = FALSE])
+      expr_filtered$total_reads <- rowSums(sample_matrix, na.rm = TRUE)
+    } else {
+      # Calculate using base R with total columns
+      total_matrix <- as.matrix(expr_filtered[, total_cols_in_filtered, drop = FALSE])
+      expr_filtered$total_reads <- rowSums(total_matrix, na.rm = TRUE)
+    }
+    
+    # Aggregate using base R
+    # Rename miRNA column to avoid spaces in formula
+    mirna_col_index <- which(names(expr_filtered) == mirna_col_name)
+    names(expr_filtered)[mirna_col_index] <- "miRNA_name_temp"
+    
+    # Use formula interface for aggregate
+    expression_data <- aggregate(
+      total_reads ~ miRNA_name_temp,
+      data = expr_filtered,
+      FUN = sum,
+      na.rm = TRUE
+    )
+    names(expression_data)[1] <- "miRNA name"
+    expression_data$n_samples <- length(sample_cols_raw)
+    expression_data$estimated_rpm <- expression_data$total_reads / expression_data$n_samples
+    expression_data <- expression_data[, c("miRNA name", "total_reads", "n_samples", "estimated_rpm")]
+    
+    if (length(total_cols_in_filtered) > 0) {
+      log_info("Calculated RPM from total read columns")
+    } else {
+      log_info("Calculated RPM from sample columns (no total columns found)")
+    }
   } else {
     # Fallback: use sample columns directly
-    expression_data <- expression_data %>%
-      group_by(`miRNA name`) %>%
-      summarise(
-        total_reads = sum(across(all_of(sample_cols_raw), ~ sum(.x, na.rm = TRUE))),
-        n_samples = length(sample_cols_raw),
-        estimated_rpm = total_reads / n_samples,
-        .groups = "drop"
-      )
+    keep_cols <- c(mirna_col_name, sample_cols_raw)
+    keep_indices <- which(names(expression_data) %in% keep_cols)
+    expr_filtered <- as.data.frame(expression_data[, keep_indices, drop = FALSE])
+    
+    # Calculate using base R
+    sample_matrix <- as.matrix(expr_filtered[, sample_cols_raw, drop = FALSE])
+    expr_filtered$total_reads <- rowSums(sample_matrix, na.rm = TRUE)
+    
+    # Aggregate using base R
+    # Rename miRNA column to avoid spaces in formula
+    mirna_col_index <- which(names(expr_filtered) == mirna_col_name)
+    names(expr_filtered)[mirna_col_index] <- "miRNA_name_temp"
+    
+    # Use formula interface for aggregate
+    expression_data <- aggregate(
+      total_reads ~ miRNA_name_temp,
+      data = expr_filtered,
+      FUN = sum,
+      na.rm = TRUE
+    )
+    names(expression_data)[1] <- "miRNA name"
+    expression_data$n_samples <- length(sample_cols_raw)
+    expression_data$estimated_rpm <- expression_data$total_reads / expression_data$n_samples
+    expression_data <- expression_data[, c("miRNA name", "total_reads", "n_samples", "estimated_rpm")]
+    
     log_info("Calculated RPM from sample columns (no total columns found)")
   }
 }
@@ -223,19 +321,61 @@ log_subsection("Calculating oxidation metrics for significant G>T in seed region
 sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
 
 # Filter VAF data to only include significant G>T mutations in seed region
-oxidation_data <- vaf_data %>%
-  semi_join(significant_gt, by = c("miRNA_name", "pos.mut")) %>%  # Only significant G>T in seed
+# Use base R subsetting instead of joins to avoid variable name limit
+significant_gt_keys <- significant_gt %>%
+  select(miRNA_name, pos.mut) %>%
+  distinct()
+
+# Create keys for matching (avoid dplyr operations on large data frames)
+vaf_keys <- paste(vaf_data$miRNA_name, vaf_data$pos.mut, sep = "|||")
+gt_keys <- paste(significant_gt_keys$miRNA_name, significant_gt_keys$pos.mut, sep = "|||")
+
+# Filter using base R subsetting
+matching_indices <- which(vaf_keys %in% gt_keys)
+if (length(matching_indices) > 0) {
+  oxidation_rows <- vaf_data[matching_indices, , drop = FALSE]
+  
+  # Calculate position and filter seed region using base R
+  oxidation_rows$position <- as.numeric(gsub(":.*$", "", oxidation_rows$pos.mut))
+  oxidation_rows$in_seed <- oxidation_rows$position >= seed_start & oxidation_rows$position <= seed_end
+  oxidation_rows <- oxidation_rows[oxidation_rows$in_seed, , drop = FALSE]
+  
+  # Convert to tibble only after filtering
+  oxidation_rows <- as_tibble(oxidation_rows)
+  oxidation_rows$position <- NULL
+  oxidation_rows$in_seed <- NULL
+} else {
+  oxidation_rows <- tibble()
+}
+
+if (nrow(oxidation_rows) == 0) {
+  log_warning("No matching VAF rows for significant G>T seed mutations. Skipping Step 6.1.")
+  write_csv(tibble(), output_correlation)
+  write_csv(tibble(), output_expression_summary)
+  log_success("Step 6.1 completed (skipped due to no data).")
+  quit(save = "no", status = 0)
+}
+
+# Use column indices instead of select() to avoid variable name limit
+sample_col_indices <- which(names(oxidation_rows) %in% sample_cols)
+oxidation_matrix <- as.matrix(oxidation_rows[, sample_col_indices, drop = FALSE])
+
+row_sums <- rowSums(oxidation_matrix, na.rm = TRUE)
+row_means <- rowMeans(oxidation_matrix, na.rm = TRUE)
+row_max <- apply(oxidation_matrix, 1, max, na.rm = TRUE)
+
+oxidation_data <- oxidation_rows %>%
   mutate(
-    position = as.numeric(str_extract(pos.mut, "^\\d+")),
-    in_seed = position >= seed_start & position <= seed_end
+    total_row_counts = row_sums,
+    mean_row_vaf = row_means,
+    max_row_vaf = row_max
   ) %>%
-  filter(in_seed == TRUE) %>%  # Double-check seed region
   group_by(miRNA_name) %>%
   summarise(
     n_seed_gt_mutations = n(),
-    total_gt_counts = sum(across(all_of(sample_cols), ~ sum(.x, na.rm = TRUE)), na.rm = TRUE),
-    mean_gt_vaf = mean(across(all_of(sample_cols), ~ mean(.x, na.rm = TRUE)), na.rm = TRUE),
-    max_gt_vaf = max(across(all_of(sample_cols), ~ max(.x, na.rm = TRUE)), na.rm = TRUE),
+    total_gt_counts = sum(total_row_counts, na.rm = TRUE),
+    mean_gt_vaf = mean(mean_row_vaf, na.rm = TRUE),
+    max_gt_vaf = max(max_row_vaf, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   arrange(desc(total_gt_counts))
@@ -248,17 +388,31 @@ log_info(paste("miRNAs with significant G>T in seed region:", nrow(oxidation_dat
 
 log_subsection("Combining expression and oxidation data")
 
-# Normalize miRNA name for joining
-expression_data <- expression_data %>%
-  mutate(miRNA_name = `miRNA name`)
+# Normalize miRNA name for joining - use base R to avoid variable name limit
+expression_data$miRNA_name <- expression_data[["miRNA name"]]
 
-correlation_data <- expression_data %>%
-  inner_join(oxidation_data, by = "miRNA_name") %>%
-  filter(total_gt_counts > 0, estimated_rpm > 0) %>%  # Only miRNAs with both expression and oxidation
-  mutate(
-    log10_rpm = log10(estimated_rpm + 1),
-    log10_oxidation = log10(total_gt_counts + 1)
-  )
+# Use base R merge and subsetting to avoid variable name limit
+# Extract only needed columns before merge
+expr_subset <- data.frame(
+  miRNA_name = expression_data$miRNA_name,
+  estimated_rpm = expression_data$estimated_rpm,
+  stringsAsFactors = FALSE
+)
+
+# Merge using base R
+correlation_data <- merge(expr_subset, oxidation_data, by = "miRNA_name", all = FALSE)
+
+# Filter and transform using base R
+correlation_data <- correlation_data[
+  correlation_data$total_gt_counts > 0 & correlation_data$estimated_rpm > 0,
+  , drop = FALSE
+]
+
+correlation_data$log10_rpm <- log10(correlation_data$estimated_rpm + 1)
+correlation_data$log10_oxidation <- log10(correlation_data$total_gt_counts + 1)
+
+# Convert to tibble only at the end
+correlation_data <- as_tibble(correlation_data)
 
 log_info(paste("miRNAs with both expression and oxidation data:", nrow(correlation_data)))
 

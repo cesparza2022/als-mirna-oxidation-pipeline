@@ -5,7 +5,7 @@
 # Purpose: Identify miRNA families and summarize oxidation patterns by family
 #
 # Snakemake parameters:
-#   input: Statistical comparison results and VAF-filtered data
+#   input: Statistical comparison results, VAF-filtered data, and cluster assignments (from Step 3)
 #   output: Family summary and comparison tables
 # ============================================================================
 
@@ -43,6 +43,7 @@ log_section("STEP 5.1: miRNA Family Identification and Analysis")
 
 input_statistical <- snakemake@input[["comparisons"]]
 input_vaf_filtered <- snakemake@input[["filtered_data"]]
+input_cluster_assignments <- snakemake@input[["cluster_assignments"]]
 output_family_summary <- snakemake@output[["family_summary"]]
 output_family_comparison <- snakemake@output[["family_comparison"]]
 
@@ -53,6 +54,7 @@ seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_
 
 log_info(paste("Input statistical:", input_statistical))
 log_info(paste("Input VAF filtered:", input_vaf_filtered))
+log_info(paste("Input cluster assignments:", input_cluster_assignments))
 log_info(paste("Seed region: positions", seed_start, "-", seed_end))
 
 ensure_output_dir(dirname(output_family_summary))
@@ -99,6 +101,21 @@ vaf_data <- tryCatch({
   result
 }, error = function(e) {
   handle_error(e, context = "Step 5.1 - Data Loading", exit_code = 1, log_file = log_file)
+})
+
+# Load cluster assignments from Step 3
+cluster_assignments <- tryCatch({
+  if (file.exists(input_cluster_assignments)) {
+    result <- read_csv(input_cluster_assignments, show_col_types = FALSE)
+    log_success(paste("Loaded:", nrow(result), "cluster assignments from Step 3"))
+    result
+  } else {
+    log_warning("Cluster assignments file not found, proceeding without cluster information")
+    NULL
+  }
+}, error = function(e) {
+  log_warning(paste("Could not load cluster assignments:", e$message, "- proceeding without cluster information"))
+  NULL
 })
 
 # Normalize column names
@@ -180,6 +197,20 @@ vaf_data <- vaf_data %>%
     in_seed = position >= seed_start & position <= seed_end
   )
 
+# Add cluster information if available
+if (!is.null(cluster_assignments) && "cluster" %in% names(cluster_assignments) && "miRNA_name" %in% names(cluster_assignments)) {
+  log_info("Adding cluster information to family analysis")
+  vaf_data <- vaf_data %>%
+    left_join(cluster_assignments %>% select(miRNA_name, cluster), by = "miRNA_name")
+  statistical_results <- statistical_results %>%
+    left_join(cluster_assignments %>% select(miRNA_name, cluster), by = "miRNA_name")
+  log_success("Cluster information added to data")
+} else {
+  log_info("No cluster information available, proceeding with family analysis only")
+  vaf_data <- vaf_data %>% mutate(cluster = NA_character_)
+  statistical_results <- statistical_results %>% mutate(cluster = NA_character_)
+}
+
 log_info(paste("Unique families identified:", n_distinct(statistical_results$family)))
 log_info(paste("Top 10 families by SNV count:", 
                paste(head(names(sort(table(statistical_results$family), decreasing = TRUE)), 10), 
@@ -222,11 +253,9 @@ family_summary <- statistical_results %>%
   mutate(
     avg_oxidation_diff = avg_group1_mean - avg_group2_mean,
     # Backward compatibility
-    avg_oxidation_diff_legacy = if (!is.na(avg_ALS_mean) && !is.na(avg_Control_mean)) {
-      avg_ALS_mean - avg_Control_mean
-    } else {
-      avg_oxidation_diff
-    },
+    avg_oxidation_diff_legacy = ifelse(!is.na(avg_ALS_mean) & !is.na(avg_Control_mean),
+                                       avg_ALS_mean - avg_Control_mean,
+                                       avg_oxidation_diff),
     pct_significant = (n_significant / n_mutations) * 100
   ) %>%
   arrange(desc(n_significant), desc(n_mutations))

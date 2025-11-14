@@ -24,6 +24,8 @@ suppressPackageStartupMessages({
   # library(dendextend)  # Optional: For better dendrogram visualization
 })
 
+utils::globalVariables(c("handle_error"))
+
 # Load common functions and theme
 source(snakemake@params[["functions"]], local = TRUE)
 # Theme is loaded via functions_common.R
@@ -121,14 +123,39 @@ vaf_data <- tryCatch({
 })
 
 # Normalize column names
-if ("miRNA name" %in% names(vaf_data)) {
-  vaf_data <- vaf_data %>% rename(miRNA_name = `miRNA name`)
-}
-if ("pos:mut" %in% names(vaf_data)) {
-  vaf_data <- vaf_data %>% rename(pos.mut = `pos:mut`)
+standardize_mirna_col <- function(df) {
+  variants <- c("miRNA_name", "miRNA name", "miRNA.name", "miRNA")
+  found <- intersect(variants, names(df))
+  if (length(found) == 0) {
+    handle_error(
+      "No miRNA column found (expected one of: miRNA_name, miRNA name, miRNA.name, miRNA)",
+      context = "Step 3.2 - Data Preparation",
+      exit_code = 1,
+      log_file = log_file
+    ) # nolint
+  }
+  df %>% dplyr::rename(miRNA_name = tidyselect::all_of(found[1]))
 }
 
-sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
+standardize_posmut_col <- function(df) {
+  variants <- c("pos.mut", "pos:mut", "pos_mut")
+  found <- intersect(variants, names(df))
+  if (length(found) == 0) {
+    handle_error(
+      "No position/mutation column found (expected one of: pos.mut, pos:mut, pos_mut)",
+      context = "Step 3.2 - Data Preparation",
+      exit_code = 1,
+      log_file = log_file
+    ) # nolint
+  }
+  df %>% dplyr::rename(pos.mut = tidyselect::all_of(found[1]))
+}
+
+vaf_data <- vaf_data %>%
+  standardize_mirna_col() %>%
+  standardize_posmut_col()
+
+sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut"))
 
 # Prepare heatmap data
 heatmap_data <- vaf_data %>%
@@ -141,10 +168,10 @@ heatmap_data <- vaf_data %>%
     in_seed = position >= seed_start & position <= seed_end
   ) %>%
   filter(in_seed == TRUE) %>%
-  select(miRNA_name, all_of(sample_cols)) %>%
+  select(miRNA_name, any_of(sample_cols)) %>%
   group_by(miRNA_name) %>%
   summarise(
-    across(all_of(sample_cols), ~ mean(.x, na.rm = TRUE)),
+    across(tidyselect::all_of(sample_cols), ~ mean(.x, na.rm = TRUE)),
     .groups = "drop"
   ) %>%
   left_join(cluster_assignments, by = "miRNA_name") %>%

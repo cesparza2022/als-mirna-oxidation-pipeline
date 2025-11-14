@@ -1,9 +1,10 @@
 # ============================================================================
-# SNAKEMAKE RULES: STEP 3 - Clustering Analysis (Structure Discovery)
+# SNAKEMAKE RULES: STEP 3 - Clustering Analysis
 # ============================================================================
 # Purpose: Identify clusters of miRNAs with similar oxidation patterns
-# Execution: Runs FIRST after Step 2, before Steps 4, 5, 6
-#            Steps 4, 5, 6 depend on Step 3 to use clustering results
+#          This step discovers data-driven structure in the dataset
+# Execution: Runs after Step 2 (statistical comparisons), before Steps 4, 5, 6
+#            Steps 4, 5, 6 can use clustering results for interpretation
 # ============================================================================
 
 # Load configuration
@@ -29,8 +30,8 @@ OUTPUT_TABLES_CLUSTERS = OUTPUT_STEP3 + "/tables/clusters"
 OUTPUT_LOGS = OUTPUT_STEP3 + "/logs"
 
 # Inputs from previous steps (using full paths)
-STEP2_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step2"]
-STEP1_5_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step1_5"]
+STEP2_DATA_DIR = config["paths"]["outputs"]["step2"]
+STEP1_5_DATA_DIR = config["paths"]["outputs"]["step1_5"]
 INPUT_STEP2_STATS = STEP2_DATA_DIR + "/tables/statistical_results/S2_statistical_comparisons.csv"
 INPUT_STEP1_5_FILTERED_DATA = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATIONS_VAF_FILTERED.csv"
 
@@ -84,7 +85,6 @@ rule all_step3:
         # Clustering analysis tables
         OUTPUT_TABLES_CLUSTERS + "/S3_cluster_assignments.csv",
         OUTPUT_TABLES_CLUSTERS + "/S3_cluster_summary.csv",
-        # Figures
+        # Clustering figures
         OUTPUT_FIGURES + "/step3_panelA_cluster_heatmap.png",
         OUTPUT_FIGURES + "/step3_panelB_cluster_dendrogram.png"
-

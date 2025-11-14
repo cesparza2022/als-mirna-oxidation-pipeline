@@ -52,6 +52,7 @@ log_section("STEP 5.2: Family Comparison Visualization")
 
 input_family_summary <- snakemake@input[["family_summary"]]
 input_family_comparison <- snakemake@input[["family_comparison"]]
+input_cluster_assignments <- snakemake@input[["cluster_assignments"]]
 
 output_figure_a <- snakemake@output[["figure_a"]]
 output_figure_b <- snakemake@output[["figure_b"]]
@@ -194,18 +195,29 @@ heatmap_families <- family_comparison %>%
 
 # Create matrix for heatmap
 # Rows: families, Columns: metrics
+# First, determine which VAF columns to use
+vaf_col1 <- if ("group1_mean_vaf" %in% names(heatmap_families)) "group1_mean_vaf" else "als_mean_vaf"
+vaf_col2 <- if ("group2_mean_vaf" %in% names(heatmap_families)) "group2_mean_vaf" else "control_mean_vaf"
+
 heatmap_matrix <- heatmap_families %>%
+  mutate(
+    Group1_Mean_VAF = .data[[vaf_col1]],
+    Group2_Mean_VAF = .data[[vaf_col2]],
+    # Backward compatibility
+    ALS_Mean_VAF = if ("als_mean_vaf" %in% names(.)) .data[["als_mean_vaf"]] else NA_real_,
+    Control_Mean_VAF = if ("control_mean_vaf" %in% names(.)) .data[["control_mean_vaf"]] else NA_real_
+  ) %>%
   select(
     family,
     VAF_Difference = vaf_difference,
     Log2FC = log2_fold_change,
     N_Significant = n_significant,
     N_Mutations = n_mutations,
-    Group1_Mean_VAF = if ("group1_mean_vaf" %in% names(.)) group1_mean_vaf else als_mean_vaf,
-    Group2_Mean_VAF = if ("group2_mean_vaf" %in% names(.)) group2_mean_vaf else control_mean_vaf,
+    Group1_Mean_VAF,
+    Group2_Mean_VAF,
     # Backward compatibility
-    ALS_Mean_VAF = als_mean_vaf,
-    Control_Mean_VAF = control_mean_vaf
+    ALS_Mean_VAF,
+    Control_Mean_VAF
   ) %>%
   # Normalize columns to 0-1 scale for better visualization
   mutate(

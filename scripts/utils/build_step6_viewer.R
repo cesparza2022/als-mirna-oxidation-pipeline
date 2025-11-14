@@ -2,7 +2,7 @@
 # ============================================================================
 # BUILD STEP 6 VIEWER HTML
 # ============================================================================
-# Generates HTML viewer for Step 6 Functional Analysis results
+# Generates HTML viewer for Step 6 Expression-Oxidation Correlation results
 # ============================================================================
 
 suppressPackageStartupMessages({
@@ -30,28 +30,38 @@ if (requireNamespace("base64enc", quietly = TRUE)) {
 # Get Snakemake inputs
 fig_a <- snakemake@input[["figure_a"]]
 fig_b <- snakemake@input[["figure_b"]]
-fig_c <- snakemake@input[["figure_c"]]
-fig_d <- snakemake@input[["figure_d"]]
-pathway_heatmap <- snakemake@input[["pathway_heatmap"]]
 
 output_html <- snakemake@output[["html"]]
-figures_dir <- snakemake@params[["figures_dir"]]
 tables_dir <- snakemake@params[["tables_dir"]]
 
-# Load summary data
-targets_file <- file.path(tables_dir, "functional", "S3_target_analysis.csv")
-go_file <- file.path(tables_dir, "functional", "S3_go_enrichment.csv")
-kegg_file <- file.path(tables_dir, "functional", "S3_kegg_enrichment.csv")
+# Load correlation data for summary
+correlation_file <- file.path(tables_dir, "correlation", "S6_expression_oxidation_correlation.csv")
+expression_summary_file <- file.path(tables_dir, "correlation", "S6_expression_summary.csv")
 
-n_targets <- if (file.exists(targets_file)) nrow(read_csv(targets_file, show_col_types = FALSE)) else 0
-n_go <- if (file.exists(go_file)) sum(read_csv(go_file, show_col_types = FALSE)$p.adjust < 0.1, na.rm = TRUE) else 0
-n_kegg <- if (file.exists(kegg_file)) sum(read_csv(kegg_file, show_col_types = FALSE)$p.adjust < 0.1, na.rm = TRUE) else 0
+n_miRNAs <- if (file.exists(correlation_file)) nrow(read_csv(correlation_file, show_col_types = FALSE)) else 0
+
+# Calculate correlation from data
+correlation_r <- if (file.exists(correlation_file)) {
+  cor_data <- read_csv(correlation_file, show_col_types = FALSE)
+  if (all(c("estimated_rpm", "total_gt_counts") %in% names(cor_data))) {
+    cor_result <- cor.test(cor_data$estimated_rpm, cor_data$total_gt_counts, method = "pearson")
+    round(cor_result$estimate, 4)
+  } else 0
+} else 0
+
+high_expression_n <- if (file.exists(expression_summary_file)) {
+  summary <- read_csv(expression_summary_file, show_col_types = FALSE)
+  if ("expression_category" %in% names(summary) && "n_miRNAs" %in% names(summary)) {
+    high_row <- summary %>% filter(expression_category == "High (top 20%)")
+    if (nrow(high_row) > 0) high_row$n_miRNAs[1] else 0
+  } else 0
+} else 0
 
 # Generate HTML
 html_content <- paste0('<!DOCTYPE html>
 <html>
 <head>
-  <title>Step 6: Functional Analysis Viewer</title>
+  <title>Step 6: Expression-Oxidation Correlation Viewer</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
     .container { max-width: 1400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -69,65 +79,43 @@ html_content <- paste0('<!DOCTYPE html>
 </head>
 <body>
   <div class="container">
-    <h1>Step 6: Functional Analysis Results</h1>
+    <h1>Step 6: Expression vs Oxidation Correlation Results</h1>
     
     <div class="summary">
       <h2>📊 Summary Statistics</h2>
       <div class="stats">
         <div class="stat-box">
-          <div class="stat-number">', n_targets, '</div>
-          <div class="stat-label">Targets Analyzed</div>
+          <div class="stat-number">', n_miRNAs, '</div>
+          <div class="stat-label">miRNAs Analyzed</div>
         </div>
         <div class="stat-box">
-          <div class="stat-number">', n_go, '</div>
-          <div class="stat-label">Significant GO Terms</div>
+          <div class="stat-number">', correlation_r, '</div>
+          <div class="stat-label">Pearson Correlation (r)</div>
         </div>
         <div class="stat-box">
-          <div class="stat-number">', n_kegg, '</div>
-          <div class="stat-label">Significant KEGG Pathways</div>
+          <div class="stat-number">', high_expression_n, '</div>
+          <div class="stat-label">High Expression miRNAs</div>
         </div>
       </div>
     </div>
 
-    <h2>🎯 Pathway Enrichment Heatmap</h2>
+    <h2>📈 Panel A: Expression vs Oxidation Scatter</h2>
     <div class="figure">
-      <img src="', encode_image(pathway_heatmap), '" alt="Pathway Enrichment Heatmap">
-      <div class="figure-caption">Top enriched pathways (GO and KEGG) for targets of oxidized miRNAs</div>
+      <img src="', encode_image(fig_a), '" alt="Expression vs Oxidation">
+      <div class="figure-caption">Correlation between miRNA expression (RPM) and G>T oxidation counts</div>
     </div>
 
-    <h2>📈 Panel A: Pathway Enrichment</h2>
+    <h2>📊 Panel B: Oxidation by Expression Category</h2>
     <div class="figure">
-      <img src="', encode_image(fig_a), '" alt="Pathway Enrichment">
-      <div class="figure-caption">Top enriched pathways by significance (-log10 adjusted p-value)</div>
-    </div>
-
-    <h2>🧬 Panel B: ALS-Relevant Genes Impact</h2>
-    <div class="figure">
-      <img src="', encode_image(fig_b), '" alt="ALS Genes Impact">
-      <div class="figure-caption">Functional impact of oxidized miRNAs on ALS-relevant genes</div>
-    </div>
-
-    <h2>🔀 Panel C: Target Comparison</h2>
-    <div class="figure">
-      <img src="', encode_image(fig_c), '" alt="Target Comparison">
-      <div class="figure-caption">Comparison of canonical vs oxidized miRNA targets</div>
-    </div>
-
-    <h2>📍 Panel D: Position-Specific Impact</h2>
-    <div class="figure">
-      <img src="', encode_image(fig_d), '" alt="Position Impact">
-      <div class="figure-caption">Functional impact by position in seed region</div>
+      <img src="', encode_image(fig_b), '" alt="Expression Groups">
+      <div class="figure-caption">Oxidation levels grouped by expression category</div>
     </div>
 
     <div class="summary" style="margin-top: 40px;">
       <h2>📋 Available Tables</h2>
       <ul>
-        <li><strong>S3_target_analysis.csv</strong>: miRNA-target analysis results</li>
-        <li><strong>S3_als_relevant_genes.csv</strong>: ALS-relevant genes analysis</li>
-        <li><strong>S3_target_comparison.csv</strong>: Canonical vs oxidized target comparison</li>
-        <li><strong>S3_go_enrichment.csv</strong>: GO enrichment results</li>
-        <li><strong>S3_kegg_enrichment.csv</strong>: KEGG enrichment results</li>
-        <li><strong>S3_als_pathways.csv</strong>: ALS-specific pathways</li>
+        <li><strong>S6_expression_oxidation_correlation.csv</strong>: Per-miRNA correlation data</li>
+        <li><strong>S6_expression_summary.csv</strong>: Summary by expression category</li>
       </ul>
     </div>
   </div>
@@ -136,4 +124,5 @@ html_content <- paste0('<!DOCTYPE html>
 
 writeLines(html_content, output_html)
 cat("✅ Step 6 viewer generated:", output_html, "\n")
+
 

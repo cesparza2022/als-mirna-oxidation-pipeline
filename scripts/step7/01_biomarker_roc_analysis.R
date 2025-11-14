@@ -1,22 +1,17 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# STEP 7: Biomarker ROC Analysis (Final Integration)
+# STEP 4.1: Biomarker ROC Analysis
 # ============================================================================
 # Purpose: Evaluate diagnostic potential of miRNA oxidation patterns
-#          This step runs LAST, after Step 6, primarily using statistical results from Step 2
-#          and VAF-filtered data. Note: Currently uses Steps 1.5, 2, and depends on Step 6.
-#          Future versions may integrate clustering, families, and expression data.
-#
-# Execution order: Step 1 → Step 1.5 → Step 2 → Step 3 → [4,5,6 parallel] → Step 7 (LAST, after Step 6)
-#
+# 
 # This script performs:
 # 1. ROC curve analysis for individual miRNAs
 # 2. AUC calculation and ranking
 # 3. Multi-miRNA signature identification
-# 4. Combined ROC analysis (integrates all insights)
+# 4. Combined ROC analysis
 #
 # Snakemake parameters:
-#   input: Statistical comparisons from Step 2, VAF-filtered data from Step 1.5
+#   input: Statistical comparison results and VAF-filtered data
 #   output: ROC analysis tables and figures
 # ============================================================================
 
@@ -29,9 +24,26 @@ suppressPackageStartupMessages({
   library(scales)
 })
 
-# Load common functions and theme
+# Load common functions FIRST (needed for initialize_logging)
 source(snakemake@params[["functions"]], local = TRUE)
 # Theme is loaded via functions_common.R
+
+# Initialize logging (now that functions_common.R is loaded)
+log_file <- if (length(snakemake@log) > 0) snakemake@log[[1]] else {
+  file.path(dirname(snakemake@output[[1]]), "biomarker_roc_analysis.log")
+}
+initialize_logging(log_file, context = "Step 4.1 - Biomarker ROC Analysis")
+
+# Load data loading helpers (use path relative to project root)
+data_helpers_path <- "scripts/utils/data_loading_helpers.R"
+if (file.exists(data_helpers_path)) {
+  source(data_helpers_path, local = TRUE)
+  log_info(paste("Data loading helpers loaded from:", data_helpers_path))
+  log_info(paste("Function exists:", exists("identify_snv_count_columns")))
+} else {
+  warning("data_loading_helpers.R not found, using fallback column detection")
+  log_warning("data_loading_helpers.R not found, using fallback column detection")
+}
 
 # Load group comparison utilities for dynamic group detection
 group_functions_path <- if (!is.null(snakemake@params[["group_functions"]])) {
@@ -44,13 +56,7 @@ if (file.exists(group_functions_path)) {
   source(group_functions_path, local = TRUE)
 }
 
-# Initialize logging
-log_file <- if (length(snakemake@log) > 0) snakemake@log[[1]] else {
-  file.path(dirname(snakemake@output[[1]]), "biomarker_roc_analysis.log")
-}
-initialize_logging(log_file, context = "Step 7.1 - Biomarker ROC Analysis")
-
-log_section("STEP 7: Biomarker ROC Analysis (Final Integration)")
+log_section("STEP 4.1: Biomarker ROC Analysis")
 
 # ============================================================================
 # GET SNAKEMAKE PARAMETERS
@@ -64,9 +70,7 @@ output_roc_figure <- snakemake@output[["roc_figure"]]
 
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
-# For biomarker analysis, we want all mutations that are higher in ALS (log2FC > 0)
-# Not just those with very high fold change (log2FC > 1.0)
-log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step7)) config$analysis$log2fc_threshold_step7 else 0.0
+log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step3)) config$analysis$log2fc_threshold_step3 else 1.0
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
 color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
@@ -97,7 +101,40 @@ if ("pos:mut" %in% names(vaf_data)) {
   vaf_data <- vaf_data %>% rename(pos.mut = `pos:mut`)
 }
 
-# Extract sample groups (dynamic - supports metadata file or pattern matching)
+# CRITICAL: Use only SNV count columns (exclude total count columns)
+# Step 1.5 outputs 830 columns (415 SNV + 415 totals), but we only need SNV columns
+log_info(paste("Checking for identify_snv_count_columns function. Exists:", exists("identify_snv_count_columns")))
+log_info(paste("Initial vaf_data columns:", ncol(vaf_data)))
+
+if (exists("identify_snv_count_columns")) {
+  snv_cols <- identify_snv_count_columns(vaf_data)
+  log_info(paste("Identified", length(snv_cols), "SNV count columns"))
+  metadata_cols <- c("miRNA_name", "pos.mut")
+  metadata_cols <- intersect(metadata_cols, names(vaf_data))
+  # Use column indices to avoid variable name limit
+  keep_cols <- c(metadata_cols, snv_cols)
+  keep_indices <- which(names(vaf_data) %in% keep_cols)
+  vaf_data <- as.data.frame(vaf_data[, keep_indices, drop = FALSE])
+  log_info(paste("Filtered to", length(snv_cols), "SNV count columns (excluded total count columns)"))
+  log_info(paste("Final vaf_data columns:", ncol(vaf_data)))
+} else {
+  log_warning("identify_snv_count_columns function not found, using fallback")
+  # Fallback: try to exclude total columns manually
+  total_pattern <- "\\(PM\\+1MM\\+2MM\\)$"
+  all_cols <- names(vaf_data)
+  metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut")
+  metadata_cols <- intersect(metadata_cols, names(vaf_data))
+  sample_cols <- setdiff(all_cols, metadata_cols)
+  total_cols <- sample_cols[grepl(total_pattern, sample_cols)]
+  if (length(total_cols) > 0) {
+    # Use column indices to avoid variable name limit
+    total_indices <- which(names(vaf_data) %in% total_cols)
+    vaf_data <- vaf_data[, -total_indices, drop = FALSE]
+    log_info(paste("Fallback: Excluded", length(total_cols), "total count columns"))
+  }
+}
+
+# Extract sample groups (now using only SNV columns)
 sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
 
 # Get metadata file path from Snakemake params if available
@@ -117,7 +154,7 @@ metadata_file <- if (!is.null(snakemake@params[["metadata_file"]])) {
 sample_groups <- tryCatch({
   extract_sample_groups(vaf_data, metadata_file = metadata_file)
 }, error = function(e) {
-  handle_error(e, context = "Step 7.1 - Group Identification", exit_code = 1, log_file = log_file)
+  handle_error(e, context = "Step 4.1 - Group Identification", exit_code = 1, log_file = log_file)
 })
 
 # Get dynamic group names
@@ -161,7 +198,7 @@ significant_gt <- statistical_results %>%
     !is.na(t_test_fdr) | !is.na(wilcoxon_fdr),
     (t_test_fdr < alpha | wilcoxon_fdr < alpha),
     !is.na(log2_fold_change),
-    log2_fold_change > log2fc_threshold  # Higher in ALS (default: 0.0, meaning any positive fold change)
+    log2_fold_change > log2fc_threshold  # Higher in ALS (configurable threshold)
   ) %>%
   mutate(
     position = as.numeric(str_extract(pos.mut, "^\\d+")),
@@ -174,6 +211,48 @@ significant_gt <- statistical_results %>%
 
 log_info(paste("Significant G>T mutations for ROC analysis:", nrow(significant_gt)))
 
+# Check if data is empty
+if (nrow(significant_gt) == 0) {
+  log_warning("No significant G>T mutations found. Creating empty output files.")
+  
+  # Create empty output files
+  empty_roc <- tibble(
+    SNV_id = character(),
+    miRNA_name = character(),
+    pos.mut = character(),
+    auc = numeric(),
+    ci_lower = numeric(),
+    ci_upper = numeric(),
+    p_value = numeric(),
+    sensitivity = numeric(),
+    specificity = numeric()
+  )
+  
+  empty_signatures <- tibble(
+    signature_name = character(),
+    n_miRNAs = integer(),
+    auc = numeric(),
+    ci_lower = numeric(),
+    ci_upper = numeric(),
+    p_value = numeric()
+  )
+  
+  write_csv(empty_roc, output_roc_table)
+  write_csv(empty_signatures, output_signatures)
+  
+  # Create empty placeholder figure
+  p_empty <- ggplot() +
+    annotate("text", x = 0.5, y = 0.5, label = "No significant G>T mutations\nfound for ROC analysis", 
+             size = 6, hjust = 0.5, vjust = 0.5) +
+    theme_void() +
+    theme(plot.margin = margin(20, 20, 20, 20))
+  
+  ggsave(output_roc_figure, p_empty, width = 12, height = 10, dpi = 300)
+  
+  log_success("Step 7.1 completed (empty outputs created).")
+  quit(save = "no", status = 0)
+}
+
 # ============================================================================
 # ROC ANALYSIS FOR INDIVIDUAL miRNAs
 # ============================================================================
@@ -182,15 +261,20 @@ log_subsection("Performing ROC analysis for individual miRNAs")
 
 roc_results <- list()
 
-for (i in seq_len(min(nrow(significant_gt), 30))) {  # Top 30 for computational efficiency
+for (i in 1:min(nrow(significant_gt), 30)) {  # Top 30 for computational efficiency
   snv_id <- significant_gt$SNV_id[i]
   mirna <- significant_gt$miRNA_name[i]
   pos_mut <- significant_gt$pos.mut[i]
   
   # Get data for this SNV (match by miRNA_name and pos.mut)
-  snv_data <- vaf_data %>%
-    filter(miRNA_name == mirna & pos.mut == pos_mut) %>%
-    select(all_of(sample_cols))
+  # Use column indices instead of select() to avoid variable name limit
+  snv_row <- vaf_data %>%
+    filter(miRNA_name == mirna & pos.mut == pos_mut)
+  
+  if (nrow(snv_row) == 0) next
+  
+  sample_col_indices <- which(names(snv_row) %in% sample_cols)
+  snv_data <- as.data.frame(snv_row[, sample_col_indices, drop = FALSE])
   
   if (nrow(snv_data) == 0) next
   
@@ -209,17 +293,11 @@ for (i in seq_len(min(nrow(significant_gt), 30))) {  # Top 30 for computational 
   # Ensure group2_name is control-like and group1_name is disease-like
   roc_data$group_factor <- factor(roc_data$group, levels = c(group2_name, group1_name))
   
-  # Determine ROC direction: if disease group has higher values, use ">"
-  # Check mean values to determine direction
-  mean_group1 <- mean(roc_data$value[roc_data$group == group1_name], na.rm = TRUE)
-  mean_group2 <- mean(roc_data$value[roc_data$group == group2_name], na.rm = TRUE)
-  roc_direction <- ifelse(mean_group1 > mean_group2, ">", "<")
-  
   tryCatch({
     roc_obj <- roc(response = roc_data$group_factor, 
                   predictor = roc_data$value,
                   levels = c(group2_name, group1_name),  # Control-like first, then Disease-like
-                  direction = roc_direction)  # Dynamic: ">" if disease has higher values
+                  direction = "<")
     
     auc_value <- as.numeric(auc(roc_obj))
     
@@ -281,13 +359,20 @@ if (nrow(top_biomarkers) > 0) {
     snv_id <- top_biomarkers$SNV_id[i]
     mirna <- top_biomarkers$miRNA_name[i]
     pos_mut <- top_biomarkers$pos.mut[i]
-    snv_data <- vaf_data %>%
-      filter(miRNA_name == mirna & pos.mut == pos_mut) %>%
-      select(all_of(sample_cols))
+    # Use column indices instead of select() to avoid variable name limit
+    snv_row <- vaf_data %>%
+      filter(miRNA_name == mirna & pos.mut == pos_mut)
     
-    if (nrow(snv_data) > 0) {
+    if (nrow(snv_row) == 0) next
+    
+    sample_col_indices <- which(names(snv_row) %in% sample_cols)
+    snv_data <- as.data.frame(snv_row[, sample_col_indices, drop = FALSE])
+    
+    if (nrow(snv_data) > 0 && ncol(snv_data) > 0) {
+      # Extract values using column indices
+      snv_values <- as.numeric(snv_data[1, , drop = TRUE])
       signature_data <- signature_data %>%
-        mutate(!!paste0("biomarker_", i) := as.numeric(snv_data[1, sample_cols]))
+        mutate(!!paste0("biomarker_", i) := snv_values)
     }
   }
   
@@ -304,16 +389,11 @@ if (nrow(top_biomarkers) > 0) {
     
     # ROC for combined signature
     if (nrow(signature_data) >= 10 && n_distinct(signature_data$group) == 2) {
-      # Determine ROC direction dynamically for combined signature
-      mean_group1_combined <- mean(signature_data$Combined_Score[signature_data$group == group1_name], na.rm = TRUE)
-      mean_group2_combined <- mean(signature_data$Combined_Score[signature_data$group == group2_name], na.rm = TRUE)
-      roc_direction_combined <- ifelse(mean_group1_combined > mean_group2_combined, ">", "<")
-      
       tryCatch({
         combined_roc <- roc(response = signature_data$group,
                             predictor = signature_data$Combined_Score,
                             levels = c(group2_name, group1_name),  # Control-like first, then Disease-like
-                            direction = roc_direction_combined)  # Dynamic direction
+                            direction = "<")
         combined_auc <- as.numeric(auc(combined_roc))
         
         # Save per-sample signature data (this is what we want)
@@ -393,13 +473,18 @@ top_5 <- roc_table %>% head(5)
 roc_curves <- list()
 
 # Individual ROC curves
-for (i in seq_len(nrow(top_5))) {
+for (i in 1:nrow(top_5)) {
   snv_id <- top_5$SNV_id[i]
   mirna <- top_5$miRNA_name[i]
   pos_mut <- top_5$pos.mut[i]
-  snv_data <- vaf_data %>%
-    filter(miRNA_name == mirna & pos.mut == pos_mut) %>%
-    select(all_of(sample_cols))
+  # Use column indices instead of select() to avoid variable name limit
+  snv_row <- vaf_data %>%
+    filter(miRNA_name == mirna & pos.mut == pos_mut)
+  
+  if (nrow(snv_row) == 0) next
+  
+  sample_col_indices <- which(names(snv_row) %in% sample_cols)
+  snv_data <- as.data.frame(snv_row[, sample_col_indices, drop = FALSE])
   
   if (nrow(snv_data) == 0) next
   
@@ -411,16 +496,11 @@ for (i in seq_len(nrow(top_5))) {
     filter(!is.na(group), !is.na(value))
   
   if (nrow(roc_data) >= 10) {
-    # Determine ROC direction dynamically
-  mean_group1 <- mean(roc_data$value[roc_data$group == group1_name], na.rm = TRUE)
-  mean_group2 <- mean(roc_data$value[roc_data$group == group2_name], na.rm = TRUE)
-  roc_direction <- ifelse(mean_group1 > mean_group2, ">", "<")
-  
-  tryCatch({
+    tryCatch({
       roc_obj <- roc(response = roc_data$group,
                     predictor = roc_data$value,
                     levels = c(group2_name, group1_name),  # Control-like first, then Disease-like
-                    direction = roc_direction)  # Dynamic direction
+                    direction = "<")
       
       roc_df <- tibble(
         Sensitivity = roc_obj$sensitivities,
@@ -467,15 +547,12 @@ roc_plot <- ggplot(all_roc, aes(x = Specificity, y = Sensitivity, color = Label)
   scale_color_manual(values = colors, name = "Biomarker") +
   scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
-    labs(
-    title = "Diagnostic Potential of G>T Oxidation Patterns in ALS",
-    subtitle = paste("ROC analysis: Top", nrow(top_5), "individual miRNA oxidation biomarkers + combined signature |",
-                     "Seed region (positions", seed_start, "-", seed_end, ") |",
-                     "AUC > 0.5 indicates better than random classification"),
+  labs(
+    title = "ROC Curves: Diagnostic Potential of miRNA Oxidation Patterns",
+    subtitle = paste("Top", nrow(top_5), "individual biomarkers + combined signature | G>T mutations in seed region"),
     x = "1 - Specificity (False Positive Rate)",
     y = "Sensitivity (True Positive Rate)",
-    caption = paste("Analysis based on", length(group1_samples), group1_name, "and", length(group2_samples), group2_name, "samples |",
-                   "Dashed line: Random classifier (AUC = 0.5)")
+    caption = paste("Analysis based on", length(group1_samples), group1_name, "and", length(group2_samples), group2_name, "samples")
   ) +
   theme_professional +
   theme(
@@ -489,5 +566,5 @@ ggsave(output_roc_figure, roc_plot,
        width = 12, height = 10, dpi = 300, bg = "white")
 
 log_success(paste("ROC figure saved:", output_roc_figure))
-log_success("Step 7.1 completed successfully")
+log_success("Step 4.1 completed successfully")
 

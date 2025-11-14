@@ -2,112 +2,135 @@
 # ============================================================================
 # BUILD STEP 4 VIEWER HTML
 # ============================================================================
-# Generates HTML viewer for Step 4 Family Analysis results
+# Generates HTML viewer for Step 4 functional analysis results
 # ============================================================================
 
 suppressPackageStartupMessages({
   library(readr)
   library(stringr)
+  library(dplyr)
 })
 
 if (requireNamespace("base64enc", quietly = TRUE)) {
   library(base64enc)
   encode_image <- function(image_path) {
+    if (is.null(image_path) || image_path == "") return("")
     if (!file.exists(image_path)) return("")
     con <- file(image_path, "rb")
     img_data <- readBin(con, "raw", file.info(image_path)$size)
     close(con)
-    base64_data <- base64encode(img_data)
-    return(paste0("data:image/png;base64,", base64_data))
+    paste0("data:image/png;base64,", base64encode(img_data))
   }
 } else {
   encode_image <- function(image_path) {
+    if (is.null(image_path) || image_path == "") return("")
     if (!file.exists(image_path)) return("")
-    return(image_path)
+    image_path
   }
 }
 
-# Get Snakemake inputs
-fig_a <- snakemake@input[["figure_a"]]
-fig_b <- snakemake@input[["figure_b"]]
+pathway_heatmap <- snakemake@input[["pathway_heatmap"]]
+functional_panel_a <- snakemake@input[["functional_panel_a"]]
+functional_panel_b <- snakemake@input[["functional_panel_b"]]
+functional_panel_c <- snakemake@input[["functional_panel_c"]]
+functional_panel_d <- snakemake@input[["functional_panel_d"]]
 
 output_html <- snakemake@output[["html"]]
+figures_dir <- snakemake@params[["figures_dir"]]
 tables_dir <- snakemake@params[["tables_dir"]]
 
-# Load family data for summary
-family_summary_file <- file.path(tables_dir, "families", "S5_family_summary.csv")
-family_comp_file <- file.path(tables_dir, "families", "S5_family_comparison.csv")
+# Load functional summaries
+functional_table <- file.path(tables_dir, "functional", "S4_target_analysis.csv")
+go_file <- file.path(tables_dir, "functional", "S4_go_enrichment.csv")
+kegg_file <- file.path(tables_dir, "functional", "S4_kegg_enrichment.csv")
 
-n_families <- if (file.exists(family_summary_file)) nrow(read_csv(family_summary_file, show_col_types = FALSE)) else 0
-n_significant_families <- if (file.exists(family_summary_file)) {
-  summary <- read_csv(family_summary_file, show_col_types = FALSE)
-  sum(summary$n_significant > 0, na.rm = TRUE)
-} else 0
+o_safe_read <- function(path) {
+  if (!file.exists(path)) return(NULL)
+  read_csv(path, show_col_types = FALSE)
+}
 
-top_family <- if (file.exists(family_comp_file)) {
-  comp <- read_csv(family_comp_file, show_col_types = FALSE)
-  comp %>% arrange(desc(n_significant)) %>% head(1) %>% pull(family)
-} else "N/A"
+functional_targets <- o_safe_read(functional_table)
+go_enrichment <- o_safe_read(go_file)
+kegg_enrichment <- o_safe_read(kegg_file)
 
-# Generate HTML
+n_targets <- if (!is.null(functional_targets)) nrow(functional_targets) else 0
+n_go <- if (!is.null(go_enrichment)) sum(go_enrichment$p.adjust < 0.1, na.rm = TRUE) else 0
+n_kegg <- if (!is.null(kegg_enrichment)) sum(kegg_enrichment$p.adjust < 0.1, na.rm = TRUE) else 0
+
 html_content <- paste0('<!DOCTYPE html>
 <html>
 <head>
-  <title>Step 4: Family Analysis Viewer</title>
+  <meta charset="utf-8" />
+  <title>Step 4 Viewer · Functional Analysis</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    .container { max-width: 1400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     h1 { color: #D62728; border-bottom: 3px solid #D62728; padding-bottom: 10px; }
     h2 { color: #2E86AB; margin-top: 30px; }
-    .figure { margin: 20px 0; text-align: center; }
+    .summary { background: #f9f9f9; padding: 18px; border-radius: 4px; margin: 20px 0; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 15px; }
+    .stat-box { background: #e8f4f8; padding: 18px; border-radius: 4px; text-align: center; }
+    .stat-number { font-size: 24px; font-weight: bold; color: #D62728; }
+    .stat-label { color: #666; margin-top: 6px; }
+    .figure { margin: 25px 0; text-align: center; }
     .figure img { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; }
     .figure-caption { margin-top: 10px; font-style: italic; color: #666; }
-    .summary { background: #f9f9f9; padding: 15px; border-radius: 4px; margin: 20px 0; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
-    .stat-box { background: #e8f4f8; padding: 15px; border-radius: 4px; text-align: center; }
-    .stat-number { font-size: 24px; font-weight: bold; color: #D62728; }
-    .stat-label { color: #666; margin-top: 5px; }
+    ul { line-height: 1.6; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Step 4: miRNA Family Analysis Results</h1>
-    
+    <h1>Step 4 · Functional Analysis</h1>
+
     <div class="summary">
-      <h2>📊 Summary Statistics</h2>
+      <h2>📊 Summary</h2>
       <div class="stats">
         <div class="stat-box">
-          <div class="stat-number">', n_families, '</div>
-          <div class="stat-label">Total Families</div>
+          <div class="stat-number">', n_targets, '</div>
+          <div class="stat-label">Targets Analyzed</div>
         </div>
         <div class="stat-box">
-          <div class="stat-number">', n_significant_families, '</div>
-          <div class="stat-label">Families with Significant Mutations</div>
+          <div class="stat-number">', n_go, '</div>
+          <div class="stat-label">Significant GO Terms</div>
         </div>
         <div class="stat-box">
-          <div class="stat-number">', top_family, '</div>
-          <div class="stat-label">Top Family</div>
+          <div class="stat-number">', n_kegg, '</div>
+          <div class="stat-label">Significant KEGG Pathways</div>
         </div>
       </div>
     </div>
 
-    <h2>📊 Panel A: Family Oxidation Comparison</h2>
+    <h2>🧬 Pathway Enrichment</h2>
     <div class="figure">
-      <img src="', encode_image(fig_a), '" alt="Family Comparison">
-      <div class="figure-caption">Comparison of oxidation patterns (ALS vs Control) by miRNA family</div>
+      <img src="', encode_image(pathway_heatmap), '" alt="Pathway Heatmap">
+      <div class="figure-caption">Heatmap of GO/KEGG pathways enriched in oxidized miRNA targets</div>
     </div>
 
-    <h2>🔥 Panel B: Family Heatmap</h2>
+    <h2>🧠 Functional Panels</h2>
     <div class="figure">
-      <img src="', encode_image(fig_b), '" alt="Family Heatmap">
-      <div class="figure-caption">Heatmap showing oxidation patterns across top families</div>
+      <img src="', encode_image(functional_panel_a), '" alt="Target Network">
+      <div class="figure-caption">Panel A · Target network overview</div>
+    </div>
+    <div class="figure">
+      <img src="', encode_image(functional_panel_b), '" alt="GO Enrichment">
+      <div class="figure-caption">Panel B · GO enrichment (top biological processes)</div>
+    </div>
+    <div class="figure">
+      <img src="', encode_image(functional_panel_c), '" alt="KEGG Enrichment">
+      <div class="figure-caption">Panel C · KEGG pathway enrichment</div>
+    </div>
+    <div class="figure">
+      <img src="', encode_image(functional_panel_d), '" alt="ALS Pathways">
+      <div class="figure-caption">Panel D · ALS-relevant pathways and functional impact</div>
     </div>
 
     <div class="summary" style="margin-top: 40px;">
-      <h2>📋 Available Tables</h2>
+      <h2>📁 Available Resources</h2>
       <ul>
-        <li><strong>S5_family_summary.csv</strong>: Summary statistics by miRNA family</li>
-        <li><strong>S5_family_comparison.csv</strong>: ALS vs Control comparison by family</li>
+        <li><strong>functional/S4_target_analysis.csv</strong> – miRNA-target analysis</li>
+        <li><strong>functional/S4_go_enrichment.csv</strong> – GO enrichment results</li>
+        <li><strong>functional/S4_kegg_enrichment.csv</strong> – KEGG enrichment results</li>
+        <li><strong>functional/S4_als_pathways.csv</strong> – ALS-specific pathways</li>
       </ul>
     </div>
   </div>

@@ -16,6 +16,12 @@ if (length(args) < 1) {
 
 # Define output structure
 output_structure <- list(
+  "step0" = c(
+    "figures",
+    "tables",
+    "logs",
+    "logs/benchmarks"
+  ),
   "step1" = c(
     "figures",
     "tables/summary",
@@ -41,6 +47,7 @@ output_structure <- list(
   ),
   "step3" = c(
     "figures",
+    "tables/clusters",
     "tables/functional",
     "logs",
     "logs/benchmarks"
@@ -60,6 +67,7 @@ output_structure <- list(
       "step6" = c(
         "figures",
         "tables/correlation",
+        "tables/functional",
         "logs",
         "logs/benchmarks"
       ),
@@ -88,7 +96,7 @@ for (step in names(output_structure)) {
   }
   
   # Create final and intermediate for steps
-  if (step %in% c("step1", "step1_5", "step2")) {
+  if (step %in% c("step0", "step1", "step1_5", "step2")) {
     final_dir <- file.path(step_dir, "final")
     intermediate_dir <- file.path(step_dir, "intermediate")
     

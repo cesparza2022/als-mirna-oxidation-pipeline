@@ -85,6 +85,38 @@ if (file.exists("scripts/utils/theme_professional.R")) {
 }
 
 # ============================================================================
+# OUTPUT VALIDATION HELPERS
+# ============================================================================
+
+validate_output_file <- function(output_path,
+                                 min_size_bytes = 1024,
+                                 context = "Output validation",
+                                 fail_on_missing = TRUE) {
+  if (!file.exists(output_path)) {
+    message <- glue::glue("{context}: Output not found -> {output_path}")
+    if (fail_on_missing) {
+      stop(message)
+    } else {
+      log_warning(message)
+      return(invisible(FALSE))
+    }
+  }
+
+  file_size <- file.info(output_path)$size
+  if (is.na(file_size) || file_size < min_size_bytes) {
+    log_warning(glue::glue(
+      "{context}: Output file too small ({file_size} bytes) -> {output_path}"
+    ))
+    return(invisible(FALSE))
+  }
+
+  log_success(glue::glue(
+    "{context}: Output validated -> {output_path} ({file_size} bytes)"
+  ))
+  invisible(TRUE)
+}
+
+# ============================================================================
 # DATA LOADING FUNCTIONS
 # ============================================================================
 
@@ -123,7 +155,15 @@ load_and_process_raw_data <- function(raw_file) {
   }
   
   cat("📂 Loading raw data from:", raw_file, "\n")
-  raw_data <- read_tsv(raw_file, show_col_types = FALSE)
+  raw_data <- read_csv(
+    raw_file,
+    col_types = cols(
+      .default = col_skip(),
+      `miRNA name` = col_character(),
+      `pos:mut` = col_character()
+    ),
+    show_col_types = FALSE
+  )
   
   cat("   ✅ Raw data loaded:", nrow(raw_data), "rows\n")
   

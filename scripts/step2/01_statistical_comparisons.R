@@ -26,6 +26,14 @@ suppressPackageStartupMessages({
 # Load common functions
 source(snakemake@params[["functions"]], local = TRUE)
 
+# Load data loading helpers
+data_helpers_path <- "scripts/utils/data_loading_helpers.R"
+if (file.exists(data_helpers_path)) {
+  source(data_helpers_path, local = TRUE)
+} else {
+  warning("data_loading_helpers.R not found, using fallback column detection")
+}
+
 # Load statistical assumptions validation functions
 assumptions_path <- if (!is.null(snakemake@params[["assumptions_functions"]])) {
   snakemake@params[["assumptions_functions"]]
@@ -172,6 +180,29 @@ data <- tryCatch({
   }
   if ("pos:mut" %in% names(result)) {
     result <- result %>% rename(pos.mut = `pos:mut`)
+  }
+  
+  # CRITICAL: Use only SNV count columns (exclude total count columns)
+  # Step 1.5 outputs 830 columns (415 SNV + 415 totals), but we only need SNV columns
+  if (exists("identify_snv_count_columns")) {
+    snv_cols <- identify_snv_count_columns(result)
+    metadata_cols <- c("miRNA_name", "pos.mut")
+    metadata_cols <- intersect(metadata_cols, names(result))
+    result <- result %>% select(all_of(c(metadata_cols, snv_cols)))
+    log_info(paste("Filtered to", length(snv_cols), "SNV count columns (excluded", 
+                   ncol(result) - length(snv_cols) - length(metadata_cols), "total count columns)"))
+  } else {
+    # Fallback: try to exclude total columns manually
+    total_pattern <- "\\(PM\\+1MM\\+2MM\\)$"
+    all_cols <- names(result)
+    metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut")
+    metadata_cols <- intersect(metadata_cols, names(result))
+    sample_cols <- setdiff(all_cols, metadata_cols)
+    total_cols <- sample_cols[grepl(total_pattern, sample_cols)]
+    if (length(total_cols) > 0) {
+      result <- result %>% select(-all_of(total_cols))
+      log_info(paste("Fallback: Excluded", length(total_cols), "total count columns"))
+    }
   }
   
   log_success(paste("Data loaded:", nrow(result), "rows,", ncol(result), "columns"))

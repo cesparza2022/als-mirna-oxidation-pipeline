@@ -16,7 +16,7 @@ import os
 
 # Input data (from Step 1.5 - VAF filtered)
 # Note: Path is relative to snakemake_dir
-STEP1_5_DATA_DIR = config["paths"]["snakemake_dir"] + "/" + config["paths"]["outputs"]["step1_5"]
+STEP1_5_DATA_DIR = config["paths"]["outputs"]["step1_5"]
 INPUT_DATA_VAF_FILTERED = STEP1_5_DATA_DIR + "/tables/filtered_data/ALL_MUTATIONS_VAF_FILTERED.csv"
 
 # Alternative: use processed clean data if VAF filtered not available
@@ -97,21 +97,12 @@ rule step2_confounder_analysis:
 
 rule step2_statistical_comparisons:
     input:
-<<<<<<< HEAD:final_analysis/pipeline_definitivo/snakemake_pipeline/rules/step2.smk
-        # Batch effect analysis output (optional - script will check if exists)
+        # Use batch-corrected data if available, otherwise original
         batch_corrected = rules.step2_batch_effect_analysis.output.batch_corrected,
         vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Fallback: Try VAF filtered
         fallback_data = INPUT_DATA_FALLBACK,  # Fallback: processed clean
         functions = FUNCTIONS_COMMON,
         assumptions_functions = "scripts/utils/statistical_assumptions.R",  # For input: (resolved from Snakefile)
-=======
-        # Use batch-corrected data if available, otherwise original
-        batch_corrected = OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
-        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,  # Fallback: Try VAF filtered
-        fallback_data = INPUT_DATA_FALLBACK,  # Fallback: processed clean
-        functions = FUNCTIONS_COMMON,
-        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R",
->>>>>>> 352eb6950c566304a08c8054f00dc95591ac07de:rules/step2.smk
         metadata = lambda wildcards: METADATA_FILE if METADATA_FILE else []
     output:
         table = OUTPUT_TABLES_STATISTICAL + "/S2_statistical_comparisons.csv",
@@ -119,11 +110,7 @@ rule step2_statistical_comparisons:
     params:
         functions = FUNCTIONS_COMMON,
         group_functions = GROUP_FUNCTIONS,
-<<<<<<< HEAD:final_analysis/pipeline_definitivo/snakemake_pipeline/rules/step2.smk
         assumptions_functions = "scripts/utils/statistical_assumptions.R",  # For params: (resolved from Snakefile)
-=======
-        assumptions_functions = SCRIPTS_UTILS + "/statistical_assumptions.R",
->>>>>>> 352eb6950c566304a08c8054f00dc95591ac07de:rules/step2.smk
         metadata_file = METADATA_FILE if METADATA_FILE else ""
     log:
         OUTPUT_LOGS + "/statistical_comparisons.log"
@@ -208,61 +195,13 @@ rule step2_position_specific_analysis:
         SCRIPTS_STEP2 + "/05_position_specific_analysis.R"
 
 # ============================================================================
-<<<<<<< HEAD:final_analysis/pipeline_definitivo/snakemake_pipeline/rules/step2.smk
-# RULE: Hierarchical Clustering - ALL G>T SNVs (Step 2.6)
-# ============================================================================
-
-rule step2_hierarchical_clustering_all_gt:
-    input:
-        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
-        fallback_data = INPUT_DATA_FALLBACK,
-        functions = FUNCTIONS_COMMON
-    output:
-        clustering_figure = OUTPUT_FIGURES + "/step2_clustering_all_gt.png",
-        cluster_assignments = OUTPUT_TABLES_STATISTICAL + "/S2_clustering_all_gt_assignments.csv",
-        clustering_table = OUTPUT_TABLES_STATISTICAL + "/S2_clustering_all_gt_summary.csv"
-    params:
-        functions = FUNCTIONS_COMMON,
-        data_file = lambda wildcards: INPUT_DATA_VAF_FILTERED if os.path.exists(INPUT_DATA_VAF_FILTERED) else INPUT_DATA_FALLBACK
-    log:
-        OUTPUT_LOGS + "/hierarchical_clustering_all_gt.log"
-    script:
-        SCRIPTS_STEP2 + "/06_hierarchical_clustering_all_gt.R"
-
-# ============================================================================
-# RULE: Hierarchical Clustering - SEED REGION G>T SNVs ONLY (Step 2.7)
-# ============================================================================
-
-rule step2_hierarchical_clustering_seed_gt:
-    input:
-        vaf_filtered_data = INPUT_DATA_VAF_FILTERED,
-        fallback_data = INPUT_DATA_FALLBACK,
-        functions = FUNCTIONS_COMMON
-    output:
-        clustering_figure = OUTPUT_FIGURES + "/step2_clustering_seed_gt.png",
-        cluster_assignments = OUTPUT_TABLES_STATISTICAL + "/S2_clustering_seed_gt_assignments.csv",
-        clustering_table = OUTPUT_TABLES_STATISTICAL + "/S2_clustering_seed_gt_summary.csv"
-    params:
-        functions = FUNCTIONS_COMMON,
-        data_file = lambda wildcards: INPUT_DATA_VAF_FILTERED if os.path.exists(INPUT_DATA_VAF_FILTERED) else INPUT_DATA_FALLBACK
-    log:
-        OUTPUT_LOGS + "/hierarchical_clustering_seed_gt.log"
-    script:
-        SCRIPTS_STEP2 + "/07_hierarchical_clustering_seed_gt.R"
-
-# ============================================================================
-=======
->>>>>>> 352eb6950c566304a08c8054f00dc95591ac07de:rules/step2.smk
 # AGGREGATE RULE: All Step 2 outputs
 # ============================================================================
 
 rule all_step2:
     input:
-<<<<<<< HEAD:final_analysis/pipeline_definitivo/snakemake_pipeline/rules/step2.smk
         # DEPENDENCY: Step 1.5 must complete before Step 2
         rules.all_step1_5.output,
-=======
->>>>>>> 352eb6950c566304a08c8054f00dc95591ac07de:rules/step2.smk
         # Pre-analysis (new critical steps)
         OUTPUT_TABLES_STATISTICAL + "/S2_batch_corrected_data.csv",
         OUTPUT_LOGS + "/batch_effect_report.txt",
@@ -276,16 +215,6 @@ rule all_step2:
         # NEW: Position-specific analysis
         OUTPUT_TABLES_STATISTICAL + "/S2_position_specific_statistics.csv",
         OUTPUT_FIGURES + "/step2_position_specific_distribution.png",
-<<<<<<< HEAD:final_analysis/pipeline_definitivo/snakemake_pipeline/rules/step2.smk
-        # NEW: Hierarchical clustering analyses
-        OUTPUT_FIGURES + "/step2_clustering_all_gt.png",
-        OUTPUT_TABLES_STATISTICAL + "/S2_clustering_all_gt_assignments.csv",
-        OUTPUT_TABLES_STATISTICAL + "/S2_clustering_all_gt_summary.csv",
-        OUTPUT_FIGURES + "/step2_clustering_seed_gt.png",
-        OUTPUT_TABLES_STATISTICAL + "/S2_clustering_seed_gt_assignments.csv",
-        OUTPUT_TABLES_STATISTICAL + "/S2_clustering_seed_gt_summary.csv",
-=======
->>>>>>> 352eb6950c566304a08c8054f00dc95591ac07de:rules/step2.smk
         # Figures
         OUTPUT_FIGURES + "/step2_volcano_plot.png",
         OUTPUT_FIGURES + "/step2_effect_size_distribution.png",

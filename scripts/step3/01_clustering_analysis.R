@@ -23,6 +23,14 @@ suppressPackageStartupMessages({
 # Load common functions
 source(snakemake@params[["functions"]], local = TRUE)
 
+# Load data loading helpers
+data_helpers_path <- "scripts/utils/data_loading_helpers.R"
+if (file.exists(data_helpers_path)) {
+  source(data_helpers_path, local = TRUE)
+} else {
+  warning("data_loading_helpers.R not found, using fallback column detection")
+}
+
 # Load group comparison utilities for dynamic group detection
 group_functions_path <- if (!is.null(snakemake@params[["group_functions"]])) {
   snakemake@params[["group_functions"]]
@@ -93,7 +101,29 @@ if ("pos:mut" %in% names(vaf_data)) {
   vaf_data <- vaf_data %>% rename(pos.mut = `pos:mut`)
 }
 
-# Extract sample groups
+# CRITICAL: Use only SNV count columns (exclude total count columns)
+# Step 1.5 outputs 830 columns (415 SNV + 415 totals), but we only need SNV columns
+if (exists("identify_snv_count_columns")) {
+  snv_cols <- identify_snv_count_columns(vaf_data)
+  metadata_cols <- c("miRNA_name", "pos.mut")
+  metadata_cols <- intersect(metadata_cols, names(vaf_data))
+  vaf_data <- vaf_data %>% select(all_of(c(metadata_cols, snv_cols)))
+  log_info(paste("Filtered to", length(snv_cols), "SNV count columns (excluded total count columns)"))
+} else {
+  # Fallback: try to exclude total columns manually
+  total_pattern <- "\\(PM\\+1MM\\+2MM\\)$"
+  all_cols <- names(vaf_data)
+  metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut")
+  metadata_cols <- intersect(metadata_cols, names(vaf_data))
+  sample_cols <- setdiff(all_cols, metadata_cols)
+  total_cols <- sample_cols[grepl(total_pattern, sample_cols)]
+  if (length(total_cols) > 0) {
+    vaf_data <- vaf_data %>% select(-all_of(total_cols))
+    log_info(paste("Fallback: Excluded", length(total_cols), "total count columns"))
+  }
+}
+
+# Extract sample groups (now using only SNV columns)
 sample_cols <- setdiff(names(vaf_data), c("miRNA_name", "pos.mut", "miRNA name", "pos:mut"))
 # Get metadata file path from Snakemake params if available
 metadata_file <- if (!is.null(snakemake@params[["metadata_file"]])) {

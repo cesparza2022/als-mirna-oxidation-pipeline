@@ -33,15 +33,28 @@ paths:
   
   # Output directories (relative to snakemake_dir - usually no need to change)
   outputs:
-    step1: "outputs/step1"
-    step1_5: "outputs/step1_5"
-    step2: "outputs/step2"
+    step1: "results/step1/final"
+    step1_5: "results/step1_5/final"
+    step2: "results/step2/final"
+    step3: "results/step3/final"
+    step4: "results/step4/final"
+    step5: "results/step5/final"
+    step6: "results/step6/final"
+    step7: "results/step7/final"
+    pipeline_info: "results/pipeline_info"
+    summary: "results/summary"
+    validation: "results/validation"
   
   # Scripts directories (relative to snakemake_dir - usually no need to change)
   scripts:
     step1: "scripts/step1"
     step1_5: "scripts/step1_5"
     step2: "scripts/step2"
+    step3: "scripts/step3"
+    step4: "scripts/step4"
+    step5: "scripts/step5"
+    step6: "scripts/step6"
+    step7: "scripts/step7"
     utils: "scripts/utils"
   
   # Viewers directory (relative to snakemake_dir)
@@ -62,16 +75,6 @@ analysis:
     check_variance_homogeneity: true  # Perform variance homogeneity tests (Levene's, Bartlett's)
     generate_diagnostic_plots: true  # Generate Q-Q plots and histograms
     auto_select_test: true  # Automatically select parametric vs non-parametric test
-  
-  # Batch effect analysis and correction
-  batch_correction:
-    method: "none"  # Options: "none", "mean_centering", "combat", "limma"
-    pvalue_threshold: 0.05  # p-value threshold for detecting batch effects
-  
-  # Confounder analysis and control
-  confounders:
-    adjust: true  # Whether to adjust for confounders in models
-    variables: ["age", "sex"]  # List of confounders to analyze/adjust for
   
   # Batch effect analysis and correction
   batch_correction:

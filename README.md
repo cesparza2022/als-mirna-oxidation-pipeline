@@ -8,16 +8,17 @@ A comprehensive, reproducible Snakemake pipeline for analyzing G>T oxidation pat
 
 ## 🎯 Overview
 
-This pipeline analyzes 8-oxoguanine (8-oxoG) damage in miRNAs, identified through G>T mutations, which are biomarkers of oxidative stress. The pipeline performs:
+This pipeline analyzes 8-oxoguanine (8-oxoG) damage in miRNAs, identified through G>T mutations, which are biomarkers of oxidative stress. The pipeline performs a comprehensive analysis in a logical sequence:
 
-- **Quality Control**: VAF filtering to remove technical artifacts
-- **Statistical Analysis**: Group comparisons with assumption validation
-- **Position-Specific Analysis**: Individual position analysis (1-24)
-- **Functional Analysis**: Target prediction and pathway enrichment
-- **Biomarker Analysis**: ROC curves and diagnostic signatures
-- **Family Analysis**: miRNA family-level oxidation patterns
-- **Expression Correlation**: Relationship between expression and oxidation
-- **Clustering**: Identification of miRNA groups with similar oxidation patterns
+- **Step 0 - Overview**: Initial dataset characterization without G>T bias, providing general statistics on miRNAs, samples, and SNVs
+- **Step 1 - Exploratory Analysis**: G>T-specific exploratory analysis with positional patterns and mutation spectrum
+- **Step 1.5 - Quality Control**: VAF filtering to remove technical artifacts (VAF ≥ 0.5)
+- **Step 2 - Statistical Comparisons**: Group comparisons with assumption validation, batch effect analysis, and confounder assessment
+- **Step 3 - Clustering Analysis**: Identification of miRNA groups with similar oxidation patterns (data-driven structure discovery)
+- **Step 4 - Functional Analysis**: Target prediction and pathway enrichment, interpreting the clusters discovered in Step 3
+- **Step 5 - Family Analysis**: Comparison of data-driven clusters (Step 3) with biological miRNA families
+- **Step 6 - Expression Correlation**: Relationship between miRNA expression levels and oxidation patterns
+- **Step 7 - Biomarker Analysis**: ROC curves, AUC calculation, and multi-miRNA diagnostic signatures (final clinical application)
 
 ## 🚀 Quick Start
 
@@ -45,6 +46,10 @@ conda activate mirna_oxidation_pipeline
 cp config/config.yaml.example config/config.yaml
 nano config/config.yaml  # Update the path to your data file
 
+# (Optional) Generate processed inputs from raw counts
+Rscript scripts/preprocess_data.R /path/to/miRNA_count.Q33.txt data/processed
+# This creates the processed files referenced in config.yaml (processed_clean.csv, step1_original_data.csv)
+
 # 5. Run pipeline
 snakemake -j 4
 
@@ -66,9 +71,12 @@ conda env create -f environment.yml
 # 3. Activate environment
 conda activate mirna_oxidation_pipeline
 
-# 4. Configure data
+# 4. Configure datas´
 cp config/config.yaml.example config/config.yaml
 nano config/config.yaml  # Update paths to your data
+
+# (Optional) Generate processed inputs from raw counts
+Rscript scripts/preprocess_data.R /path/to/miRNA_count.Q33.txt data/processed
 
 # 5. Run pipeline
 snakemake -j 4
@@ -120,6 +128,19 @@ Sample2	Control	Batch1	62	F
 
 ## 📈 Pipeline Steps
 
+### Step 0: Dataset Overview
+- Initial characterization without G>T bias
+- General statistics on miRNAs, samples, and SNVs
+- Distribution analysis by mutation type
+- Positional density analysis
+- Pie charts and summary tables
+
+**Outputs:**
+- 9 figures (PNG, 300 DPI)
+- 5 tables (CSV)
+
+**Purpose:** Provides an unbiased initial view of the dataset before focusing on G>T mutations.
+
 ### Step 1: Exploratory Analysis
 - Dataset characterization
 - G>T positional patterns
@@ -149,57 +170,80 @@ Sample2	Control	Batch1	62	F
 - **Position-specific analysis** (NEW: Step 2.5)
 
 **Outputs:**
-- 4 figures (PNG, 300 DPI)
+- **Basic**: 5 figures (batch effect PCA, group balance, volcano, effect size, position-specific)
+- **Detailed**: 15 additional figures (VAF distributions, heatmaps, clustering, enrichment, etc.)
+- **Total**: 20 figures (PNG, 300 DPI)
 - Statistical results tables (CSV)
 
-### Step 3: Functional Analysis
+### Step 3: Clustering Analysis
+- Hierarchical clustering of miRNAs with similar oxidation patterns
+- Identifies data-driven structure in the dataset
+- Uses Ward.D2 linkage and correlation distance
+- **This step discovers structure that is interpreted in Steps 4 and 5**
+
+**Outputs:**
+- 2 figures (heatmap, dendrogram)
+- 2 tables (cluster assignments, summary)
+
+**Dependencies:** Requires Step 2 (statistical comparisons)  
+**Used by:** Steps 4 and 5 use cluster assignments for interpretation
+
+### Step 4: Functional Analysis
 - Target prediction for oxidized miRNAs
 - GO and KEGG pathway enrichment
-- Disease-relevant genes impact
+- Disease-relevant genes impact (ALS pathways)
+- **Interprets the structure discovered in Step 3 (clustering)**
 
 **Outputs:**
-- 5 figures (PNG, 300 DPI)
-- 6 tables (CSV)
+- 3 figures (pathway heatmap, target network, GO/KEGG enrichment, ALS pathways)
+- 6 tables (targets, ALS genes, GO/KEGG enrichment, pathways)
 
-### Step 4: Biomarker Analysis
-- ROC curve analysis
-- AUC calculation
-- Multi-miRNA diagnostic signatures
-
-**Outputs:**
-- 2 figures (PNG, 300 DPI)
-- 2 tables (CSV)
+**Dependencies:** Requires Step 3 (cluster assignments) and Step 2 (statistical results)
 
 ### Step 5: miRNA Family Analysis
 - Family identification and grouping
 - Family-level oxidation patterns
+- **Compares data-driven clusters (Step 3) with biological miRNA families**
 - Group comparison by family
 
 **Outputs:**
-- 2 figures (PNG, 300 DPI)
-- 2 tables (CSV)
+- 2 figures (family comparison, family heatmap)
+- 2 tables (family summary, family comparison)
 
-### Step 6: Expression vs Oxidation Correlation
-- Correlation between RPM and G>T mutations
+**Dependencies:** Requires Step 3 (cluster assignments)
+
+### Step 6: Expression vs Oxidation Correlation Analysis
+- Correlation between miRNA expression levels (RPM) and G>T oxidation patterns
 - Expression category analysis
+- Focuses on significant G>T mutations in seed region (positions 2-8)
+- **Independent analysis that does not require clustering**
 
 **Outputs:**
-- 2 figures (PNG, 300 DPI)
-- 2 tables (CSV)
+- 2 figures (expression vs oxidation scatter, expression groups comparison)
+- 2 tables (correlation results, expression summary)
 
-### Step 7: Clustering Analysis
-- Hierarchical clustering of miRNAs
-- Cluster identification (k=6)
-- Pattern-based grouping
+**Dependencies:** Requires Step 2 (statistical results) and Step 1.5 (VAF filtered data)
+
+### Step 7: Biomarker Analysis
+- ROC curve analysis for individual miRNAs
+- AUC calculation and ranking
+- Multi-miRNA diagnostic signatures (combined scores)
+- **Final clinical application step**, integrating insights from previous steps
+- Evaluates diagnostic potential of oxidation patterns
 
 **Outputs:**
-- 2 figures (PNG, 300 DPI)
-- 2 tables (CSV)
+- 2 figures (ROC curves, biomarker signature heatmap)
+- 2 tables (ROC analysis, biomarker signatures)
+
+**Dependencies:** Requires Step 2 (statistical results) and Step 1.5 (VAF filtered data)
 
 ## 📁 Output Structure
 
 ```
 results/
+├── step0/final/
+│   ├── figures/      # 9 PNG figures (overview)
+│   └── tables/        # 5 CSV tables (summary statistics)
 ├── step1/final/
 │   ├── figures/      # 6 PNG figures
 │   └── tables/        # 6 CSV tables
@@ -207,23 +251,27 @@ results/
 │   ├── figures/      # 11 PNG figures
 │   └── tables/        # Filtered data and reports
 ├── step2/final/
-│   ├── figures/      # 4 PNG figures (including position-specific)
+│   ├── figures/      # 73 PNG figures (including detailed analysis)
 │   └── tables/        # Statistical results
 ├── step3/final/
-│   ├── figures/      # Functional analysis figures
-│   └── tables/        # Functional analysis tables
+│   ├── figures/      # 7 PNG figures (clustering)
+│   └── tables/
+│       └── clusters/  # Cluster assignments and summary
 ├── step4/final/
-│   ├── figures/      # Biomarker analysis figures
-│   └── tables/        # Biomarker analysis tables
+│   ├── figures/      # 3 PNG figures (functional analysis)
+│   └── tables/
+│       └── functional/  # Targets, GO/KEGG, pathways
 ├── step5/final/
-│   ├── figures/      # Family analysis figures
-│   └── tables/        # Family analysis tables
+│   ├── figures/      # 2 PNG figures (family analysis)
+│   └── tables/        # Family summary and comparison
 ├── step6/final/
-│   ├── figures/      # Expression-oxidation correlation figures
-│   └── tables/        # Expression-oxidation correlation tables
+│   ├── figures/      # 2 PNG figures (expression-oxidation correlation)
+│   └── tables/
+│       └── correlation/  # Correlation results
 ├── step7/final/
-│   ├── figures/      # Clustering analysis figures
-│   └── tables/        # Clustering analysis tables
+│   ├── figures/      # 2 PNG figures (biomarker analysis)
+│   └── tables/
+│       └── biomarkers/  # ROC analysis and signatures
 ├── summary/          # Consolidated summary reports
 └── validation/        # Validation reports
 ```
@@ -236,6 +284,9 @@ results/
 # Run complete pipeline
 snakemake -j 4
 
+# Run only Step 0 (Overview)
+snakemake -j 1 all_step0
+
 # Run only Step 1
 snakemake -j 4 all_step1
 
@@ -244,6 +295,9 @@ snakemake -j 1 all_step1_5
 
 # Run only Step 2
 snakemake -j 4 all_step2
+
+# Run Steps 3-7 (logical sequence)
+snakemake -j 4 all_step3 all_step4 all_step5 all_step6 all_step7
 
 # Dry-run (see what would execute)
 snakemake -j 4 -n
@@ -357,12 +411,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<<<<<<< HEAD
-**Version:** 1.0.0  
-**Last Updated:** 2025-11-01
-
-
-=======
 **Last Updated:** 2025-01-21  
 **Pipeline Version:** 1.0.0
->>>>>>> 352eb6950c566304a08c8054f00dc95591ac07de

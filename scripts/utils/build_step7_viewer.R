@@ -2,12 +2,13 @@
 # ============================================================================
 # BUILD STEP 7 VIEWER HTML
 # ============================================================================
-# Generates HTML viewer for Step 7 Biomarker Analysis results
+# Generates HTML viewer for Step 7 biomarker analysis results
 # ============================================================================
 
 suppressPackageStartupMessages({
   library(readr)
   library(stringr)
+  library(dplyr)
 })
 
 if (requireNamespace("base64enc", quietly = TRUE)) {
@@ -35,8 +36,8 @@ output_html <- snakemake@output[["html"]]
 tables_dir <- snakemake@params[["tables_dir"]]
 
 # Load ROC data for summary
-roc_file <- file.path(tables_dir, "biomarkers", "S4_roc_analysis.csv")
-signatures_file <- file.path(tables_dir, "biomarkers", "S4_biomarker_signatures.csv")
+roc_file <- file.path(tables_dir, "biomarkers", "S7_roc_analysis.csv")
+signatures_file <- file.path(tables_dir, "biomarkers", "S7_biomarker_signatures.csv")
 
 n_biomarkers <- if (file.exists(roc_file)) {
   roc_data <- read_csv(roc_file, show_col_types = FALSE)
@@ -111,8 +112,8 @@ html_content <- paste0('<!DOCTYPE html>
     <div class="summary" style="margin-top: 40px;">
       <h2>📋 Available Tables</h2>
       <ul>
-        <li><strong>S4_roc_analysis.csv</strong>: ROC analysis results for all biomarkers</li>
-        <li><strong>S4_biomarker_signatures.csv</strong>: Per-sample signature scores</li>
+        <li><strong>S7_roc_analysis.csv</strong>: ROC analysis results for all biomarkers</li>
+        <li><strong>S7_biomarker_signatures.csv</strong>: Per-sample signature scores</li>
       </ul>
     </div>
   </div>

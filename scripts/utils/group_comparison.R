@@ -38,8 +38,11 @@ load_sample_groups_from_metadata <- function(metadata_file, data) {
   }
   
   # Get actual sample column names from data
+  # Use column indices to avoid variable name limit with many columns
   metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut")
-  sample_cols <- names(data)[!names(data) %in% metadata_cols]
+  all_cols <- names(data)
+  metadata_indices <- which(all_cols %in% metadata_cols)
+  sample_cols <- all_cols[-metadata_indices]
   
   # Filter metadata to only samples present in data
   groups_df <- metadata %>%
@@ -122,18 +125,38 @@ extract_sample_groups <- function(data,
   
   # Priority 2: Pattern matching (backward compatibility)
   # Get sample column names (excluding metadata columns)
+  # Use column indices to avoid variable name limit with many columns
   metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut")
-  sample_cols <- names(data)[!names(data) %in% metadata_cols]
+  all_cols <- names(data)
+  metadata_indices <- which(all_cols %in% metadata_cols)
+  sample_cols <- all_cols[-metadata_indices]
   
   # Extract groups using pattern matching
-  groups_df <- tibble(sample_id = sample_cols) %>%
-    mutate(
-      group = case_when(
-        str_detect(sample_id, regex(als_pattern, ignore_case = TRUE)) ~ "Disease",
-        str_detect(sample_id, regex(control_pattern, ignore_case = TRUE)) ~ "Control",
-        TRUE ~ NA_character_
+  # Avoid creating large tibbles - use data.frame and process in chunks if needed
+  if (length(sample_cols) > 200) {
+    # For large datasets, process in chunks to avoid variable name limit
+    groups_list <- lapply(sample_cols, function(sid) {
+      group_val <- if (str_detect(sid, regex(als_pattern, ignore_case = TRUE))) {
+        "Disease"
+      } else if (str_detect(sid, regex(control_pattern, ignore_case = TRUE))) {
+        "Control"
+      } else {
+        NA_character_
+      }
+      data.frame(sample_id = sid, group = group_val, stringsAsFactors = FALSE)
+    })
+    groups_df <- do.call(rbind, groups_list)
+  } else {
+    # For smaller datasets, use tibble normally
+    groups_df <- tibble(sample_id = sample_cols) %>%
+      mutate(
+        group = case_when(
+          str_detect(sample_id, regex(als_pattern, ignore_case = TRUE)) ~ "Disease",
+          str_detect(sample_id, regex(control_pattern, ignore_case = TRUE)) ~ "Control",
+          TRUE ~ NA_character_
+        )
       )
-    )
+  }
   
   # Remove unmatched samples
   n_unmatched <- sum(is.na(groups_df$group))

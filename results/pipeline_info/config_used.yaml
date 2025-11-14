@@ -1,7 +1,7 @@
 # Configuration file for Snakemake Pipeline
 # miRNA Oxidation Analysis Pipeline
 #
-# Test configuration with actual data files
+# COPY THIS FILE TO config.yaml AND UPDATE PATHS TO YOUR DATA
 
 # Project information
 project:
@@ -9,40 +9,46 @@ project:
   version: "1.0.0"
   description: "Reproducible pipeline for analyzing G>T oxidation patterns in miRNAs"
 
-# Paths (updated for test run)
+# Paths (update these to your data locations)
 paths:
-  project_root: "/Users/cesaresparza/New_Desktop/UCSD/8OG/final_analysis/pipeline_definitivo"
-  snakemake_dir: "/Users/cesaresparza/New_Desktop/UCSD/8OG/final_analysis/pipeline_definitivo/snakemake_pipeline"
+  project_root: "/Users/cesaresparza/New_Desktop/miRNA-oxidation-pipeline"
+  snakemake_dir: "/Users/cesaresparza/New_Desktop/miRNA-oxidation-pipeline"
   
-  # Input data - Using actual data files
+  # Input data - UPDATE THESE PATHS
   data:
     # Raw data file (original miRNA_count.Q33.txt format)
-    raw: "/Users/cesaresparza/New_Desktop/UCSD/8OG/organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt"
+    raw: "/Users/cesaresparza/New_Desktop/UCSD/8OG/data/processed/step1_original_data.csv"
     
     # Processed data (after split-collapse, for Step 1)
-    # Using the raw data file (will be processed by pipeline)
-    processed_clean: "/Users/cesaresparza/New_Desktop/UCSD/8OG/organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt"
+    processed_clean: "/Users/cesaresparza/New_Desktop/UCSD/8OG/data/processed/processed_clean.csv"
     
     # Original data for Step 1.5 (VAF filtering - needs SNV + total counts)
-    # Using the same file (it has both SNV and total counts in the format)
-    step1_original: "/Users/cesaresparza/New_Desktop/UCSD/8OG/organized/02_data/Magen_ALS-bloodplasma/miRNA_count.Q33.txt"
+    step1_original: "/Users/cesaresparza/New_Desktop/UCSD/8OG/data/processed/step1_original_data.csv"
     
-    # Sample metadata file (OPTIONAL - will use pattern matching if not provided)
-    metadata: null  # Pattern matching will identify ALS vs Control from sample names
+    # Sample metadata file (OPTIONAL but RECOMMENDED for flexible group assignment)
+    # Format: TSV with columns: sample_id, group (and optionally: batch, age, sex, etc.)
+    # If not provided, pipeline will use pattern matching on column names as fallback
+    # See: sample_metadata_template.tsv for format
+    metadata: null  # e.g., "/path/to/your/sample_metadata.tsv"
   
   # Output directories (relative to snakemake_dir - usually no need to change)
   outputs:
-    step1: "outputs/step1"
-    step1_5: "outputs/step1_5"
-    step2: "outputs/step2"
-    step3: "outputs/step3"
-    step4: "outputs/step4"
-    step5: "outputs/step5"
-    step6: "outputs/step6"
-    step7: "outputs/step7"
+    step0: "results/step0/final"
+    step1: "results/step1/final"
+    step1_5: "results/step1_5/final"
+    step2: "results/step2/final"
+    step3: "results/step3/final"
+    step4: "results/step4/final"
+    step5: "results/step5/final"
+    step6: "results/step6/final"
+    step7: "results/step7/final"
+    pipeline_info: "results/pipeline_info"
+    summary: "results/summary"
+    validation: "results/validation"
   
   # Scripts directories (relative to snakemake_dir - usually no need to change)
   scripts:
+    step0: "scripts/step0"
     step1: "scripts/step1"
     step1_5: "scripts/step1_5"
     step2: "scripts/step2"
@@ -64,11 +70,6 @@ analysis:
   # Statistical parameters
   alpha: 0.05  # Significance threshold
   fdr_method: "BH"  # FDR correction method
-  
-  # Seed region definition
-  seed_region:
-    start: 2
-    end: 8
   
   # Statistical assumptions validation
   assumptions:
@@ -112,3 +113,4 @@ resources:
 conda_envs:
   r_base: "envs/r_base.yaml"
   r_analysis: "envs/r_analysis.yaml"
+

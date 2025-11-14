@@ -69,6 +69,24 @@ expression_summary <- read_csv(input_expression_summary, show_col_types = FALSE)
 log_info(paste("Loaded correlation data:", nrow(correlation_data), "miRNAs"))
 log_info(paste("Loaded expression summary:", nrow(expression_summary), "categories"))
 
+# Check if data is empty
+if (nrow(correlation_data) == 0 || !"estimated_rpm" %in% names(correlation_data) || !"total_gt_counts" %in% names(correlation_data)) {
+  log_warning("No correlation data available. Creating empty placeholder figures.")
+  
+  # Create empty placeholder figures
+  p_empty <- ggplot() +
+    annotate("text", x = 0.5, y = 0.5, label = "No significant G>T mutations\nin seed region found", 
+             size = 6, hjust = 0.5, vjust = 0.5) +
+    theme_void() +
+    theme(plot.margin = margin(20, 20, 20, 20))
+  
+  ggsave(output_figure_a, p_empty, width = fig_width, height = fig_height, dpi = fig_dpi)
+  ggsave(output_figure_b, p_empty, width = fig_width, height = fig_height, dpi = fig_dpi)
+  
+  log_success("Step 6.2 completed (empty figures created).")
+  quit(save = "no", status = 0)
+}
+
 # Calculate correlation for annotation
 correlation_result <- cor.test(correlation_data$estimated_rpm, correlation_data$total_gt_counts, method = "pearson")
 cor_pearson <- round(correlation_result$estimate, 4)

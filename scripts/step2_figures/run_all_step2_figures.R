@@ -218,13 +218,13 @@ if (file.exists(master_script)) {
       "generate_FIG_2.4_HEATMAP_RAW.R",
       "generate_FIG_2.5_ZSCORE_ALL301.R",
       "generate_FIG_2.6_POSITIONAL.R",
-      "generate_FIG_2.7_IMPROVED.R",
-      # "generate_FIG_2.8_CLUSTERING.R",  # REMOVED: Redundant with FIG_2.16 (uses ALL G>T SNVs)
+      # "generate_FIG_2.7_IMPROVED.R",  # Optional PCA figure (covered by FIG_2.16 clustering)
+      # "generate_FIG_2.8_CLUSTERING.R",  # Deprecated
       "generate_FIG_2.9_IMPROVED.R",
       "generate_FIG_2.10_GT_RATIO.R",
       "generate_FIG_2.11_IMPROVED.R",
       "generate_FIG_2.12_ENRICHMENT.R",
-      "generate_HEATMAP_DENSITY_GT.R"  # Updated to use correct script
+      "generate_FIG_2.13-15_DENSITY.R"
     )
     
     for (script in scripts) {
@@ -254,13 +254,13 @@ if (file.exists(master_script)) {
     "generate_FIG_2.4_HEATMAP_RAW.R",
     "generate_FIG_2.5_ZSCORE_ALL301.R",
     "generate_FIG_2.6_POSITIONAL.R",
-    "generate_FIG_2.7_IMPROVED.R",
-    # "generate_FIG_2.8_CLUSTERING.R",  # REMOVED: Redundant with FIG_2.16 (uses ALL G>T SNVs)
+    # "generate_FIG_2.7_IMPROVED.R",  # Optional PCA figure (covered by FIG_2.16 clustering)
+    # "generate_FIG_2.8_CLUSTERING.R",  # Deprecated
     "generate_FIG_2.9_IMPROVED.R",
     "generate_FIG_2.10_GT_RATIO.R",
     "generate_FIG_2.11_IMPROVED.R",
     "generate_FIG_2.12_ENRICHMENT.R",
-    "generate_HEATMAP_DENSITY_GT.R"  # Updated to use correct script
+    "generate_FIG_2.13-15_DENSITY.R"
   )
   
   for (script in scripts) {
