@@ -59,15 +59,13 @@ rule generate_step0_viewer:
         fig_samples_box = OUTPUT_STEP0_FIGURES + "/step0_fig_samples_snv_boxplot.png",
         fig_samples_group = OUTPUT_STEP0_FIGURES + "/step0_fig_samples_group_pie.png",
         fig_miRNA = OUTPUT_STEP0_FIGURES + "/step0_fig_miRNA_snv_counts.png",
-        fig_top_miRNA = OUTPUT_STEP0_FIGURES + "/step0_fig_top_miRNA.png",
         fig_mutation_bar = OUTPUT_STEP0_FIGURES + "/step0_fig_mutation_type_distribution.png",
         fig_mutation_pie_snvs = OUTPUT_STEP0_FIGURES + "/step0_fig_mutation_type_pie_snvs.png",
         fig_mutation_pie_counts = OUTPUT_STEP0_FIGURES + "/step0_fig_mutation_type_pie_counts.png",
-        fig_position = OUTPUT_STEP0_FIGURES + "/step0_fig_position_density.png",
+        fig_coverage = OUTPUT_STEP0_FIGURES + "/step0_fig_dataset_coverage.png", # Replaces positional density
         table_samples = OUTPUT_STEP0_TABLES + "/step0_sample_summary.csv",
         table_sample_group = OUTPUT_STEP0_TABLES + "/step0_sample_group_summary.csv",
         table_miRNA = OUTPUT_STEP0_TABLES + "/step0_miRNA_summary.csv",
-        table_top_miRNA = OUTPUT_STEP0_TABLES + "/step0_top_miRNA.csv",
         table_mutation = OUTPUT_STEP0_TABLES + "/step0_mutation_type_counts.csv"
     output:
         html = OUTPUT_VIEWERS + "/step0.html"

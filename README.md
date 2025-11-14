@@ -132,11 +132,12 @@ Sample2	Control	Batch1	62	F
 - Initial characterization without G>T bias
 - General statistics on miRNAs, samples, and SNVs
 - Distribution analysis by mutation type
-- Positional density analysis
+- Dataset coverage analysis (fraction of miRNAs/samples with SNVs)
+- Proportional representation and ratio analysis
 - Pie charts and summary tables
 
 **Outputs:**
-- 9 figures (PNG, 300 DPI)
+- 8 figures (PNG, 300 DPI)
 - 5 tables (CSV)
 
 **Purpose:** Provides an unbiased initial view of the dataset before focusing on G>T mutations.
@@ -182,7 +183,7 @@ Sample2	Control	Batch1	62	F
 - **This step discovers structure that is interpreted in Steps 4 and 5**
 
 **Outputs:**
-- 2 figures (heatmap, dendrogram)
+- 2 figures (cluster heatmap, cluster dendrogram)
 - 2 tables (cluster assignments, summary)
 
 **Dependencies:** Requires Step 2 (statistical comparisons)  
@@ -195,7 +196,7 @@ Sample2	Control	Batch1	62	F
 - **Interprets the structure discovered in Step 3 (clustering)**
 
 **Outputs:**
-- 3 figures (pathway heatmap, target network, GO/KEGG enrichment, ALS pathways)
+- 7 figures (target network, GO enrichment, KEGG enrichment, ALS pathways, pathway heatmap, biomarker signature heatmap, ROC curves)
 - 6 tables (targets, ALS genes, GO/KEGG enrichment, pathways)
 
 **Dependencies:** Requires Step 3 (cluster assignments) and Step 2 (statistical results)
@@ -242,7 +243,7 @@ Sample2	Control	Batch1	62	F
 ```
 results/
 ├── step0/final/
-│   ├── figures/      # 9 PNG figures (overview)
+│   ├── figures/      # 8 PNG figures (overview)
 │   └── tables/        # 5 CSV tables (summary statistics)
 ├── step1/final/
 │   ├── figures/      # 6 PNG figures
@@ -254,11 +255,11 @@ results/
 │   ├── figures/      # 73 PNG figures (including detailed analysis)
 │   └── tables/        # Statistical results
 ├── step3/final/
-│   ├── figures/      # 7 PNG figures (clustering)
+│   ├── figures/      # 2 PNG figures (clustering: heatmap, dendrogram)
 │   └── tables/
 │       └── clusters/  # Cluster assignments and summary
 ├── step4/final/
-│   ├── figures/      # 3 PNG figures (functional analysis)
+│   ├── figures/      # 7 PNG figures (functional analysis)
 │   └── tables/
 │       └── functional/  # Targets, GO/KEGG, pathways
 ├── step5/final/
