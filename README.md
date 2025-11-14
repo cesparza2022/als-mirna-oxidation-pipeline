@@ -413,4 +413,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Last Updated:** 2025-01-21  
-**Pipeline Version:** 1.0.0
+**Pipeline Version:** 1.0.1
+
+---
+
+## 🆕 Latest Changes (v1.0.1)
+
+See [RELEASE_NOTES_v1.0.1.md](RELEASE_NOTES_v1.0.1.md) for detailed release notes.
+
+### Critical Fixes
+- 🔴 **Fixed:** Correct VAF calculation in Step 2 detailed figures
+- 🔴 **Fixed:** Heatmap combination for FIG_2.15
+- 🔧 **Fixed:** ggplot2 3.4+ compatibility (`size` → `linewidth`)
+
+### Improvements
+- ✨ **Improved:** Visual consistency (G>T highlighted in red)
+- 📚 **Added:** Comprehensive documentation (CHANGELOG, RELEASE_NOTES)
+- 📚 **Added:** Critical cohesion issues identified and documented
+
+### Critical Cohesion Issues - All Resolved ✅
+All 5 critical cohesion issues identified have been addressed:
+- ✅ Unified input files in Step 1 (all panels use `processed_clean.csv`)
+- ✅ Clarified metric usage (different metrics are intentional and appropriate)
+- ✅ Fixed Panel E Metric 1 (now sums only position-specific reads)
+- ✅ Removed unused calculations
+- ✅ Documented data structure assumptions in Step 0
+
+See [ESTADO_PROBLEMAS_CRITICOS.md](ESTADO_PROBLEMAS_CRITICOS.md) for detailed status.
+
+---
+
+**Previous Version:** 1.0.0 (2025-01-21)
