@@ -38,11 +38,11 @@ tables_dir <- snakemake@params[["tables_dir"]]
 correlation_file <- file.path(tables_dir, "correlation", "S6_expression_oxidation_correlation.csv")
 expression_summary_file <- file.path(tables_dir, "correlation", "S6_expression_summary.csv")
 
-n_miRNAs <- if (file.exists(correlation_file)) nrow(read_csv(correlation_file, show_col_types = FALSE)) else 0
+n_miRNAs <- if (file.exists(correlation_file)) nrow(readr::read_csv(correlation_file, show_col_types = FALSE)) else 0
 
 # Calculate correlation from data
 correlation_r <- if (file.exists(correlation_file)) {
-  cor_data <- read_csv(correlation_file, show_col_types = FALSE)
+  cor_data <- readr::read_csv(correlation_file, show_col_types = FALSE)
   if (all(c("estimated_rpm", "total_gt_counts") %in% names(cor_data))) {
     cor_result <- cor.test(cor_data$estimated_rpm, cor_data$total_gt_counts, method = "pearson")
     round(cor_result$estimate, 4)
@@ -50,7 +50,7 @@ correlation_r <- if (file.exists(correlation_file)) {
 } else 0
 
 high_expression_n <- if (file.exists(expression_summary_file)) {
-  summary <- read_csv(expression_summary_file, show_col_types = FALSE)
+  summary <- readr::read_csv(expression_summary_file, show_col_types = FALSE)
   if ("expression_category" %in% names(summary) && "n_miRNAs" %in% names(summary)) {
     high_row <- summary %>% filter(expression_category == "High (top 20%)")
     if (nrow(high_row) > 0) high_row$n_miRNAs[1] else 0

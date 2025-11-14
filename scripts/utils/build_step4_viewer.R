@@ -46,7 +46,7 @@ kegg_file <- file.path(tables_dir, "functional", "S4_kegg_enrichment.csv")
 
 o_safe_read <- function(path) {
   if (!file.exists(path)) return(NULL)
-  read_csv(path, show_col_types = FALSE)
+  readr::read_csv(path, show_col_types = FALSE)
 }
 
 functional_targets <- o_safe_read(functional_table)

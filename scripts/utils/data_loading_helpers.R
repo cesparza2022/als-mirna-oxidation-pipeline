@@ -11,32 +11,44 @@
 # - VAF columns: Pre-calculated VAF (e.g., "VAF_Magen_ALS_001")
 # ============================================================================
 
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(readr)
+})
+
+# ============================================================================
+# CONSTANTS
+# ============================================================================
+
+# Default metadata column names (various formats supported)
+DEFAULT_METADATA_COLS <- c("miRNA_name", "miRNA name", "miRNA.name", "miRNA",
+                          "pos.mut", "pos:mut", "pos_mut")
+
+# Regex patterns for column identification
+PATTERN_TOTAL_COLUMNS <- "\\(PM\\+1MM\\+2MM\\)$"  # Total count columns suffix
+PATTERN_VAF_COLUMNS <- "^VAF_"                     # VAF columns prefix
+
 #' Identify SNV count columns (excluding total count columns)
 #' 
 #' @param data Data frame with miRNA data
 #' @param metadata_cols Optional vector of metadata column names to exclude
 #' @return Character vector of SNV count column names
 identify_snv_count_columns <- function(data, metadata_cols = NULL) {
-  # Default metadata columns
-  default_metadata <- c("miRNA_name", "miRNA name", "miRNA.name", "miRNA",
-                       "pos.mut", "pos:mut", "pos_mut")
-  
+  # Use default metadata columns or merge with provided
   if (is.null(metadata_cols)) {
-    metadata_cols <- default_metadata
+    metadata_cols <- DEFAULT_METADATA_COLS
   } else {
-    metadata_cols <- unique(c(metadata_cols, default_metadata))
+    metadata_cols <- unique(c(metadata_cols, DEFAULT_METADATA_COLS))
   }
   
   # Get all sample columns (exclude metadata)
   all_sample_cols <- setdiff(names(data), metadata_cols)
   
   # Identify total count columns (contain "(PM+1MM+2MM)" suffix)
-  total_pattern <- "\\(PM\\+1MM\\+2MM\\)$"
-  total_cols <- all_sample_cols[grepl(total_pattern, all_sample_cols)]
+  total_cols <- all_sample_cols[grepl(PATTERN_TOTAL_COLUMNS, all_sample_cols)]
   
   # SNV count columns are everything else (not metadata, not totals, not VAF)
-  vaf_pattern <- "^VAF_"
-  vaf_cols <- all_sample_cols[grepl(vaf_pattern, all_sample_cols)]
+  vaf_cols <- all_sample_cols[grepl(PATTERN_VAF_COLUMNS, all_sample_cols)]
   
   snv_cols <- setdiff(all_sample_cols, c(total_cols, vaf_cols))
   
@@ -49,22 +61,18 @@ identify_snv_count_columns <- function(data, metadata_cols = NULL) {
 #' @param metadata_cols Optional vector of metadata column names to exclude
 #' @return Character vector of total count column names
 identify_total_count_columns <- function(data, metadata_cols = NULL) {
-  # Default metadata columns
-  default_metadata <- c("miRNA_name", "miRNA name", "miRNA.name", "miRNA",
-                       "pos.mut", "pos:mut", "pos_mut")
-  
+  # Use default metadata columns or merge with provided
   if (is.null(metadata_cols)) {
-    metadata_cols <- default_metadata
+    metadata_cols <- DEFAULT_METADATA_COLS
   } else {
-    metadata_cols <- unique(c(metadata_cols, default_metadata))
+    metadata_cols <- unique(c(metadata_cols, DEFAULT_METADATA_COLS))
   }
   
   # Get all sample columns (exclude metadata)
   all_sample_cols <- setdiff(names(data), metadata_cols)
   
   # Identify total count columns (contain "(PM+1MM+2MM)" suffix)
-  total_pattern <- "\\(PM\\+1MM\\+2MM\\)$"
-  total_cols <- all_sample_cols[grepl(total_pattern, all_sample_cols)]
+  total_cols <- all_sample_cols[grepl(PATTERN_TOTAL_COLUMNS, all_sample_cols)]
   
   return(total_cols)
 }
@@ -75,22 +83,18 @@ identify_total_count_columns <- function(data, metadata_cols = NULL) {
 #' @param metadata_cols Optional vector of metadata column names to exclude
 #' @return Character vector of VAF column names
 identify_vaf_columns <- function(data, metadata_cols = NULL) {
-  # Default metadata columns
-  default_metadata <- c("miRNA_name", "miRNA name", "miRNA.name", "miRNA",
-                       "pos.mut", "pos:mut", "pos_mut")
-  
+  # Use default metadata columns or merge with provided
   if (is.null(metadata_cols)) {
-    metadata_cols <- default_metadata
+    metadata_cols <- DEFAULT_METADATA_COLS
   } else {
-    metadata_cols <- unique(c(metadata_cols, default_metadata))
+    metadata_cols <- unique(c(metadata_cols, DEFAULT_METADATA_COLS))
   }
   
   # Get all sample columns (exclude metadata)
   all_sample_cols <- setdiff(names(data), metadata_cols)
   
   # Identify VAF columns (start with "VAF_")
-  vaf_pattern <- "^VAF_"
-  vaf_cols <- all_sample_cols[grepl(vaf_pattern, all_sample_cols)]
+  vaf_cols <- all_sample_cols[grepl(PATTERN_VAF_COLUMNS, all_sample_cols)]
   
   return(vaf_cols)
 }
@@ -101,6 +105,11 @@ identify_vaf_columns <- function(data, metadata_cols = NULL) {
 #' @param metadata_cols Optional vector of metadata column names
 #' @return Data frame with only metadata and SNV count columns
 load_snv_counts_only <- function(file_path, metadata_cols = NULL) {
+  # Validate file exists
+  if (!file.exists(file_path)) {
+    stop(paste("❌ File not found:", file_path))
+  }
+  
   # Detect file format
   file_ext <- tolower(tools::file_ext(file_path))
   
@@ -141,6 +150,11 @@ load_snv_counts_only <- function(file_path, metadata_cols = NULL) {
 #' @param metadata_cols Optional vector of metadata column names
 #' @return Data frame with only metadata and VAF columns, or NULL if no VAF columns
 load_vaf_only <- function(file_path, metadata_cols = NULL) {
+  # Validate file exists
+  if (!file.exists(file_path)) {
+    stop(paste("❌ File not found:", file_path))
+  }
+  
   # Detect file format
   file_ext <- tolower(tools::file_ext(file_path))
   
@@ -188,9 +202,7 @@ get_column_summary <- function(data) {
   total_cols <- identify_total_count_columns(data)
   vaf_cols <- identify_vaf_columns(data)
   
-  default_metadata <- c("miRNA_name", "miRNA name", "miRNA.name", "miRNA",
-                       "pos.mut", "pos:mut", "pos_mut")
-  metadata_cols <- intersect(default_metadata, names(data))
+  metadata_cols <- intersect(DEFAULT_METADATA_COLS, names(data))
   
   return(list(
     metadata = length(metadata_cols),

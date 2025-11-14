@@ -46,10 +46,10 @@ asset_files <- lapply(fig_inputs, function(path) {
 })
 
 # Load tables for summary blocks
-sample_summary <- read_csv(table_samples_path, show_col_types = FALSE)
-sample_group_summary <- read_csv(table_sample_group_path, show_col_types = FALSE)
-miRNA_summary <- read_csv(table_miRNA_path, show_col_types = FALSE)
-mutation_summary <- read_csv(table_mutation_path, show_col_types = FALSE)
+sample_summary <- readr::read_csv(table_samples_path, show_col_types = FALSE)
+sample_group_summary <- readr::read_csv(table_sample_group_path, show_col_types = FALSE)
+miRNA_summary <- readr::read_csv(table_miRNA_path, show_col_types = FALSE)
+mutation_summary <- readr::read_csv(table_mutation_path, show_col_types = FALSE)
 
 html_escape <- function(x) {
   x <- gsub("&", "&amp;", x, fixed = TRUE)

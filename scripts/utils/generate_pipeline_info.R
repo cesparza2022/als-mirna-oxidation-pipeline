@@ -4,8 +4,10 @@
 # FASE 2: Creates execution_info.yaml, software_versions.yml, config_used.yaml
 # ============================================================================
 
-library(yaml)
-library(jsonlite)
+suppressPackageStartupMessages({
+  library(yaml)
+  library(jsonlite)
+})
 
 # Check if running in Snakemake context
 if (exists("snakemake")) {
@@ -27,6 +29,9 @@ if (exists("snakemake")) {
 
 # Create output directory if it doesn't exist
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Helper function for NULL coalescing (define once at the start)
+`%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
 
 # ============================================================================
 # 1. GENERATE execution_info.yaml
@@ -85,8 +90,6 @@ for (step in all_steps) {
   }
 }
 
-# Helper function for NULL coalescing
-`%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
 
 execution_info <- list(
   pipeline = list(
@@ -131,7 +134,7 @@ execution_info <- list(
 )
 
 # Write execution_info.yaml
-write_yaml(execution_info, file.path(output_dir, "execution_info.yaml"))
+yaml::write_yaml(execution_info, file.path(output_dir, "execution_info.yaml"))
 cat("execution_info.yaml created\n")
 
 # ============================================================================
@@ -170,10 +173,6 @@ snakemake_version <- tryCatch({
   }
 }, error = function(e) "unknown")
 
-# Helper function for NULL coalescing (if not already defined)
-if (!exists("%||%")) {
-  `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
-}
 
 software_versions <- list(
   software = list(
@@ -185,7 +184,7 @@ software_versions <- list(
 )
 
 # Write software_versions.yml
-write_yaml(software_versions, file.path(output_dir, "software_versions.yml"))
+yaml::write_yaml(software_versions, file.path(output_dir, "software_versions.yml"))
 cat("software_versions.yml created\n")
 
 # ============================================================================
@@ -202,10 +201,6 @@ cat("config_used.yaml created\n")
 
 cat("Generating provenance.json...\n")
 
-# Helper function (if not already defined)
-if (!exists("%||%")) {
-  `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
-}
 
 provenance <- list(
   pipeline = list(
@@ -281,7 +276,7 @@ provenance <- list(
 )
 
 # Write provenance.json
-write_json(provenance, file.path(output_dir, "provenance.json"), pretty = TRUE, auto_unbox = TRUE)
+jsonlite::write_json(provenance, file.path(output_dir, "provenance.json"), pretty = TRUE, auto_unbox = TRUE)
 cat("provenance.json created\n")
 
 cat("\nPipeline info generation completed.\n")

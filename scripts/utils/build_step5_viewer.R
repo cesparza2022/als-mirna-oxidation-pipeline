@@ -38,9 +38,9 @@ tables_dir <- snakemake@params[["tables_dir"]]
 family_summary_file <- file.path(tables_dir, "families", "S5_family_summary.csv")
 family_comparison_file <- file.path(tables_dir, "families", "S5_family_comparison.csv")
 
-n_families <- if (file.exists(family_summary_file)) nrow(read_csv(family_summary_file, show_col_types = FALSE)) else 0
+n_families <- if (file.exists(family_summary_file)) nrow(readr::read_csv(family_summary_file, show_col_types = FALSE)) else 0
 n_miRNAs <- if (file.exists(family_summary_file)) {
-  summary <- read_csv(family_summary_file, show_col_types = FALSE)
+  summary <- readr::read_csv(family_summary_file, show_col_types = FALSE)
   sum(summary$n_miRNAs, na.rm = TRUE)
 } else 0
 

@@ -37,7 +37,7 @@ cat("\n")
 
 # Load data to get column names
 cat("📂 Loading data to identify sample columns...\n")
-data <- read_csv(input_data, show_col_types = FALSE, n_max = 1)
+data <- readr::read_csv(input_data, show_col_types = FALSE, n_max = 1)
 
 # Identify metadata columns (non-sample columns)
 metadata_cols <- c("miRNA_name", "miRNA name", "pos.mut", "pos:mut", 
@@ -88,6 +88,6 @@ if (n_unknown > 0) {
 }
 
 # Save metadata
-write_csv(metadata, output_metadata)
+readr::write_csv(metadata, output_metadata)
 cat("\n✅ Metadata saved to:", output_metadata, "\n\n")
 

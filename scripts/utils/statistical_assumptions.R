@@ -14,8 +14,7 @@
 # ============================================================================
 
 suppressPackageStartupMessages({
-  library(tidyverse)
-  library(ggplot2)
+  library(tidyverse)  # Includes ggplot2
 })
 
 # ============================================================================
@@ -236,7 +235,7 @@ diagnostic_plots <- function(data, group = NULL, output_dir = NULL, prefix = "di
   }
   
   p_hist <- ggplot(df_hist, aes(x = value)) +
-    geom_histogram(aes(y = ..density..), bins = 30, fill = "steelblue", alpha = 0.7, color = "white") +
+    geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "steelblue", alpha = 0.7, color = "white") +
     stat_function(fun = dnorm, 
                   args = list(mean = mean(data_clean), sd = sd(data_clean)),
                   color = "red", linewidth = 1.2) +

@@ -62,7 +62,7 @@ validate_table <- function(path) {
     delimiter <- if (grepl("\t", first_line)) "\t" else ","
     
     # Read first few lines
-    data <- read_delim(path, delim = delimiter, n_max = 10, show_col_types = FALSE)
+    data <- readr::read_delim(path, delim = delimiter, n_max = 10, show_col_types = FALSE)
     
     if (nrow(data) == 0) {
       errors <- c(errors, paste("Table has no rows:", path))

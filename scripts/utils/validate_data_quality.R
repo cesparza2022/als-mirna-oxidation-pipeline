@@ -34,7 +34,7 @@ if (!file.exists(file_path)) {
 
 # Read file
 delimiter <- if (file_type == "tsv") "\t" else ","
-data <- read_delim(file_path, delim = delimiter, show_col_types = FALSE)
+data <- readr::read_delim(file_path, delim = delimiter, show_col_types = FALSE)
 
 # Basic checks
 errors <- character(0)

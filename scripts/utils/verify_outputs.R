@@ -53,7 +53,7 @@ verify_csv <- function(csv_path, min_rows = 1, required_cols = NULL) {
   }
   
   tryCatch({
-    data <- read_csv(csv_path, show_col_types = FALSE)
+    data <- readr::read_csv(csv_path, show_col_types = FALSE)
     
     if (nrow(data) < min_rows) {
       cat("⚠️ CSV file has fewer rows than expected:", basename(csv_path), "\n")

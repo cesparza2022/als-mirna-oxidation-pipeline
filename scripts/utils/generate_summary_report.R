@@ -4,9 +4,12 @@
 # FASE 3: Creates summary_report.html with all key results
 # ============================================================================
 
-library(yaml)
-library(jsonlite)
-library(dplyr)
+suppressPackageStartupMessages({
+  library(yaml)
+  library(jsonlite)
+  library(dplyr)
+  library(readr)
+})
 
 # Check if running in Snakemake context
 if (exists("snakemake")) {
@@ -57,13 +60,13 @@ if (file.exists(file.path(pipeline_info_dir, "execution_info.yaml"))) {
 statistical_data <- NULL
 statistical_file <- file.path(step2_dir, "tables/step2_statistical_comparisons.csv")
 if (file.exists(statistical_file)) {
-  statistical_data <- read.csv(statistical_file, stringsAsFactors = FALSE)
+  statistical_data <- readr::read_csv(statistical_file, show_col_types = FALSE)
 }
 
 effect_sizes <- NULL
 effect_sizes_file <- file.path(step2_dir, "tables/step2_effect_sizes.csv")
 if (file.exists(effect_sizes_file)) {
-  effect_sizes <- read.csv(effect_sizes_file, stringsAsFactors = FALSE)
+  effect_sizes <- readr::read_csv(effect_sizes_file, show_col_types = FALSE)
 }
 
 # ============================================================================

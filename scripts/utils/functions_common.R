@@ -7,6 +7,7 @@ suppressPackageStartupMessages({
   library(tidyverse)
   library(readr)
   library(stringr)
+  library(glue)
 })
 
 # Source logging functions (robust method)
@@ -62,9 +63,16 @@ if (!exists("validate_input")) {
 }
 
 # Professional colors (consistent across pipeline)
-COLOR_GT <- "#D62728"  # Red for G>T (oxidation)
-COLOR_CONTROL <- "grey60"
-COLOR_ALS <- "#D62728"
+# Note: Colors are now defined in colors.R
+# Load colors if available, otherwise use fallback
+if (file.exists("scripts/utils/colors.R")) {
+  source("scripts/utils/colors.R", local = TRUE)
+} else {
+  # Fallback colors (should not be needed if colors.R exists)
+  COLOR_GT <- "#D62728"
+  COLOR_CONTROL <- "grey60"
+  COLOR_ALS <- "#D62728"
+}
 
 # Load professional theme if available
 if (file.exists("scripts/utils/theme_professional.R")) {
@@ -204,14 +212,5 @@ ensure_output_dir <- function(output_dir) {
 # ============================================================================
 # PROFESSIONAL THEME FOR GGPLOT
 # ============================================================================
-
-theme_professional <- theme_classic() +
-  theme(
-    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 12, hjust = 0.5),
-    axis.title = element_text(size = 11),
-    axis.text = element_text(size = 10),
-    legend.title = element_text(size = 11),
-    legend.text = element_text(size = 10),
-    strip.text = element_text(size = 11, face = "bold")
-  )
+# Note: theme_professional is defined in theme_professional.R
+# This section removed to avoid duplication - use theme_professional.R instead

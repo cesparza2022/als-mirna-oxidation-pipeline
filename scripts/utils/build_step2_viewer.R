@@ -45,7 +45,7 @@ clustering_seed_summary <- normalize_input(snakemake@input[["clustering_seed_sum
 output_html <- snakemake@output[["viewer"]]
 
 # Load comparison results for summary
-comparisons <- read_csv(comparisons_file, show_col_types = FALSE)
+comparisons <- readr::read_csv(comparisons_file, show_col_types = FALSE)
 
 # Calculate summary statistics
 n_total <- nrow(comparisons)
@@ -57,10 +57,10 @@ n_down <- sum(comparisons$significant & !is.na(comparisons$log2_fold_change) & c
 clustering_all_info <- NULL
 clustering_seed_info <- NULL
 if (file.exists(clustering_all_summary)) {
-  clustering_all_info <- read_csv(clustering_all_summary, show_col_types = FALSE)
+  clustering_all_info <- readr::read_csv(clustering_all_summary, show_col_types = FALSE)
 }
 if (file.exists(clustering_seed_summary)) {
-  clustering_seed_info <- read_csv(clustering_seed_summary, show_col_types = FALSE)
+  clustering_seed_info <- readr::read_csv(clustering_seed_summary, show_col_types = FALSE)
 }
 
 # Copy figures to viewer assets directory to avoid browser security issues

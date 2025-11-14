@@ -40,17 +40,17 @@ roc_file <- file.path(tables_dir, "biomarkers", "S7_roc_analysis.csv")
 signatures_file <- file.path(tables_dir, "biomarkers", "S7_biomarker_signatures.csv")
 
 n_biomarkers <- if (file.exists(roc_file)) {
-  roc_data <- read_csv(roc_file, show_col_types = FALSE)
+  roc_data <- readr::read_csv(roc_file, show_col_types = FALSE)
   nrow(roc_data %>% filter(SNV_id != "COMBINED_SIGNATURE"))
 } else 0
 
 top_auc <- if (file.exists(roc_file)) {
-  roc_data <- read_csv(roc_file, show_col_types = FALSE)
+  roc_data <- readr::read_csv(roc_file, show_col_types = FALSE)
   round(max(roc_data$AUC, na.rm = TRUE), 3)
 } else 0
 
 combined_auc <- if (file.exists(roc_file)) {
-  roc_data <- read_csv(roc_file, show_col_types = FALSE)
+  roc_data <- readr::read_csv(roc_file, show_col_types = FALSE)
   combined <- roc_data %>% filter(SNV_id == "COMBINED_SIGNATURE")
   if (nrow(combined) > 0) round(combined$AUC[1], 3) else 0
 } else 0

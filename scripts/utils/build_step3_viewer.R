@@ -41,7 +41,7 @@ cluster_summary_file <- file.path(tables_dir, "clusters", "S3_cluster_summary.cs
 
 o_safe_read <- function(path) {
   if (!file.exists(path)) return(NULL)
-  read_csv(path, show_col_types = FALSE)
+  readr::read_csv(path, show_col_types = FALSE)
 }
 
 assignments <- o_safe_read(cluster_assignments_file)
