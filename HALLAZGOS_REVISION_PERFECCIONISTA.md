@@ -10,7 +10,7 @@
 
 ### **1. CÓDIGO DUPLICADO EN logging.R (CRÍTICO)**
 
-**Problema:**
+**Issue:**
 - File `scripts/utils/logging.R` has **duplicate code 3 times**
 - Tamaño actual: 1067 lines
 - Tamaño esperado: ~356 lines (single definition)
@@ -19,7 +19,7 @@
 - `LOG_LEVELS` defined 3 times (lines 13, 368, 723)
 - `get_timestamp()` defined 3 times (lines 32, 387, 742)
 - `log_info()` defined 3 times (lines 64, 419, 774)
-- Todas las funciones duplicated 3 times
+- All the funciones duplicated 3 times
 
 **Impact:**
 - **Alto:** Confusion about which definition is being used
@@ -28,7 +28,7 @@
 - Can cause unexpected behaviors
 
 **Acción Requerida:**
-1. Eliminar duplicate code (keep only one definition)
+1. Remove duplicate code (keep only one definition)
 2. Verify that all functions work correctly
 3. Reduce file to ~356 lines
 
@@ -38,7 +38,7 @@
 
 ### **2. INCONSISTENCIA EN theme_professional**
 
-**Problema:**
+**Issue:**
 - `functions_common.R` defines `theme_professional` (lines 208-216)
 - `theme_professional.R` defines `theme_professional` differently (lines 11-35)
 - Depends on which one is loaded first
@@ -64,7 +64,7 @@
 
 ### **3. INCONSISTENCIA EN COLORES**
 
-**Problema:**
+**Issue:**
 - Múltiples formas from definir colores:
   - `COLOR_GT` in `functions_common.R` (line 65)
   - `color_gt` defined locally in scripts
@@ -74,7 +74,7 @@
 - `functions_common.R` line 65: `COLOR_GT <- "#D62728"`
 - `step1_5/02_generate_diagnostic_figures.R` line 57: `color_gt <- if (!is.null(config$analysis$colors$gt)) ...`
 - `step5/02_family_comparison_visualization.R` line 64: Similar pattern
-- `step1/02_panel_c_gx_spectrum.R` lines 59-60: Defines COLOR_GC y COLOR_GA locally
+- `step1/02_panel_c_gx_spectrum.R` lines 59-60: Defines COLOR_GC and COLOR_GA locally
 
 **Impact:**
 - **Medio:** Possible visual inconsistency
@@ -83,7 +83,7 @@
 
 **Acción Requerida:**
 1. Create `scripts/utils/colors.R` centralized
-2. Definir todos los colores in un solo lugar
+2. Definir all the colores in un only lugar
 3. Update all scripts to use centralized colors
 
 **Prioridad:** 🟡 IMPORTANTE
@@ -92,7 +92,7 @@
 
 ### **4. INCONSISTENCIA EN DIMENSIONES DE FIGURAS** ✅ RESOLVED
 
-**Problema:**
+**Issue:**
 - Some scripts use `config$analysis$figure$width/height/dpi`
 - Others use hardcoded values (12, 6, 14, 8, 300, etc.)
 
@@ -110,13 +110,13 @@
 
 **Acción Requerida:**
 1. ✅ All scripts must use config$analysis$figure
-2. ✅ Eliminar hardcoded values
+2. ✅ Remove hardcoded values
 3. ✅ Verify that all figures use dimensions from config
 
-**Correcciones Aplicadas:**
+**Corrections Aplicadas:**
 - ✅ Added variables fig_width, fig_height, fig_dpi usando config$analysis$figure in 13 scripts
-- ✅ Reemplazados hardcoded values in ggsave() y png() with variables from config
-- ✅ Scripts actualizados: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
+- ✅ Replaced hardcoded values in ggsave() and png() with variables from config
+- ✅ Scripts updated: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
 
 **Prioridad:** 🟢 MENOR (quality improvement) - ✅ RESOLVED
 
@@ -127,9 +127,9 @@
 ### **5. INCONSISTENCIA EN PATRONES DE MANEJO DE ERRORES**
 
 **Observación:**
-- Some scripts use `tryCatch()` con logging
+- Some scripts use `tryCatch()` with logging
 - Others use `handle_error()` from logging.R
-- Algunos solo usan `stop()`
+- Algunos only usan `stop()`
 
 **Impact:**
 - **Bajo-Medio:** Inconsistent error handling
@@ -150,13 +150,13 @@
 **Observación:**
 - Some scripts have excellent documentation
 - Others have minimal documentation
-- Inconsistencia in estilo from comentarios
+- Inconsistency in estilo from comments
 
 **Impact:**
-- **Bajo:** Makes maintenance difficult y entendimiento
+- **Bajo:** Makes maintenance difficult and entendimiento
 
 **Acción Requerida:**
-- Mejorar documentación in scripts con documentación mínima
+- Mejorar documentación in scripts with documentación mínima
 - Standardize comment style
 
 **Prioridad:** 🟢 MENOR
@@ -165,7 +165,7 @@
 
 ## 📊 ESTADÍSTICAS INICIALES
 
-### **Archivos a Revisar:**
+### **Archivos to Review:**
 - **R scripts:** 80 files
 - **Snakemake rules:** 15 files
 - **Total:** 95 files of code
@@ -190,7 +190,7 @@
 
 ### **PHASE 1: CRITICAL FIXES (Day 1)**
 1. 🔴 Corregir duplicate code in logging.R
-2. 🟡 Corregir inconsistencia in theme_professional
+2. 🟡 Corregir inconsistency in theme_professional
 3. 🟡 Create colors.R centralized
 
 ### **PHASE 2: CONSISTENCY IMPROVEMENTS (Day 2-3)**
@@ -199,32 +199,32 @@
 6. 🟡 Standardize error handling
 
 ### **PHASE 3: CODE REVIEW (Day 4-5)**
-7. 🟢 Revisar estructura y organización from scripts
-8. 🟢 Revisar calidad of code
-9. 🟢 Revisar patrones y consistencia
+7. 🟢 Review structure and organización from scripts
+8. 🟢 Review calidad of code
+9. 🟢 Review patrones and consistency
 
 ### **PHASE 4: GRAPHICS REVIEW (Day 6)**
-10. 🟢 Revisar calidad visual from todas las figures
-11. 🟢 Verificar consistencia entre figures
-12. 🟢 Verificar mensaje y claridad científica
+10. 🟢 Review calidad visual from all the figures
+11. 🟢 Verify consistency entre figures
+12. 🟢 Verify mensaje and claridad científica
 
 ### **PHASE 5: DOCUMENTATION REVIEW (Day 7)**
-13. 🟢 Revisar documentación from usuario
-14. 🟢 Revisar documentación técnica
-15. 🟢 Revisar documentación in código
+13. 🟢 Review documentación from usuario
+14. 🟢 Review documentación técnica
+15. 🟢 Review documentación in code
 
 ---
 
 ## ✅ PROGRESO DE CORRECCIONES
 
 ### **PHASE 1.1: Structure and organization - COMPLETED**
-- ✅ Corregido duplicate code in logging.R (1067 → 356 lines)
+- ✅ Fixed duplicate code in logging.R (1067 → 356 lines)
 - ✅ Removed duplicate definition of theme_professional in functions_common.R
-- ✅ Creado colors.R centralized
+- ✅ Created colors.R centralized
 
 ### **PHASE 1.2: Calidad of code - COMPLETED**
-- ✅ Mejorada robustez in todos los scripts (empty data validation, explicit namespaces)
-- ✅ Corregidos problemas from robustez in error_handling.R, data_loading_helpers.R, group_comparison.R
+- ✅ Improved robustez in all the scripts (empty data validation, explicit namespaces)
+- ✅ Fixed issues from robustez in error_handling.R, data_loading_helpers.R, group_comparison.R
 - ✅ Applied corrections to all scripts in step0-step7
 
 ### **PHASE 1.3: Patterns and consistency - COMPLETED**
@@ -242,66 +242,66 @@
   - COLOR_DOWNREGULATED, COLOR_SIGNIFICANT_LOW_FC
   - COLOR_CLUSTER_1, COLOR_CLUSTER_2
   - COLORS_SEQUENTIAL_LOW_PINK, COLORS_SEQUENTIAL_HIGH_DARK
-  - Función helper get_heatmap_gradient() para gradientes from heatmap
-- ✅ Actualizados scripts from step1 (6 scripts):
+  - Función helper get_heatmap_gradient() for gradientes from heatmap
+- ✅ Updated scripts from step1 (6 scripts):
   - 01_panel_b_gt_count_by_position.R: COLOR_SEED_HIGHLIGHT
-  - 02_panel_c_gx_spectrum.R: COLOR_SEED_HIGHLIGHT, COLOR_GC, COLOR_GA (removidas definiciones locales)
+  - 02_panel_c_gx_spectrum.R: COLOR_SEED_HIGHLIGHT, COLOR_GC, COLOR_GA (removed definiciones locales)
   - 03_panel_d_positional_fraction.R: COLOR_SEED, COLOR_NONSEED (ya updated in PHASE 1.3)
   - 04_panel_e_gcontent.R: COLOR_SEED_BACKGROUND, COLORS_SEQUENTIAL_LOW_PINK, COLORS_SEQUENTIAL_HIGH_DARK
   - 05_panel_f_seed_vs_nonseed.R: COLOR_SEED, COLOR_NONSEED (ya updated in PHASE 1.3)
   - 06_panel_g_gt_specificity.R: COLOR_OTHERS (ya updated in PHASE 1.3)
-- ✅ Actualizados scripts from step2 (6 scripts):
+- ✅ Updated scripts from step2 (6 scripts):
   - 02_volcano_plots.R: COLOR_DOWNREGULATED, COLOR_SIGNIFICANT_LOW_FC
   - 03_effect_size_analysis.R: COLOR_EFFECT_LARGE, COLOR_EFFECT_MEDIUM, COLOR_EFFECT_SMALL, COLOR_EFFECT_NEGLIGIBLE
   - 05_position_specific_analysis.R: COLOR_ALS, COLOR_GT
   - 06_hierarchical_clustering_all_gt.R: COLOR_CLUSTER_1, COLOR_CLUSTER_2, get_heatmap_gradient()
   - 07_hierarchical_clustering_seed_gt.R: COLOR_CLUSTER_1, COLOR_CLUSTER_2, get_heatmap_gradient()
   - 00_confounder_analysis.R: COLOR_ALS, COLOR_GT, COLOR_CONTROL
-- ✅ Actualizado step6 (1 script):
+- ✅ Updated step6 (1 script):
   - 03_direct_target_prediction.R: theme_professional (reemplazo from theme_minimal)
-- ✅ Actualizados scripts from step3-step7 (6 scripts):
+- ✅ Updated scripts from step3-step7 (6 scripts):
   - step3/02_clustering_visualization.R: get_blue_red_heatmap_gradient()
   - step4/02_pathway_enrichment_analysis.R: COLOR_GO, COLOR_KEGG, get_heatmap_gradient()
   - step4/03_complex_functional_visualization.R: COLOR_GRADIENT_LOW_BLUE, COLOR_SEED_HIGHLIGHT, COLOR_GT
   - step5/02_family_comparison_visualization.R: get_blue_red_heatmap_gradient(), COLOR_SIGNIFICANCE_*
   - step6/03_direct_target_prediction.R: COLOR_GRADIENT_LOW_BLUE, COLOR_GT (3 lugares)
-  - step7/02_biomarker_signature_heatmap.R: get_blue_red_heatmap_gradient(), COLOR_AUC_*, eliminado código muerto
+  - step7/02_biomarker_signature_heatmap.R: get_blue_red_heatmap_gradient(), COLOR_AUC_*, removed code dead
 - ✅ Estandarización from dimensiones from figures:
   - Added variables fig_width, fig_height, fig_dpi usando config$analysis$figure in 13 scripts
-  - Reemplazados hardcoded values in ggsave() y png() with variables from config
-  - Scripts actualizados: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
+  - Replaced hardcoded values in ggsave() and png() with variables from config
+  - Scripts updated: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
 
 **Total PHASE 2.1:** 
 - 21 scripts updated to use centralized colors (step1-step7)
 - 13 scripts updated to use configurable dimensions (step1-step7)
-- colors.R centralized con 20+ colors and 2 helper functions
+- colors.R centralized with 20+ colors and 2 helper functions
 
-### **PHASE 2.2: Consistencia entre figures - COMPLETED ✅**
-- ✅ Estandarización from breaks del eje X:
-  - Panel B: Changed from `seq(1, 23, by = 2)` a `breaks = 1:23` (show all positions)
+### **PHASE 2.2: Consistency entre figures - COMPLETED ✅**
+- ✅ Estandarización from breaks of the eje X:
+  - Panel B: Changed from `seq(1, 23, by = 2)` to `breaks = 1:23` (show all positions)
   - All step1 panels now show all positions consistently
-- ✅ Estandarización from ángulo del eje X:
+- ✅ Estandarización from ángulo of the eje X:
   - Panel B: Added `axis.text.x = element_text(angle = 45, hjust = 1)` for consistency
   - Panel E: Added `axis.text.x = element_text(angle = 45, hjust = 1)` for consistency
-  - Panels C y D ya tenían ángulo from 45° ✅
-- ✅ Corrección from hardcoded values in volcano plot:
+  - Panels C and D ya tenían ángulo from 45° ✅
+- ✅ Correction from hardcoded values in volcano plot:
   - Added config from fig_width, fig_height, fig_dpi
-  - Reemplazados hardcoded values (12, 9, 300) with variables from config
-- ✅ Estandarización from escalas del eje Y y expand:
+  - Replaced hardcoded values (12, 9, 300) with variables from config
+- ✅ Estandarización from escalas of the eje Y and expand:
   - Panel D: Added `scale_y_continuous(expand = expansion(mult = c(0, 0.1)))` for consistency
-  - Panel F: Added `expand = expansion(mult = c(0, 0.1))` for consistency con Panel B
-  - Panels C y G ya usan `expand = expansion(mult = c(0, 0.02))` apropiado para porcentajes (0-100) ✅
-- ✅ Estandarización from etiquetas from ejes:
-  - Panel G: Changed `x = NULL` a `x = "Mutation Type"` for consistency con Panel F
-  - Panel E: Changed `x = "Position in miRNA (1-23)"` a `x = "Position in miRNA"` for consistency
-- ✅ Estandarización from namespaces para funciones from formato:
-  - Panel E: Changed `comma` a `scales::comma` (2 lugares)
-  - step1_5/02_generate_diagnostic_figures.R: Changed `comma` a `scales::comma` (4 lugares)
-  - step1_5/02_generate_diagnostic_figures.R: Changed `percent` a `scales::percent` (1 lugar)
+  - Panel F: Added `expand = expansion(mult = c(0, 0.1))` for consistency with Panel B
+  - Panels C and G ya usan `expand = expansion(mult = c(0, 0.02))` apropiado for porcentajes (0-100) ✅
+- ✅ Estandarización from labels from ejes:
+  - Panel G: Changed `x = NULL` to `x = "Mutation Type"` for consistency with Panel F
+  - Panel E: Changed `x = "Position in miRNA (1-23)"` to `x = "Position in miRNA"` for consistency
+- ✅ Estandarización from namespaces for funciones from format:
+  - Panel E: Changed `comma` to `scales::comma` (2 lugares)
+  - step1_5/02_generate_diagnostic_figures.R: Changed `comma` to `scales::comma` (4 lugares)
+  - step1_5/02_generate_diagnostic_figures.R: Changed `percent` to `scales::percent` (1 lugar)
 
 - ✅ Estandarización from idioma:
-  - step2/05_position_specific_analysis.R: Traducido from español a inglés for consistency
-  - title, subtitle, x/y labels, caption y annotate label translated
+  - step2/05_position_specific_analysis.R: Traducido from español to inglés for consistency
+  - title, subtitle, x/and labels, caption and annotate label translated
 
 **Total PHASE 2.2:** 
 - 9 scripts updated to improve visual consistency (step1: panels B, C, D, E, F, G; step2: volcano plot, position_specific_analysis; step1_5: diagnostic figures)
@@ -311,48 +311,48 @@
 **PHASE 2.2 COMPLETED ✅**
 
 ### **PHASE 2.3: Message and scientific clarity - COMPLETED ✅**
-- ✅ Captions mejorados in step1:
+- ✅ Captions improved in step1:
   - Panel D: Added caption explicando SNVs únicos vs read counts
-  - Panel G: Changed 'Based on' a 'Shows percentage based on' for consistency
+  - Panel G: Changed 'Based on' to 'Shows percentage based on' for consistency
   - All panels now have clear captions about data types
-- ✅ Captions mejorados in step2:
+- ✅ Captions improved in step2:
   - Volcano plot: Includes method FDR (Benjamini-Hochberg) and explains statistical significance
   - Effect size: Includes formula for Cohen's d and interpretation thresholds (Large, Medium, Small)
   - Position-specific: Specifies statistical method (Wilcoxon rank-sum) and FDR correction
-- ✅ Captions mejorados in step6:
+- ✅ Captions improved in step6:
   - Correlation visualization: Explains method (Pearson correlation test) and linear regression with confidence intervals
-- ✅ **Títulos y subtítulos perfeccionados:**
+- ✅ **Titles and subtitles refined:**
   - All step1 panels now have letters (B., C., D., E., F., G.) for consistency
-  - Subtítulos mejorados: Explain seed region as "functional binding domain" o "functional miRNA binding domain"
+  - Subtitles improved: Explain seed region as "functional binding domain" o "functional miRNA binding domain"
   - Term "oxidative signature" added consistently for biological context of G>T
-  - Etiquetas from ejes mejoradas: More descriptive and scientifically accurate
-- ✅ **Leyendas mejoradas:**
-  - Panel D: "Region (Seed vs Non-seed)" in lugar from solo "Region"
-  - Panel F: Etiquetas from ejes más descriptivas
-- ✅ **Anotaciones mejoradas:**
-  - Panel C: Added texto explicativo para seed region
+  - Labels from ejes mejoradas: More descriptive and scientifically accurate
+- ✅ **Legends mejoradas:**
+  - Panel D: "Region (Seed vs Non-seed)" in lugar from only "Region"
+  - Panel F: Labels from ejes more descriptivas
+- ✅ **Annotations mejoradas:**
+  - Panel C: Added text explanatory for seed region
   - Panels B, E: Improved annotations with explanation of seed region
-  - step4/03: Anotaciones from seed region mejoradas
-- ✅ **Consistencia terminológica:**
-  - Standardized "Non-Seed" a "Non-seed" (lowercase) for consistency
-  - Consistent explanation of seed region (positions 2-8: functional binding domain) in todos los scripts
+  - step4/03: Annotations from seed region mejoradas
+- ✅ **Consistency terminological:**
+  - Standardized "Non-Seed" to "Non-seed" (lowercase) for consistency
+  - Consistent explanation of seed region (positions 2-8: functional binding domain) in all the scripts
   - Term "oxidative signature" used consistently for G>T mutations
   - RPM explained as "Reads Per Million" where it appears
-- ✅ **Clustering y heatmaps:**
+- ✅ **Clustering and heatmaps:**
   - step2/06: Improved title with "(Oxidative Signature)"
-  - step2/07: Título and summary table improved with explanation of seed region
+  - step2/07: Title and summary table improved with explanation of seed region
 - ✅ **Step4 functional analysis:**
-  - Subtítulos mejorados: Explain "oxidized miRNAs" and seed region
-  - Captions mejorados: Include complete biological explanations
+  - Subtitles improved: Explain "oxidized miRNAs" and seed region
+  - Captions improved: Include complete biological explanations
 - ✅ **Step5 family analysis:**
-  - Subtítulo mejorado: Explica seed region como functional binding domain
+  - Subtitle improved: Explains seed region como functional binding domain
 - ✅ **Step6 correlation:**
-  - Subtítulos mejorados: Explain RPM and seed region
-  - Etiqueta from eje X: Includes explicación from RPM
+  - Subtitles improved: Explain RPM and seed region
+  - Label from eje X: Includes explanation from RPM
 - ✅ **Step7 biomarker:**
-  - Subtítulo mejorado: Includes "oxidative signature" and explanation of seed region
+  - Subtitle improved: Includes "oxidative signature" and explanation of seed region
 
-**Scripts actualizados (Total: 21 scripts):**
+**Scripts updated (Total: 21 scripts):**
 - step1: 6 scripts (panels B-G)
 - step2: 4 scripts (volcano, effect size, position-specific, clustering)
 - step4: 1 script (complex functional visualization)
@@ -370,24 +370,24 @@
 - ✅ **Dimensiones estandarizadas:**
   - `step0/01_generate_overview.R`: Fixed to use `fig_width`, `fig_height`, `fig_dpi` from config (8 `ggsave()` calls)
   - All scripts now load dimensions from `config$analysis$figure`
-  - Eliminados hardcoded values in `ggsave()` y `png()` calls
+  - Removed hardcoded values in `ggsave()` and `png()` calls
 
-- ✅ **Formato from files from salida:**
+- ✅ **Format from files from output:**
   - All `png()` calls now specify `bg = "white"` for white background
-  - Scripts corregidos:
+  - Scripts fixed:
     - `step2/06_hierarchical_clustering_all_gt.R`: Added `bg = "white"`
     - `step2/07_hierarchical_clustering_seed_gt.R`: Added `bg = "white"`
     - `step3/02_clustering_visualization.R`: Added `bg = "white"` to both `png()` calls + `par(bg = "white")`
     - `step4/02_pathway_enrichment_analysis.R`: Added `bg = "white"`
     - `step5/02_family_comparison_visualization.R`: Added `bg = "white"`
-    - `step7/02_biomarker_signature_heatmap.R`: Added `bg = "white"` a 4 `png()` calls
+    - `step7/02_biomarker_signature_heatmap.R`: Added `bg = "white"` to 4 `png()` calls
 
-- ✅ **Manejo from dispositivos gráficos:**
-  - Todos los `png()` calls tienen su correspondiente `dev.off()`
+- ✅ **Handling from devices graphics:**
+  - Todos the `png()` calls have its correspondiente `dev.off()`
   - No graphics devices open without closing
-  - `par(mar)` y `par(bg)` correctly configured
+  - `par(mar)` and `par(bg)` correctly configured
 
-**Scripts actualizados (Total: 7 scripts):**
+**Scripts updated (Total: 7 scripts):**
 - step0: 1 script (generate_overview)
 - step2: 2 scripts (hierarchical clustering)
 - step3: 1 script (clustering visualization)
@@ -401,44 +401,44 @@
 
 **Status:** ✅ **COMPLETED**
 
-### **Problemas identificados y corregidos:**
+### **Issues identified and fixed:**
 
-1. **Error tipográfico in README.md:**
+1. **Error typo in README.md:**
    - ❌ `"Configure datas´"` (line 74)
    - ✅ `"Configure data"`
 
-2. **Referencias rotas a files inexistentes:**
+2. **Referencias broken to files inexistentes:**
    - ❌ References to `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`, `docs/INDEX.md`, `docs/DATA_FORMAT_AND_FLEXIBILITY.md`, `docs/FLEXIBLE_GROUP_SYSTEM.md`, `docs/HOW_IT_WORKS.md`, `docs/METHODOLOGY.md`, `TESTING_PLAN.md`, `SOFTWARE_VERSIONS.md`, `CRITICAL_EXPERT_REVIEW.md`, `COMPREHENSIVE_PIPELINE_REVIEW.md`
-   - ✅ Reemplazadas con referencias útiles a files existentes:
+   - ✅ Replaced with referencias useful to files existentes:
      - `config/config.yaml.example` for configuration and data format
      - `README.md` for complete documentation
      - `sample_metadata_template.tsv` for metadata format
      - `CHANGELOG.md`, `RELEASE_NOTES_v1.0.1.md`, `ESTADO_PROBLEMAS_CRITICOS.md` for release information
 
-3. **Inconsistencia from versión:**
+3. **Inconsistency from version:**
    - ❌ `config/config.yaml.example` had version `"1.0.0"` while README.md mentioned `"1.0.1"`
    - ✅ Updated to `"1.0.1"` in `config.yaml.example`
 
-4. **Conteo incorrecto from figures in Step 2:**
-   - ❌ README.md mentioned "73 PNG figures" y "20 figures total"
+4. **Count incorrect from figures in Step 2:**
+   - ❌ README.md mentioned "73 PNG figures" and "20 figures total"
    - ✅ Fixed to "21 figures total" (5 basic + 16 detailed):
-     - **Básicas (5):** batch effect PCA, group balance, volcano, effect size, position-specific
-     - **Detalladas (16):** FIG_2.1 a FIG_2.15 (14 figures, FIG_2.8 removido) + FIG_2.16 (clustering all GT) + FIG_2.17 (clustering seed GT)
+     - **Basic (5):** batch effect PCA, group balance, volcano, effect size, position-specific
+     - **Detailed (16):** FIG_2.1 to FIG_2.15 (14 figures, FIG_2.8 removed) + FIG_2.16 (clustering all GT) + FIG_2.17 (clustering seed GT)
 
-5. **Sección from documentación mejorada:**
-   - ❌ Sección "Documentation" had multiple broken references
-   - ✅ Reorganizada in subsecciones útiles:
+5. **Section from documentación improved:**
+   - ❌ Section "Documentation" had multiple broken references
+   - ✅ Reorganized in subsections useful:
      - Getting Started (Quick Start Guide, README)
      - Configuration and Data Format (files existentes)
      - Release Information (CHANGELOG, RELEASE_NOTES, ESTADO_PROBLEMAS_CRITICOS)
      - Technical Notes (statistical methods, batch effects analysis, confounders)
 
 6. **QUICK_START.md updated:**
-   - ❌ Referencias rotas a `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`
-   - ✅ Reemplazadas con referencias a secciones específicas from README.md
+   - ❌ Referencias broken to `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`
+   - ✅ Replaced with referencias to sections specific from README.md
 
 **Files modified:**
-- `README.md`: Correcciones tipográficas, referencias rotas, conteo from figures
+- `README.md`: Corrections typos, referencias broken, count from figures
 - `QUICK_START.md`: Removal of broken references
 - `config/config.yaml.example`: Version update
 
@@ -448,42 +448,42 @@
 
 **Status:** ✅ **COMPLETED**
 
-### **Problemas identificados y corregidos:**
+### **Issues identified and fixed:**
 
-1. **CHANGELOG.md desactualizado:**
+1. **CHANGELOG.md outdated:**
    - ❌ Only documented changes until v1.0.1 inicial (VAF correction, ggplot2 compatibility)
-   - ❌ NO mentioned todas las mejoras from la "perfectionist review" (PHASE 1.1-2.4, PHASE 3.1)
-   - ❌ Sección "Próximas Correcciones Identificadas" mentioned problemas que YA FUERON RESUELTOS
-   - ✅ Actualizado con todas las mejoras from la perfectionist review:
-     - PHASE 1.1: Eliminación from duplicate code masivo (~2000 lines)
+   - ❌ NO mentioned all the mejoras from the "perfectionist review" (PHASE 1.1-2.4, PHASE 3.1)
+   - ❌ Section "Next Corrections Identificadas" mentioned issues que YA FUERON RESUELTOS
+   - ✅ Updated with all the mejoras from the perfectionist review:
+     - PHASE 1.1: Eliminación from duplicate code massive (~2000 lines)
      - PHASE 1.2: Robustness, efficiency and clarity improvements
      - PHASE 1.3: Pattern standardization
      - PHASE 1.4: Validation and testing
      - PHASE 2.1: Visual quality of graphics
-     - PHASE 2.2: Consistencia entre figures
+     - PHASE 2.2: Consistency entre figures
      - PHASE 2.3: Scientific clarity
      - PHASE 2.4: Technical quality
      - PHASE 3.1: User documentation
-   - ✅ Sección "Próximas Correcciones Identificadas" updated to "Estado from Problemas Críticos" with all problems resolved
+   - ✅ Section "Next Corrections Identificadas" updated to "Status from Issues Critical" with all problems resolved
 
-2. **RELEASE_NOTES_v1.0.1.md desactualizado:**
-   - ❌ Solo mentioned correcciones VAF y compatibilidad ggplot2
-   - ❌ NO mentioned las mejoras masivas from la perfectionist review
-   - ❌ Sección "Known Pending Issues" was outdated
-   - ✅ Actualizado con todas las mejoras from la perfectionist review:
-     - Resumen ejecutivo mejorado incluyendo perfectionist review
-     - Complete section of "Mejoras (Revisión Perfeccionista)" with PHASES 1-3
-     - Estadísticas actualizadas reflejando reducción neta of code
-     - Sección "Known Pending Issues" updated to "Estado from Problemas Críticos"
+2. **RELEASE_NOTES_v1.0.1.md outdated:**
+   - ❌ Only mentioned corrections VAF and compatibilidad ggplot2
+   - ❌ NO mentioned the mejoras massive from the perfectionist review
+   - ❌ Section "Known Pending Issues" was outdated
+   - ✅ Updated with all the mejoras from the perfectionist review:
+     - Resumen executive improved incluyendo perfectionist review
+     - Complete section of "Mejoras (Review Perfectionist)" with PHASES 1-3
+     - Statistics actualizadas reflecting reduction net of code
+     - Section "Known Pending Issues" updated to "Status from Issues Critical"
 
-3. **Consistencia entre documentos:**
-   - ❌ CHANGELOG y RELEASE_NOTES did not reflect the current state of the pipeline
-   - ❌ Mentioned problems as "pendientes" when they were already resolved
+3. **Consistency entre documentos:**
+   - ❌ CHANGELOG and RELEASE_NOTES did not reflect the current state of the pipeline
+   - ❌ Mentioned problems as "pending" when they were already resolved
    - ✅ Both documents now reflect the current state (all problems resolved)
    - ✅ Cross-references updated to `ESTADO_PROBLEMAS_CRITICOS.md`
 
 **Files modified:**
-- `CHANGELOG.md`: Actualizado con todas las PHASES 1.1-3.1 from la perfectionist review
+- `CHANGELOG.md`: Updated with all the PHASES 1.1-3.1 from the perfectionist review
 - `RELEASE_NOTES_v1.0.1.md`: Updated with massive improvements and current problem status
 
 ---
@@ -492,66 +492,66 @@
 
 **Status:** ✅ **COMPLETED**
 
-### **Problemas identificados y corregidos:**
+### **Issues identified and fixed:**
 
-1. **Funciones sin documentación roxygen2:**
+1. **Funciones without documentación roxygen2:**
    - ❌ `validate_output_file()` in `scripts/utils/functions_common.R` DID NOT have roxygen2 documentation
    - ❌ `detect_group_names_from_table()` in `scripts/step2/02_volcano_plots.R` DID NOT have roxygen2 documentation
    - ❌ `detect_group_names_from_table()` in `scripts/step2/03_effect_size_analysis.R` DID NOT have roxygen2 documentation
    - ❌ `detect_group_mean_columns()` in `scripts/step2/04_generate_summary_tables.R` DID NOT have roxygen2 documentation
-   - ✅ Agregada documentación roxygen2 completa a todas las funciones helper:
+   - ✅ Added documentación roxygen2 complete to all the funciones helper:
      - Description of purpose and behavior
      - Parameters documented with `@param`
      - Return values documented with `@return`
      - Usage examples with `@examples`
      - Detection logic explained step by step
 
-2. **Bloques of code complejos sin comentarios explicativos:**
-   - ❌ Cálculo from `position_counts` in `scripts/step1/01_panel_b_gt_count_by_position.R` had minimal comments
-   - ❌ Cálculo from `total_copies_by_position` in `scripts/step1/04_panel_e_gcontent.R` had incomplete comments
-   - ❌ Procesamiento from `volcano_data` in `scripts/step2/02_volcano_plots.R` had insufficient comments
-   - ❌ Cálculo from `gx_spectrum_data` in `scripts/step1/02_panel_c_gx_spectrum.R` had minimal comments
-   - ✅ Agregados comentarios explicativos detallados a todos los bloques complejos:
+2. **Bloques of code complex without comments explanatory:**
+   - ❌ Calculation from `position_counts` in `scripts/step1/01_panel_b_gt_count_by_position.R` had minimal comments
+   - ❌ Calculation from `total_copies_by_position` in `scripts/step1/04_panel_e_gcontent.R` had incomplete comments
+   - ❌ Processing from `volcano_data` in `scripts/step2/02_volcano_plots.R` had insufficient comments
+   - ❌ Calculation from `gx_spectrum_data` in `scripts/step1/02_panel_c_gx_spectrum.R` had minimal comments
+   - ✅ Added comments explanatory detailed to all the bloques complex:
      - Explanation of the logic of each step
      - Description of data transformations
      - Concrete examples where appropriate
      - Clarifications about metrics and calculations
 
-3. **Constantes sin comentarios explicativos:**
-   - ❌ Paletas from colores in `scripts/utils/colors.R` had minimal comments
+3. **Constants without comments explanatory:**
+   - ❌ Palettes from colores in `scripts/utils/colors.R` had minimal comments
    - ❌ Category constants (effect size, AUC, significance) did not explain their thresholds
-   - ✅ Mejorados comentarios para todas las constantes complejas:
+   - ✅ Improved comments for all the constants complex:
      - Description of when and how to use each palette
      - Explanation of thresholds for categories (Cohen's d, AUC, etc.)
-     - Contexto from uso in el pipeline (which scripts use them)
-     - References to fuentes (ColorBrewer for palettes)
+     - Context from uso in the pipeline (which scripts use them)
+     - References to sources (ColorBrewer for palettes)
 
 4. **Headers from files incompletos:**
    - ❌ `scripts/utils/theme_professional.R` had basic header without usage details
-   - ✅ Mejorado header con:
+   - ✅ Improved header with:
      - Complete description of purpose
      - Theme features documented
      - Usage examples
-     - Documentación roxygen2 agregada para `theme_professional`
+     - Documentación roxygen2 added for `theme_professional`
 
 **Files modified:**
-- `scripts/utils/functions_common.R`: Agregada documentación roxygen2 a `validate_output_file()`
-- `scripts/utils/theme_professional.R`: Mejorado header y agregada documentación roxygen2
-- `scripts/utils/colors.R`: Mejorados comentarios for palettes y constantes complejas
-- `scripts/step2/02_volcano_plots.R`: Agregada documentación roxygen2 a `detect_group_names_from_table()` y mejorados comentarios in bloques complejos
-- `scripts/step2/03_effect_size_analysis.R`: Agregada documentación roxygen2 a `detect_group_names_from_table()`
-- `scripts/step2/04_generate_summary_tables.R`: Agregada documentación roxygen2 a `detect_group_mean_columns()`
-- `scripts/step1/01_panel_b_gt_count_by_position.R`: Mejorados comentarios in cálculo from `position_counts`
-- `scripts/step1/02_panel_c_gx_spectrum.R`: Mejorados comentarios in cálculo from `gx_spectrum_data`
-- `scripts/step1/04_panel_e_gcontent.R`: Mejorados comentarios in cálculo from `total_copies_by_position`
+- `scripts/utils/functions_common.R`: Added documentación roxygen2 to `validate_output_file()`
+- `scripts/utils/theme_professional.R`: Improved header and added documentación roxygen2
+- `scripts/utils/colors.R`: Improved comments for palettes and constants complex
+- `scripts/step2/02_volcano_plots.R`: Added documentación roxygen2 to `detect_group_names_from_table()` and improved comments in bloques complex
+- `scripts/step2/03_effect_size_analysis.R`: Added documentación roxygen2 to `detect_group_names_from_table()`
+- `scripts/step2/04_generate_summary_tables.R`: Added documentación roxygen2 to `detect_group_mean_columns()`
+- `scripts/step1/01_panel_b_gt_count_by_position.R`: Improved comments in calculation from `position_counts`
+- `scripts/step1/02_panel_c_gx_spectrum.R`: Improved comments in calculation from `gx_spectrum_data`
+- `scripts/step1/04_panel_e_gcontent.R`: Improved comments in calculation from `total_copies_by_position`
 
 **Impact:**
-- ✅ Todas las funciones helper ahora tienen documentación roxygen2 completa
-- ✅ Bloques of code complejos tienen comentarios explicativos detallados
-- ✅ Constantes tienen comentarios que explican su propósito y uso
-- ✅ Headers from files son más informativos y útiles para desarrolladores
+- ✅ All the funciones helper ahora have documentación roxygen2 complete
+- ✅ Bloques of code complex have comments explanatory detailed
+- ✅ Constants have comments que explain its propósito and uso
+- ✅ Headers from files son more informative and useful for developers
 
-**Next step:** PHASE 3.4 - Revisar coherencia y actualización from documentación
+**Next step:** PHASE 3.4 - Review coherence and update from documentación
 
 ---
 
@@ -559,36 +559,36 @@
 
 **Status:** ✅ **COMPLETED**
 
-### **Problemas identificados y corregidos:**
+### **Issues identified and fixed:**
 
 1. **Referencias inconsistentes entre documentos:**
    - ❌ `CHANGELOG.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "ESTADO_PROBLEMAS_CRITICOS.md"
    - ❌ `RELEASE_NOTES_v1.0.1.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "ESTADO_PROBLEMAS_CRITICOS.md"
-   - ✅ Fixed all references to "ESTADO_PROBLEMAS_CRITICOS.md" in `CHANGELOG.md` y `RELEASE_NOTES_v1.0.1.md`
+   - ✅ Fixed all references to "ESTADO_PROBLEMAS_CRITICOS.md" in `CHANGELOG.md` and `RELEASE_NOTES_v1.0.1.md`
 
-2. **Documentación faltante in README.md:**
-   - ❌ `README.md` no mentioned "HALLAZGOS_REVISION_PERFECCIONISTA.md" in la sección from documentación
-   - ❌ `README.md` no mentioned las mejoras masivas from la perfectionist review in "Latest Changes"
-   - ✅ Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" in la sección "Release Information"
+2. **Documentación missing in README.md:**
+   - ❌ `README.md` no mentioned "HALLAZGOS_REVISION_PERFECCIONISTA.md" in the section from documentación
+   - ❌ `README.md` no mentioned the mejoras massive from the perfectionist review in "Latest Changes"
+   - ✅ Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" in the section "Release Information"
    - ✅ Added section "Major Refactoring (Perfectionist Review)" in "Latest Changes" with details of the improvements
 
-3. **Consistencia from versiones:**
+3. **Consistency from versions:**
    - ✅ Verified that all version references are consistent (v1.0.1)
    - ✅ Verified that all dates are consistent (2025-01-21)
 
 **Files modified:**
-- `CHANGELOG.md`: Corregida referencia from "PROBLEMAS_CRITICOS_COHESION.md" a "ESTADO_PROBLEMAS_CRITICOS.md"
-- `RELEASE_NOTES_v1.0.1.md`: Corregida referencia from "PROBLEMAS_CRITICOS_COHESION.md" a "ESTADO_PROBLEMAS_CRITICOS.md"
-- `README.md`: Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" y sección detallada from "Major Refactoring (Perfectionist Review)"
-- `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Updated status to "PHASE 3.4 completada" y agregada sección documenting las correcciones
+- `CHANGELOG.md`: Fixed referencia from "PROBLEMAS_CRITICOS_COHESION.md" to "ESTADO_PROBLEMAS_CRITICOS.md"
+- `RELEASE_NOTES_v1.0.1.md`: Fixed referencia from "PROBLEMAS_CRITICOS_COHESION.md" to "ESTADO_PROBLEMAS_CRITICOS.md"
+- `README.md`: Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" and section detailed from "Major Refactoring (Perfectionist Review)"
+- `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Updated status to "PHASE 3.4 completada" and added section documenting the corrections
 
 **Impact:**
 - ✅ All cross-references between documents are consistent
-- ✅ `README.md` ahora documenta completamente las mejoras from la perfectionist review
+- ✅ `README.md` ahora documenta completely the mejoras from the perfectionist review
 - ✅ All technical documents are correctly referenced
 - ✅ Users can easily find all relevant documentation
 
-**Next step:** PHASE 4 - Verificación integrada (código, gráficas, documentación)
+**Next step:** PHASE 4 - Verification integrated (code, graphics, documentación)
 
 ---
 
