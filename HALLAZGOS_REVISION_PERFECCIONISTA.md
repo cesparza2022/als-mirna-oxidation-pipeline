@@ -1,7 +1,7 @@
 # 🔍 HALLAZGOS DE REVISIÓN PERFECCIONISTA
 
 **Fecha:** 2025-01-21  
-**Status:** 🟡 En progreso (FASE 2 completada, FASE 3 pendiente)  
+**Status:** 🟡 En progreso (FASE 3.1 completada, FASE 3.2-3.4 pendientes)  
 **Revisión:** Sistemática y perfeccionista
 
 ---
@@ -395,5 +395,52 @@
 - step5: 1 script (family comparison)
 - step7: 1 script (biomarker signature)
 
-**Próximo paso:** FASE 3.1 - Revisar documentación de usuario
+---
+
+## ✅ FASE 3.1: REVISIÓN DE DOCUMENTACIÓN DE USUARIO (COMPLETADA)
+
+**Status:** ✅ **COMPLETADA**
+
+### **Problemas identificados y corregidos:**
+
+1. **Error tipográfico en README.md:**
+   - ❌ `"Configure datas´"` (línea 74)
+   - ✅ `"Configure data"`
+
+2. **Referencias rotas a archivos inexistentes:**
+   - ❌ Referencias a `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`, `docs/INDEX.md`, `docs/DATA_FORMAT_AND_FLEXIBILITY.md`, `docs/FLEXIBLE_GROUP_SYSTEM.md`, `docs/HOW_IT_WORKS.md`, `docs/METHODOLOGY.md`, `TESTING_PLAN.md`, `SOFTWARE_VERSIONS.md`, `CRITICAL_EXPERT_REVIEW.md`, `COMPREHENSIVE_PIPELINE_REVIEW.md`
+   - ✅ Reemplazadas con referencias útiles a archivos existentes:
+     - `config/config.yaml.example` para configuración y formato de datos
+     - `README.md` para documentación completa
+     - `sample_metadata_template.tsv` para formato de metadata
+     - `CHANGELOG.md`, `RELEASE_NOTES_v1.0.1.md`, `ESTADO_PROBLEMAS_CRITICOS.md` para información de release
+
+3. **Inconsistencia de versión:**
+   - ❌ `config/config.yaml.example` tenía versión `"1.0.0"` mientras que README.md mencionaba `"1.0.1"`
+   - ✅ Actualizado a `"1.0.1"` en `config.yaml.example`
+
+4. **Conteo incorrecto de figuras en Step 2:**
+   - ❌ README.md mencionaba "73 PNG figures" y "20 figures total"
+   - ✅ Corregido a "21 figures total" (5 básicas + 16 detalladas):
+     - **Básicas (5):** batch effect PCA, group balance, volcano, effect size, position-specific
+     - **Detalladas (16):** FIG_2.1 a FIG_2.15 (14 figuras, FIG_2.8 removido) + FIG_2.16 (clustering all GT) + FIG_2.17 (clustering seed GT)
+
+5. **Sección de documentación mejorada:**
+   - ❌ Sección "Documentation" tenía múltiples referencias rotas
+   - ✅ Reorganizada en subsecciones útiles:
+     - Getting Started (Quick Start Guide, README)
+     - Configuration and Data Format (archivos existentes)
+     - Release Information (CHANGELOG, RELEASE_NOTES, ESTADO_PROBLEMAS_CRITICOS)
+     - Technical Notes (métodos estadísticos, análisis de batch effects, confounders)
+
+6. **QUICK_START.md actualizado:**
+   - ❌ Referencias rotas a `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`
+   - ✅ Reemplazadas con referencias a secciones específicas de README.md
+
+**Archivos modificados:**
+- `README.md`: Correcciones tipográficas, referencias rotas, conteo de figuras
+- `QUICK_START.md`: Eliminación de referencias rotas
+- `config/config.yaml.example`: Actualización de versión
+
+**Próximo paso:** FASE 3.2 - Revisar documentación técnica (CHANGELOG, RELEASE_NOTES)
 
