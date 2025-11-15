@@ -65,7 +65,7 @@
 ### **3. INCONSISTENCY IN colors**
 
 **Issue:**
-- Múltiples formas from definir colors:
+- Multiple ways to define colors:
   - `COLOR_GT` in `functions_common.R` (line 65)
   - `color_gt` defined locally in scripts
   - Some scripts definen colors in config
@@ -143,7 +143,7 @@
 
 ---
 
-## 🟢 PROBLEMAS MENORES
+## 🟢 MINOR ISSUES
 
 ### **6. COMENTARIOS Y DOCUMENTATION**
 
@@ -170,9 +170,9 @@
 - **Snakemake rules:** 15 files
 - **Total:** 95 files of code
 
-### **Figuras:**
-- **Figuras generadas:** 91+ figures PNG
-- **Figuras por step:**
+### **Figures:**
+- **Figures generated:** 91+ figures PNG
+- **Figures per step:**
   - Step 0: 8 figures
   - Step 1: 6 figures
   - Step 1.5: 11 figures
