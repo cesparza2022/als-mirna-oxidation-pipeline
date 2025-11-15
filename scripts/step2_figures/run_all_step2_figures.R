@@ -278,7 +278,7 @@ cat("✅ Required packages loaded\n\n")
 
 # Use the master script that executes all figures in order
 # This is more reliable than sourcing individual scripts
-master_script <- file.path(scripts_source_dir, "RUN_COMPLETE_PIPELINE_PASO2.R")
+master_script <- file.path(scripts_source_dir, "RUN_COMPLETE_PIPELINE_STEP2.R")
 
 if (file.exists(master_script)) {
   cat("📜 Using master script:", master_script, "\n")
