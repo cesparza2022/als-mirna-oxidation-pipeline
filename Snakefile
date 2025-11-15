@@ -18,7 +18,7 @@ include: "rules/step0.smk"
 include: "rules/step1.smk"
 include: "rules/step1_5.smk"  # VAF Quality Control
 include: "rules/step2.smk"    # Statistical Comparisons (ALS vs Control)
-include: "rules/step2_figures.smk"  # Additional detailed Step 2 figures (15 figures)
+include: "rules/step2_figures.smk"  # Additional detailed Step 2 figures (16 figures)
 # Logical flow after statistical comparisons
 include: "rules/step3.smk"    # Clustering Analysis (structure discovery)
 include: "rules/step4.smk"    # Functional Analysis (target prediction, GO/KEGG, pathways - interprets clusters)
@@ -41,7 +41,7 @@ rule all:
         rules.all_step1.output,
         rules.all_step1_5.output,  # VAF Quality Control
         rules.all_step2.output,    # Statistical Comparisons
-        rules.all_step2_figures.output,  # Additional detailed Step 2 figures (15 figures)
+        rules.all_step2_figures.output,  # Additional detailed Step 2 figures (16 figures)
         # Logical flow - structure discovery before functional interpretation
         rules.all_step3.output,    # Clustering Analysis (structure discovery)
         rules.all_step4.output,    # Functional Analysis (targets, GO/KEGG, pathways - interprets clusters)

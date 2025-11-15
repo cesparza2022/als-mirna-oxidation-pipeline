@@ -145,8 +145,9 @@ rule step2_clustering_seed_gt:
         "../scripts/step2/07_hierarchical_clustering_seed_gt.R"
 
 # ============================================================================
-# AGGREGATE RULE: All Step 2 Correct Figures (15 original + 2 clustering = 17 total)
+# AGGREGATE RULE: All Step 2 Detailed Figures (16 figures total)
 # Note: FIG_2.8 removed (redundant with FIG_2.16)
+# Includes: 15 original figures + 2 clustering figures (FIG_2.16, FIG_2.17)
 # ============================================================================
 
 rule all_step2_figures:
