@@ -114,9 +114,17 @@ log_subsection("Loading data")
 
 data <- tryCatch({
   if (str_ends(input_file, ".csv")) {
-    result <- read_csv(input_file, show_col_types = FALSE)
+    result <- readr::read_csv(input_file, show_col_types = FALSE)
   } else {
-    result <- read_tsv(input_file, show_col_types = FALSE)
+    result <- readr::read_tsv(input_file, show_col_types = FALSE)
+  }
+  
+  # Validate data is not empty
+  if (nrow(result) == 0) {
+    stop("Input dataset is empty (0 rows)")
+  }
+  if (ncol(result) == 0) {
+    stop("Input dataset has no columns")
   }
   
   # Normalize column names
@@ -137,8 +145,18 @@ data <- tryCatch({
 metadata <- NULL
 if (!is.null(metadata_file) && file.exists(metadata_file)) {
   metadata <- tryCatch({
-    result <- read_tsv(metadata_file, show_col_types = FALSE)
-    log_success(paste("Metadata loaded:", nrow(result), "samples"))
+    result <- readr::read_tsv(metadata_file, show_col_types = FALSE)
+    
+    # Validate metadata is not empty
+    if (nrow(result) == 0) {
+      warning("Metadata file is empty (0 rows). Proceeding without metadata.")
+      result <- NULL
+    } else if (ncol(result) == 0) {
+      warning("Metadata file has no columns. Proceeding without metadata.")
+      result <- NULL
+    } else {
+      log_success(paste("Metadata loaded:", nrow(result), "samples"))
+    }
     result
   }, error = function(e) {
     log_warning(paste("Failed to load metadata:", e$message))

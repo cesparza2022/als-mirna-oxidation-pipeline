@@ -22,7 +22,8 @@
 #' @return Result of expression execution, or NULL on error
 safe_execute <- function(expr, context = "Pipeline step", on_error = NULL) {
   tryCatch({
-    expr
+    # Force evaluation of the expression
+    force(expr)
   }, error = function(e) {
     error_msg <- paste0("❌ ERROR in ", context, ": ", e$message)
     

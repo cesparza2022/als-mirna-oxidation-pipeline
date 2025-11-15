@@ -169,9 +169,17 @@ log_subsection("Loading data")
 data <- tryCatch({
   # Try reading as CSV first (processed data)
   if (str_ends(input_file, ".csv")) {
-    result <- read_csv(input_file, show_col_types = FALSE)
+    result <- readr::read_csv(input_file, show_col_types = FALSE)
   } else {
-    result <- read_tsv(input_file, show_col_types = FALSE)
+    result <- readr::read_tsv(input_file, show_col_types = FALSE)
+  }
+  
+  # Validate data is not empty
+  if (nrow(result) == 0) {
+    stop("Input dataset is empty (0 rows)")
+  }
+  if (ncol(result) == 0) {
+    stop("Input dataset has no columns")
   }
   
   # Normalize column names
@@ -206,6 +214,15 @@ data <- tryCatch({
   }
   
   log_success(paste("Data loaded:", nrow(result), "rows,", ncol(result), "columns"))
+  
+  # Validate that we have data for analysis
+  if (nrow(result) == 0) {
+    stop("Input dataset is empty (0 rows) after processing")
+  }
+  if (ncol(result) <= length(intersect(c("miRNA_name", "pos.mut"), names(result)))) {
+    stop("Input dataset has no sample columns after processing")
+  }
+  
   result
 }, error = function(e) {
   handle_error(e, context = "Step 2.1 - Data Loading", exit_code = 1, log_file = log_file)

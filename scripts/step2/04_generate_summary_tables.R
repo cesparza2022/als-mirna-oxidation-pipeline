@@ -123,7 +123,16 @@ ensure_output_dir(dirname(output_seed_significant))
 log_subsection("Loading statistical results")
 
 comparisons <- tryCatch({
-  result <- read_csv(input_comparisons, show_col_types = FALSE)
+  result <- readr::read_csv(input_comparisons, show_col_types = FALSE)
+  
+  # Validate data is not empty
+  if (nrow(result) == 0) {
+    stop("Comparison results table is empty (0 rows)")
+  }
+  if (ncol(result) == 0) {
+    stop("Comparison results table has no columns")
+  }
+  
   log_success(paste("Comparisons loaded:", nrow(result), "mutations"))
   result
 }, error = function(e) {
@@ -131,7 +140,16 @@ comparisons <- tryCatch({
 })
 
 effect_sizes <- tryCatch({
-  result <- read_csv(input_effect_sizes, show_col_types = FALSE)
+  result <- readr::read_csv(input_effect_sizes, show_col_types = FALSE)
+  
+  # Validate data is not empty
+  if (nrow(result) == 0) {
+    stop("Effect size results table is empty (0 rows)")
+  }
+  if (ncol(result) == 0) {
+    stop("Effect size results table has no columns")
+  }
+  
   log_success(paste("Effect sizes loaded:", nrow(result), "mutations"))
   result
 }, error = function(e) {

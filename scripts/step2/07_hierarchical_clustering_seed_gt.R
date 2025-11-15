@@ -56,7 +56,16 @@ log_subsection("Loading data")
 
 # Try to load VAF filtered data, fallback to processed clean
 if (file.exists(input_data)) {
-  data <- read_csv(input_data, show_col_types = FALSE)
+  data <- readr::read_csv(input_data, show_col_types = FALSE)
+  
+  # Validate data is not empty
+  if (nrow(data) == 0) {
+    stop("Input dataset is empty (0 rows)")
+  }
+  if (ncol(data) == 0) {
+    stop("Input dataset has no columns")
+  }
+  
   log_success(paste("Data loaded:", nrow(data), "SNVs"))
 } else {
   stop("❌ Input data file not found: ", input_data)

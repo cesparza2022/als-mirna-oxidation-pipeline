@@ -60,7 +60,18 @@ log_info(paste("Input file:", input_data))
 
 # Load dataset ---------------------------------------------------------------
 log_subsection("Loading processed dataset")
-processed <- read_csv(input_data, show_col_types = FALSE)
+processed <- readr::read_csv(input_data, show_col_types = FALSE)
+
+# Validate data is not empty
+if (nrow(processed) == 0) {
+  handle_error("Input dataset is empty (0 rows)", 
+               context = "Step 0 - Dataset Overview", exit_code = 1, log_file = log_file)
+}
+if (ncol(processed) == 0) {
+  handle_error("Input dataset has no columns", 
+               context = "Step 0 - Dataset Overview", exit_code = 1, log_file = log_file)
+}
+
 log_success(paste("Loaded", nrow(processed), "rows and", ncol(processed), "columns"))
 
 required_cols <- c("miRNA_name", "pos.mut")

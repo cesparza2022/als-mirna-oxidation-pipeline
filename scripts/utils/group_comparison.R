@@ -6,6 +6,12 @@
 # 2. Fallback: Pattern matching on column names (for backward compatibility)
 # ============================================================================
 
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(readr)
+  library(stringr)
+})
+
 #' Load Sample Groups from Metadata File
 #' 
 #' Loads sample group assignments from a metadata TSV file.
@@ -22,7 +28,7 @@ load_sample_groups_from_metadata <- function(metadata_file, data) {
   
   # Load metadata
   metadata <- tryCatch({
-    read_tsv(metadata_file, show_col_types = FALSE)
+    readr::read_tsv(metadata_file, show_col_types = FALSE)
   }, error = function(e) {
     warning(paste("Could not read metadata file:", metadata_file, "- Error:", e$message))
     return(NULL)

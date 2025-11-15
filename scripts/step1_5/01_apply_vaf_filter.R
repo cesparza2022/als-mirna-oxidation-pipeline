@@ -56,6 +56,14 @@ if (file_ext == "txt" || file_ext == "tsv") {
 cat(sprintf("   ✅ Rows: %s\n", format(nrow(data), big.mark = ",")))
 cat(sprintf("   ✅ Columns: %d\n", ncol(data)))
 
+# Validate data is not empty
+if (nrow(data) == 0) {
+  stop("❌ Input dataset is empty (0 rows)")
+}
+if (ncol(data) == 0) {
+  stop("❌ Input dataset has no columns")
+}
+
 # Detect column names (handle both formats: "miRNA name"/"pos:mut" or "miRNA_name"/"pos.mut")
 mirna_col <- if ("miRNA name" %in% names(data)) "miRNA name" else "miRNA_name"
 posmut_col <- if ("pos:mut" %in% names(data)) "pos:mut" else "pos.mut"
@@ -69,6 +77,15 @@ snv_cols <- setdiff(sample_cols, total_cols)
 
 cat(sprintf("   ✅ SNV columns: %d\n", length(snv_cols)))
 cat(sprintf("   ✅ Total columns: %d\n", length(total_cols)))
+
+# Validate that we have SNV columns
+if (length(snv_cols) == 0) {
+  stop("❌ No SNV count columns detected (no columns matching '^Magen' pattern or all matched total columns)")
+}
+# Validate that we have Total columns for VAF calculation
+if (length(total_cols) == 0) {
+  warning("⚠️  No Total count columns detected (columns with '(PM+1MM+2MM)' suffix). Cannot calculate VAF.")
+}
 
 # ============================================================================
 # 2. CALCULATE VAF AND IDENTIFY ARTIFACTS (VECTORIZED - MUCH FASTER)
@@ -115,6 +132,11 @@ long_data <- data_with_info %>%
   )
 
 cat(sprintf("   ✅ Long format: %s rows\n", format(nrow(long_data), big.mark = ",")))
+
+# Validate long_data is not empty
+if (nrow(long_data) == 0) {
+  stop("❌ Long format data is empty after conversion. Check data structure.")
+}
 
 # Vectorized VAF calculation and filtering
 cat("📊 Calculating VAF and filtering (vectorized)...\n")

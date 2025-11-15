@@ -101,7 +101,15 @@ ensure_output_dir(dirname(output_figure))
 log_subsection("Loading data")
 
 vaf_data <- tryCatch({
-  result <- read_csv(input_file, show_col_types = FALSE)
+  result <- readr::read_csv(input_file, show_col_types = FALSE)
+  
+  # Validate data is not empty
+  if (nrow(result) == 0) {
+    stop("Input dataset is empty (0 rows)")
+  }
+  if (ncol(result) == 0) {
+    stop("Input dataset has no columns")
+  }
   log_success(paste("Loaded:", nrow(result), "rows,", ncol(result), "columns"))
   result
 }, error = function(e) {
@@ -129,6 +137,11 @@ vaf_data <- vaf_data %>%
 gt_data <- vaf_data %>%
   filter(is_gt == TRUE) %>%
   filter(!is.na(position), position >= position_range[1], position <= position_range[2])
+
+# Validate G>T data is not empty
+if (nrow(gt_data) == 0) {
+  stop("No G>T mutations found in dataset. Check data filtering and mutation type extraction.")
+}
 
 log_info(paste("G>T mutations:", nrow(gt_data)))
 log_info(paste("Unique positions:", n_distinct(gt_data$position)))
@@ -176,6 +189,14 @@ group2_cols <- intersect(group2_samples, sample_cols)
 
 log_info(paste("Group 1 columns found:", length(group1_cols)))
 log_info(paste("Group 2 columns found:", length(group2_cols)))
+
+# Validate that we have columns for both groups
+if (length(group1_cols) == 0) {
+  stop(paste("No sample columns found for group:", group1_name))
+}
+if (length(group2_cols) == 0) {
+  stop(paste("No sample columns found for group:", group2_name))
+}
 
 # Pivot to long format for analysis
 gt_long <- gt_data %>%

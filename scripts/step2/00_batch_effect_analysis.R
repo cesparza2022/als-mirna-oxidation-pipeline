@@ -104,9 +104,17 @@ log_subsection("Loading data")
 
 data <- tryCatch({
   if (str_ends(input_file, ".csv")) {
-    result <- read_csv(input_file, show_col_types = FALSE)
+    result <- readr::read_csv(input_file, show_col_types = FALSE)
   } else {
-    result <- read_tsv(input_file, show_col_types = FALSE)
+    result <- readr::read_tsv(input_file, show_col_types = FALSE)
+  }
+  
+  # Validate data is not empty
+  if (nrow(result) == 0) {
+    stop("Input dataset is empty (0 rows)")
+  }
+  if (ncol(result) == 0) {
+    stop("Input dataset has no columns")
   }
   
   # Normalize column names
@@ -127,8 +135,19 @@ data <- tryCatch({
 metadata <- NULL
 if (!is.null(metadata_file) && file.exists(metadata_file)) {
   metadata <- tryCatch({
-    read_tsv(metadata_file, show_col_types = FALSE)
-    log_success(paste("Metadata loaded:", nrow(metadata), "samples"))
+    result <- readr::read_tsv(metadata_file, show_col_types = FALSE)
+    
+    # Validate metadata is not empty
+    if (nrow(result) == 0) {
+      warning("Metadata file is empty (0 rows). Proceeding without metadata.")
+      result <- NULL
+    } else if (ncol(result) == 0) {
+      warning("Metadata file has no columns. Proceeding without metadata.")
+      result <- NULL
+    } else {
+      log_success(paste("Metadata loaded:", nrow(result), "samples"))
+    }
+    result
   }, error = function(e) {
     log_warning(paste("Failed to load metadata:", e$message))
     NULL
@@ -317,7 +336,8 @@ if (n_batches < 2) {
   })
   
   # Extract PC scores
-  pca_scores <- as.data.frame(pca_result$x[, 1:min(10, ncol(pca_result$x))])
+  n_pcs <- min(10, ncol(pca_result$x))
+  pca_scores <- as.data.frame(pca_result$x[, seq_len(n_pcs)])
   pca_scores$sample_id <- rownames(pca_scores)
   pca_scores <- pca_scores %>%
     left_join(groups_df, by = "sample_id") %>%
@@ -327,7 +347,7 @@ if (n_batches < 2) {
     )
   
   # Variance explained
-  variance_explained <- summary(pca_result)$importance[2, 1:min(10, ncol(pca_result$x))]
+  variance_explained <- summary(pca_result)$importance[2, seq_len(n_pcs)]
   pc1_var <- variance_explained[1] * 100
   pc2_var <- variance_explained[2] * 100
   
@@ -423,7 +443,8 @@ pca_result <- tryCatch({
 })
 
 # Extract PC scores
-pca_scores <- as.data.frame(pca_result$x[, 1:min(10, ncol(pca_result$x))])
+n_pcs <- min(10, ncol(pca_result$x))
+pca_scores <- as.data.frame(pca_result$x[, seq_len(n_pcs)])
 
 # Add metadata
 pca_scores$sample_id <- rownames(pca_scores)
@@ -435,7 +456,7 @@ pca_scores <- pca_scores %>%
   )
 
 # Variance explained
-variance_explained <- summary(pca_result)$importance[2, 1:min(10, ncol(pca_result$x))]
+variance_explained <- summary(pca_result)$importance[2, seq_len(n_pcs)]
 pc1_var <- variance_explained[1] * 100
 pc2_var <- variance_explained[2] * 100
 
@@ -507,7 +528,7 @@ log_subsection("Generating PCA visualization (before correction)")
 
 # Get unique groups from pca_scores
 unique_groups_pca <- sort(unique(pca_scores$group))
-group_shapes <- setNames(c(16, 17, 1)[1:length(unique_groups_pca)], unique_groups_pca)
+group_shapes <- setNames(c(16, 17, 1)[seq_along(unique_groups_pca)], unique_groups_pca)
 if (length(unique_groups_pca) > 2) {
   group_shapes <- setNames(rep(16, length(unique_groups_pca)), unique_groups_pca)  # All same shape if > 2 groups
 }

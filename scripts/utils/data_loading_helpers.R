@@ -127,8 +127,21 @@ load_snv_counts_only <- function(file_path, metadata_cols = NULL) {
     data <- data %>% dplyr::rename(pos.mut = `pos:mut`)
   }
   
+  # Validate that data is not empty
+  if (nrow(data) == 0) {
+    stop(paste("❌ File is empty:", file_path))
+  }
+  if (ncol(data) == 0) {
+    stop(paste("❌ File has no columns:", file_path))
+  }
+  
   # Get SNV columns only
   snv_cols <- identify_snv_count_columns(data, metadata_cols)
+  
+  # Validate that SNV columns were found
+  if (length(snv_cols) == 0) {
+    warning(paste("⚠️  No SNV count columns found in:", file_path))
+  }
   
   # Default metadata columns
   default_metadata <- c("miRNA_name", "pos.mut")
@@ -140,6 +153,11 @@ load_snv_counts_only <- function(file_path, metadata_cols = NULL) {
   
   # Return only metadata + SNV columns
   result <- data %>% dplyr::select(dplyr::all_of(c(metadata_cols_final, snv_cols)))
+  
+  # Validate result is not empty
+  if (nrow(result) == 0) {
+    warning(paste("⚠️  Resulting data frame is empty after filtering:", file_path))
+  }
   
   return(result)
 }
@@ -172,6 +190,14 @@ load_vaf_only <- function(file_path, metadata_cols = NULL) {
     data <- data %>% dplyr::rename(pos.mut = `pos:mut`)
   }
   
+  # Validate that data is not empty
+  if (nrow(data) == 0) {
+    stop(paste("❌ File is empty:", file_path))
+  }
+  if (ncol(data) == 0) {
+    stop(paste("❌ File has no columns:", file_path))
+  }
+  
   # Get VAF columns
   vaf_cols <- identify_vaf_columns(data, metadata_cols)
   
@@ -189,6 +215,11 @@ load_vaf_only <- function(file_path, metadata_cols = NULL) {
   
   # Return only metadata + VAF columns
   result <- data %>% dplyr::select(dplyr::all_of(c(metadata_cols_final, vaf_cols)))
+  
+  # Validate result is not empty
+  if (nrow(result) == 0) {
+    warning(paste("⚠️  Resulting data frame is empty after filtering:", file_path))
+  }
   
   return(result)
 }
