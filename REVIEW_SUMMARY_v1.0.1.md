@@ -92,4 +92,4 @@ These improvements result in a more:
 
 ---
 
-For complete technical details, see `PERFECTIONIST_REVIEW_FINDINGS.md`.
+For complete technical details, see `HALLAZGOS_REVISION_PERFECCIONISTA.md`.

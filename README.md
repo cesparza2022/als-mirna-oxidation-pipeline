@@ -336,11 +336,11 @@ See `config/config.yaml.example` for detailed documentation.
 * **Metadata Format**: See `sample_metadata_template.tsv` for metadata file format (optional but recommended for flexible group assignment)
 
 ### Release Information
-* **[RESUMEN_REVISION_v1.0.1.md](RESUMEN_REVISION_v1.0.1.md)** - Executive summary of improvements in version 1.0.1
+* **[REVIEW_SUMMARY_v1.0.1.md](REVIEW_SUMMARY_v1.0.1.md)** - Executive summary of improvements in version 1.0.1
 * **[CHANGELOG.md](CHANGELOG.md)** - Detailed change history
 * **[RELEASE_NOTES_v1.0.1.md](RELEASE_NOTES_v1.0.1.md)** - Release notes for version 1.0.1
 * **[CRITICAL_ISSUES_STATUS.md](CRITICAL_ISSUES_STATUS.md)** - Status of critical cohesion issues (all resolved ✅)
-* **[HALLAZGOS_REVISION_PERFECCIONISTA.md](HALLAZGOS_REVISION_PERFECCIONISTA.md)** - Detailed findings from comprehensive code review (PHASES 1-5)
+* **[PERFECTIONIST_REVIEW_FINDINGS.md](PERFECTIONIST_REVIEW_FINDINGS.md)** - Detailed findings from comprehensive code review (PHASES 1-5)
 
 ### Technical Notes
 * **Statistical Methods**: The pipeline uses parametric (t-test) and non-parametric (Wilcoxon) tests based on data assumptions. FDR correction (Benjamini-Hochberg) is applied for multiple comparisons.
@@ -437,7 +437,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆕 Latest Changes (v1.0.1)
 
-This version includes a significant refactoring focused on improving code quality, visual consistency, and maintainability. See [RESUMEN_REVISION_v1.0.1.md](RESUMEN_REVISION_v1.0.1.md) for a complete summary or [RELEASE_NOTES_v1.0.1.md](RELEASE_NOTES_v1.0.1.md) for technical details.
+This version includes a significant refactoring focused on improving code quality, visual consistency, and maintainability. See [REVIEW_SUMMARY_v1.0.1.md](REVIEW_SUMMARY_v1.0.1.md) for a complete summary or [RELEASE_NOTES_v1.0.1.md](RELEASE_NOTES_v1.0.1.md) for technical details.
 
 ### Critical Fixes
 - 🔴 **Fixed:** Correct VAF calculation in Step 2 detailed figures
@@ -453,9 +453,9 @@ This version includes a significant refactoring focused on improving code qualit
 
 ### Improvements
 - ✨ **Improved:** Visual consistency (G>T highlighted in red)
-- 📚 **Added:** Comprehensive documentation (CHANGELOG, RELEASE_NOTES, HALLAZGOS)
+- 📚 **Added:** Comprehensive documentation (CHANGELOG, RELEASE_NOTES, PERFECTIONIST_REVIEW_FINDINGS)
 
-**See [RESUMEN_REVISION_v1.0.1.md](RESUMEN_REVISION_v1.0.1.md) for executive summary or [HALLAZGOS_REVISION_PERFECCIONISTA.md](HALLAZGOS_REVISION_PERFECCIONISTA.md) for detailed findings.**
+**See [REVIEW_SUMMARY_v1.0.1.md](REVIEW_SUMMARY_v1.0.1.md) for executive summary or [PERFECTIONIST_REVIEW_FINDINGS.md](PERFECTIONIST_REVIEW_FINDINGS.md) for detailed findings.**
 
 ### Critical Cohesion Issues - All Resolved ✅
 All 5 critical cohesion issues identified have been addressed:
