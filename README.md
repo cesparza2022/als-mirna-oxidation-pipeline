@@ -386,22 +386,31 @@ All dependencies are installed automatically when creating the conda/mamba envir
 
 See `environment.yml` for detailed version requirements and dependencies.
 
-## 📖 Citation
+## 🏛️ About
 
-If you use this pipeline in your research, please cite:
+This pipeline was developed by the **CHAIM Lab** at the **University of California, San Diego (UCSD)**.
 
-```bibtex
-@software{miRNA_oxidation_pipeline,
-  title = {miRNA Oxidation Analysis Pipeline},
-  author = {Esparza, Cesar},
-  year = {2025},
-  url = {https://github.com/cesparza2022/miRNA-oxidation-pipeline}
-}
-```
+### CHAIM Lab, UCSD
 
-## 🤝 Contributing
+The **Chaim Lab** is dedicated to exploring the molecular basis of DNA and RNA damage and its role in neurodegeneration and cancer onset and treatment. We strive to be at the forefront of scientific discovery while providing an exciting and rigorous training environment where all are welcome. We believe that diversity in all forms is what makes our community thrive.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+**Location:**
+- University of California San Diego
+- School of Biological Sciences
+- Department of Cell & Developmental Biology
+- Bonner Hall (Wet Lab 3113, Dry Lab 3110, Office 3122)
+
+For more information, please visit: **[chaimlab.com](https://chaimlab.com/)**
+
+### About This Pipeline
+
+This miRNA oxidation analysis pipeline was developed to investigate 8-oxoguanine (8-oxoG) damage patterns in microRNAs, with particular focus on G>T mutations as biomarkers of oxidative stress in neurodegenerative diseases such as ALS. The pipeline provides a comprehensive, reproducible framework for analyzing oxidative damage patterns, statistical comparisons, functional enrichment, and biomarker identification.
+
+**Research Focus:**
+- Oxidative damage in miRNAs (8-oxoG modifications)
+- Biomarkers of oxidative stress in neurodegeneration
+- G>T mutation patterns as indicators of RNA damage
+- Diagnostic signatures for neurodegenerative diseases
 
 ## 📝 License
 
@@ -409,6 +418,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- **CHAIM Lab, UCSD** - For providing the research environment and support for this pipeline development
 - Snakemake workflow management system
 - R statistical computing environment
 - All package developers and maintainers
