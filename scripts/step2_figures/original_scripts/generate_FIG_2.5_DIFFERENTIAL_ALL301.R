@@ -161,7 +161,7 @@ scale_limit <- ceiling(max_abs_diff * 1000) / 1000  # Round
 
 fig_2_5 <- ggplot(differential, aes(x = position, y = miRNA_name, fill = Differential)) +
   geom_tile(color = NA) +
-  # Marcar región seed
+  # Mark seed region
   geom_vline(xintercept = c(1.5, 8.5), color = "#2E86AB", 
              linewidth = 1.2, linetype = "dashed", alpha = 0.6) +
   annotate("text", x = 5, y = length(all_mirnas) * 0.97, 

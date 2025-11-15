@@ -32,7 +32,7 @@ data <- read_csv("final_processed_data_CLEAN.csv", show_col_types = FALSE)
 metadata <- read_csv("metadata.csv", show_col_types = FALSE)
 sample_cols <- metadata$Sample_ID
 
-# Identificar miRNAs con G>T en seed
+# Identify miRNAs with G>T in seed
 seed_gt_data <- data %>%
   filter(str_detect(pos.mut, ":GT$")) %>%
   mutate(position = as.numeric(str_extract(pos.mut, "^[0-9]+"))) %>%
@@ -45,7 +45,7 @@ seed_gt_summary <- seed_gt_data %>%
   summarise(Total_VAF = sum(VAF, na.rm = TRUE), .groups = "drop") %>%
   arrange(desc(Total_VAF))
 
-all_mirnas <- seed_gt_summary$miRNA_name  # TODOS los 301
+all_mirnas <- seed_gt_summary$miRNA_name  # ALL 301
 
 cat("   ✅ Data loaded\n")
 cat("   ✅ Total miRNAs with G>T in seed:", length(all_mirnas), "\n\n")
@@ -56,7 +56,7 @@ cat("   ✅ Total miRNAs with G>T in seed:", length(all_mirnas), "\n\n")
 
 cat("📊 Preparing data for ALL", length(all_mirnas), "miRNAs (all positions)...\n")
 
-# Todos los G>T de los 301 miRNAs (todas las posiciones, no solo seed)
+# All G>T from the 301 miRNAs (all positions, not just seed)
 vaf_gt_all <- data %>%
   filter(str_detect(pos.mut, ":GT$")) %>%
   filter(miRNA_name %in% all_mirnas) %>%
