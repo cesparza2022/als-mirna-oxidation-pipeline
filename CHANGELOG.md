@@ -9,37 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2025-01-21
 
-### 🔴 Fixed (Crítico)
+### 🔴 Fixed (Critical)
 
-#### Step 2 - Cálculo de VAF
-- **Corrección crítica del cálculo de VAF en figuras detalladas**
-  - Los scripts de Step 2 (FIG_2.1 a FIG_2.15) esperaban valores VAF como entrada, pero recibían solo SNV counts
-  - **Problema:** Las figuras mostraban valores incorrectos (counts en lugar de VAF)
-  - **Solución implementada:**
-    - Detección automática de columnas Total (patrón `(PM+1MM+2MM)`)
-    - Cálculo correcto de VAF: `VAF = SNV_Count / Total_Count`
-    - Filtrado de VAF >= 0.5 (artefactos técnicos) → NA
-    - Reemplazo de columnas SNV con valores VAF calculados
-    - Eliminación de columnas Total (los scripts ya tienen VAF directamente)
-  - **Archivos afectados:**
-    - `scripts/step2_figures/run_all_step2_figures.R` - Lógica principal de cálculo VAF
-    - `rules/step2_figures.smk` - Cambio de input de `VAF_FILTERED` a `PRIMARY` (processed_clean.csv)
-  - **Impacto:** Sin esta corrección, todos los análisis de Step 2 estaban usando métricas incorrectas
+#### Step 2 - VAF Calculation
+- **Critical fix for VAF calculation in detailed figures**
+  - Step 2 scripts (FIG_2.1 to FIG_2.15) expected VAF values as input, but received only SNV counts
+  - **Problem:** Figures showed incorrect values (counts instead of VAF)
+  - **Solution implemented:**
+    - Automatic detection of Total columns (pattern `(PM+1MM+2MM)`)
+    - Correct VAF calculation: `VAF = SNV_Count / Total_Count`
+    - Filtering of VAF >= 0.5 (technical artifacts) → NA
+    - Replacement of SNV columns with calculated VAF values
+    - Removal of Total columns (scripts now have VAF directly)
+  - **Files affected:**
+    - `scripts/step2_figures/run_all_step2_figures.R` - Main VAF calculation logic
+    - `rules/step2_figures.smk` - Input change from `VAF_FILTERED` to `PRIMARY` (processed_clean.csv)
+  - **Impact:** Without this fix, all Step 2 analyses were using incorrect metrics
 
-#### Step 2 - Combinación de Heatmaps FIG_2.15
-- **Corrección de combinación de heatmaps para FIG_2.15**
-  - **Problema:** ALS y Control tienen diferente número de columnas (23 vs 21), no se pueden combinar con `+` o `%v%`
-  - **Solución:** Implementado fallback usando `grid.layout` para layout lado a lado
-  - **Archivo afectado:** `scripts/step2_figures/original_scripts/generate_FIG_2.13-15_DENSITY.R`
-  - **Impacto:** FIG_2.15 ahora se genera correctamente
+#### Step 2 - Heatmap Combination FIG_2.15
+- **Fix for heatmap combination for FIG_2.15**
+  - **Problem:** ALS and Control have different number of columns (23 vs 21), cannot be combined with `+` or `%v%`
+  - **Solution:** Implemented fallback using `grid.layout` for side-by-side layout
+  - **File affected:** `scripts/step2_figures/original_scripts/generate_FIG_2.13-15_DENSITY.R`
+  - **Impact:** FIG_2.15 now generates correctly
 
-### 🔧 Fixed (Compatibilidad)
+### 🔧 Fixed (Compatibility)
 
-#### Compatibilidad ggplot2 3.4+
-- **Actualización de parámetros deprecated**
-  - Reemplazado `size` por `linewidth` en funciones de ggplot2
-  - Afecta: `geom_tile()`, `geom_hline()`, `geom_vline()`, etc.
-  - **Archivos afectados:**
+#### ggplot2 3.4+ Compatibility
+- **Deprecated parameter update**
+  - Replaced `size` with `linewidth` in ggplot2 functions
+  - Affects: `geom_tile()`, `geom_hline()`, `geom_vline()`, etc.
+  - **Files affected:**
     - `scripts/step0/01_generate_overview.R`
     - `scripts/step1/01_panel_b_gt_count_by_position.R`
     - `scripts/step1/02_panel_c_gx_spectrum.R`
@@ -51,224 +51,224 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `scripts/step2/03_effect_size_analysis.R`
     - `scripts/step2/05_position_specific_analysis.R`
     - `scripts/step5/02_family_comparison_visualization.R`
-  - **Impacto:** Evita warnings/errores en ggplot2 3.4+ y asegura compatibilidad futura
+  - **Impact:** Avoids warnings/errors in ggplot2 3.4+ and ensures future compatibility
 
-#### Mejoras menores de compatibilidad
-- Corregido `outlier.size = 0.5` → `outlier.size = 1.0` para mejor visibilidad
-- Ajustes menores en linewidth para mejor visualización
+#### Minor compatibility improvements
+- Fixed `outlier.size = 0.5` → `outlier.size = 1.0` for better visibility
+- Minor adjustments in linewidth for better visualization
 
-### ✨ Added (Mejoras)
+### ✨ Added (Improvements)
 
-#### Mejoras Visuales
-- **Destacar G>T en rojo para consistencia**
-  - Panel QC FIGURE 2 ahora destaca G>T mutations en rojo
-  - Consistencia con estándar de visualización en todo el pipeline
-  - **Archivo afectado:** `scripts/step1_5/02_generate_diagnostic_figures.R`
+#### Visual Improvements
+- **Highlight G>T in red for consistency**
+  - QC FIGURE 2 panel now highlights G>T mutations in red
+  - Consistency with visualization standard across the pipeline
+  - **File affected:** `scripts/step1_5/02_generate_diagnostic_figures.R`
 
-#### Documentación Mejorada
-- **Documentación de aproximaciones en cálculos**
-  - Agregados captions explicando que algunos valores son aproximaciones
-  - Clarificación en QC FIGURE 4 sobre aproximación de valores originales
-  - **Archivo afectado:** `scripts/step1_5/02_generate_diagnostic_figures.R`
+#### Improved Documentation
+- **Documentation of approximations in calculations**
+  - Added captions explaining that some values are approximations
+  - Clarification in QC FIGURE 4 about approximation of original values
+  - **File affected:** `scripts/step1_5/02_generate_diagnostic_figures.R`
 
-### 📚 Added (Documentación)
+### 📚 Added (Documentation)
 
-#### Nuevos Documentos de Análisis
+#### New Analysis Documents
 - **COMPARACION_LOCAL_vs_GITHUB.md**
-  - Comparación detallada entre versión local y GitHub
-  - Resumen de todos los cambios y su importancia
-  - Plan de acción recomendado
+  - Detailed comparison between local and GitHub versions
+  - Summary of all changes and their importance
+  - Recommended action plan
 
 - **CORRECCION_STEP2_VAF.md**
-  - Documentación detallada de la corrección crítica del cálculo de VAF
-  - Explicación del problema, solución, y verificación
-  - Flujo de datos corregido
+  - Detailed documentation of the critical VAF calculation fix
+  - Explanation of problem, solution, and verification
+  - Corrected data flow
 
-- **ESTADO_PROBLEMAS_CRITICOS.md**
-  - Identificación de 5 problemas críticos de cohesión en el pipeline
-  - Problemas identificados pero **NO corregidos aún**:
-    1. 🔴 Inconsistencia en archivos de entrada (Step 1)
-    2. 🔴 Inconsistencia en métricas (Step 1)
-    3. 🔴 Métrica 1 Panel E - Suma reads de otras posiciones
-    4. 🔴 Asunción sobre estructura de datos (Step 0)
-    5. 🟡 Datos no utilizados en figuras
-  - Plan de acción recomendado para correcciones futuras
+- **ESTADO_PROBLEMAS_CRITICOS.md** (now `CRITICAL_ISSUES_STATUS.md`)
+  - Identification of 5 critical cohesion issues in the pipeline
+  - Issues identified but **NOT yet fixed**:
+    1. 🔴 Input file inconsistency (Step 1)
+    2. 🔴 Metric inconsistency (Step 1)
+    3. 🔴 Panel E Metric 1 - Sums reads from other positions
+    4. 🔴 Data structure assumption (Step 0)
+    5. 🟡 Unused data in figures
+  - Recommended action plan for future fixes
 
-### 🔄 Changed (Refactorización Mayor - Revisión Perfeccionista)
+### 🔄 Changed (Major Refactoring - Perfectionist Review)
 
-#### FASE 1.1: Eliminación de Código Duplicado Masivo
-- **Corrección crítica de código duplicado triplicado:**
-  - `scripts/utils/logging.R`: Reducido de 1067 → 356 líneas (67% reducción)
-  - `scripts/utils/validate_input.R`: Reducido de 1144 → 383 líneas (67% reducción)
-  - `scripts/utils/build_step1_viewer.R`: Reducido de 1015 → 338 líneas (67% reducción)
-  - **Impacto:** Eliminadas ~2000 líneas de código duplicado, mejorando mantenibilidad
+#### PHASE 1.1: Massive Duplicate Code Elimination
+- **Critical fix for tripled duplicate code:**
+  - `scripts/utils/logging.R`: Reduced from 1067 → 356 lines (67% reduction)
+  - `scripts/utils/validate_input.R`: Reduced from 1144 → 383 lines (67% reduction)
+  - `scripts/utils/build_step1_viewer.R`: Reduced from 1015 → 338 lines (67% reduction)
+  - **Impact:** Eliminated ~2000 lines of duplicate code, improving maintainability
 
-- **Centralización de estilos:**
-  - Creado `scripts/utils/colors.R` centralizado con todas las definiciones de colores
-  - Eliminada definición duplicada de `theme_professional` en `functions_common.R`
-  - Todos los scripts ahora usan colores y temas centralizados
+- **Style centralization:**
+  - Created centralized `scripts/utils/colors.R` with all color definitions
+  - Removed duplicate definition of `theme_professional` in `functions_common.R`
+  - All scripts now use centralized colors and themes
 
-#### FASE 1.2: Mejora de Robustez, Eficiencia y Claridad
-- **Namespaces explícitos:**
-  - Reemplazado `read_csv()` con `readr::read_csv()` en todos los scripts
-  - Reemplazado `str_detect()` con `stringr::str_detect()` donde aplica
-  - Agregado `suppressPackageStartupMessages()` para imports silenciosos
+#### PHASE 1.2: Robustness, Efficiency and Clarity Improvements
+- **Explicit namespaces:**
+  - Replaced `read_csv()` with `readr::read_csv()` in all scripts
+  - Replaced `str_detect()` with `stringr::str_detect()` where applicable
+  - Added `suppressPackageStartupMessages()` for silent imports
 
-- **Validación robusta de datos:**
-  - Agregada validación para data frames vacíos (`nrow == 0`, `ncol == 0`)
-  - Validación de columnas críticas faltantes en todos los scripts
-  - Mejor manejo de casos edge (datos vacíos, columnas faltantes)
+- **Robust data validation:**
+  - Added validation for empty data frames (`nrow == 0`, `ncol == 0`)
+  - Validation of missing critical columns in all scripts
+  - Better handling of edge cases (empty data, missing columns)
 
-- **Robustez en bucles:**
-  - Reemplazado `1:n` con `seq_len(n)` y `seq_along()` para evitar problemas con vectores vacíos
-  - Mejorado `safe_execute()` en `error_handling.R` para evaluación correcta de expresiones
+- **Loop robustness:**
+  - Replaced `1:n` with `seq_len(n)` and `seq_along()` to avoid problems with empty vectors
+  - Improved `safe_execute()` in `error_handling.R` for correct expression evaluation
 
-#### FASE 1.3: Estandarización de Patrones
-- **Colores centralizados:**
-  - 11 scripts actualizados para usar `COLOR_GT`, `COLOR_ALS`, `COLOR_CONTROL` de `colors.R`
-  - Creadas funciones helper para gradientes de heatmap: `get_heatmap_gradient()`, `get_blue_red_heatmap_gradient()`
-  - Eliminados valores hardcoded de colores
+#### PHASE 1.3: Pattern Standardization
+- **Centralized colors:**
+  - 11 scripts updated to use `COLOR_GT`, `COLOR_ALS`, `COLOR_CONTROL` from `colors.R`
+  - Created helper functions for heatmap gradients: `get_heatmap_gradient()`, `get_blue_red_heatmap_gradient()`
+  - Eliminated hardcoded color values
 
-- **Namespaces de stringr:**
-  - 5 scripts actualizados para usar `stringr::` namespace explícito
-  - Consistencia en uso de funciones de manipulación de strings
+- **stringr namespaces:**
+  - 5 scripts updated to use explicit `stringr::` namespace
+  - Consistency in string manipulation function usage
 
-#### FASE 1.4: Validación y Pruebas
-- Revisión completa de scripts de validación existentes
-- Confirmada robustez de validaciones implementadas en FASE 1.2
-- Documentación de estrategia híbrida (centralizada + ad-hoc) como óptima
+#### PHASE 1.4: Validation and Testing
+- Complete review of existing validation scripts
+- Confirmed robustness of validations implemented in PHASE 1.2
+- Documented hybrid strategy (centralized + ad-hoc) as optimal
 
-#### FASE 2.1: Calidad Visual de Gráficas
-- **Estandarización de colores:**
-  - 30+ scripts actualizados para usar colores centralizados de `colors.R`
-  - Creados nuevos constantes: `COLOR_SEED`, `COLOR_NONSEED`, `COLOR_SEED_HIGHLIGHT`, etc.
-  - Funciones helper para gradientes de colores en heatmaps
+#### PHASE 2.1: Visual Quality of Graphics
+- **Color standardization:**
+  - 30+ scripts updated to use centralized colors from `colors.R`
+  - Created new constants: `COLOR_SEED`, `COLOR_NONSEED`, `COLOR_SEED_HIGHLIGHT`, etc.
+  - Helper functions for color gradients in heatmaps
 
-- **Dimensiones de figuras:**
-  - 13 scripts actualizados para usar `fig_width`, `fig_height`, `fig_dpi` de `config.yaml`
-  - Eliminados valores hardcoded de dimensiones
-  - Consistencia en todas las figuras del pipeline
+- **Figure dimensions:**
+  - 13 scripts updated to use `fig_width`, `fig_height`, `fig_dpi` from `config.yaml`
+  - Eliminated hardcoded dimension values
+  - Consistency across all pipeline figures
 
-#### FASE 2.2: Consistencia entre Figuras
-- **Escalas de ejes estandarizadas:**
-  - X-axis breaks: Todos los paneles de Step 1 ahora muestran todas las posiciones (1-23)
-  - X-axis angle: Estándar de 45° para mejor legibilidad
-  - Y-axis expand: Consistente `expansion(mult = c(0, 0.1))` en todos los paneles
+#### PHASE 2.2: Consistency Between Figures
+- **Standardized axis scales:**
+  - X-axis breaks: All Step 1 panels now show all positions (1-23)
+  - X-axis angle: Standard 45° for better readability
+  - Y-axis expand: Consistent `expansion(mult = c(0, 0.1))` across all panels
 
-- **Etiquetas y formato:**
-  - Uso explícito de `scales::comma` y `scales::percent` para formateo
-  - Traducción completa de `step2/05_position_specific_analysis.R` al inglés
-  - Etiquetas de ejes mejoradas con explicaciones científicas
+- **Labels and formatting:**
+  - Explicit use of `scales::comma` and `scales::percent` for formatting
+  - Complete translation of `step2/05_position_specific_analysis.R` to English
+  - Improved axis labels with scientific explanations
 
-#### FASE 2.3: Claridad Científica
-- **Títulos y subtítulos mejorados:**
-  - 13 scripts actualizados con explicaciones biológicas consistentes
-  - Términos científicos explicados: "seed region (functional binding domain)", "oxidative signature"
-  - Subtítulos más descriptivos con contexto biológico
+#### PHASE 2.3: Scientific Clarity
+- **Improved titles and subtitles:**
+  - 13 scripts updated with consistent biological explanations
+  - Scientific terms explained: "seed region (functional binding domain)", "oxidative signature"
+  - More descriptive subtitles with biological context
 
-- **Captions mejorados:**
-  - Step 1: Clarificación sobre "unique SNVs" vs "read counts"
-  - Step 2: Explicación de métodos estadísticos (FDR, Cohen's d, Wilcoxon)
-  - Step 6-7: Detalles de análisis (ROC, AUC, Pearson correlation, linear regression)
+- **Improved captions:**
+  - Step 1: Clarification on "unique SNVs" vs "read counts"
+  - Step 2: Explanation of statistical methods (FDR, Cohen's d, Wilcoxon)
+  - Step 6-7: Analysis details (ROC, AUC, Pearson correlation, linear regression)
 
-- **Leyendas y anotaciones:**
-  - Mejora de leyendas con explicaciones claras
-  - Anotaciones del seed region mejoradas en múltiples scripts
-  - Terminología estandarizada ("Non-Seed" → "Non-seed")
+- **Legends and annotations:**
+  - Improved legends with clear explanations
+  - Improved seed region annotations in multiple scripts
+  - Standardized terminology ("Non-Seed" → "Non-seed")
 
-#### FASE 2.4: Calidad Técnica
-- **Formato de salida:**
-  - Todos los `png()` calls ahora incluyen `bg = "white"` para fondo blanco consistente
-  - 7 scripts actualizados con `bg = "white"`
-  - `par(bg = "white")` agregado para plots de base R
+#### PHASE 2.4: Technical Quality
+- **Output format:**
+  - All `png()` calls now include `bg = "white"` for consistent white background
+  - 7 scripts updated with `bg = "white"`
+  - `par(bg = "white")` added for base R plots
 
-- **Dimensiones finales:**
-  - `step0/01_generate_overview.R` actualizado para usar config para todas las 8 figuras
-  - Consistencia completa en dimensiones de todas las figuras del pipeline
+- **Final dimensions:**
+  - `step0/01_generate_overview.R` updated to use config for all 8 figures
+  - Complete consistency in dimensions across all pipeline figures
 
-#### FASE 3.1: Documentación de Usuario
-- **Correcciones en README.md:**
-  - Error tipográfico corregido: "datas´" → "data"
-  - Eliminadas 11 referencias rotas a archivos inexistentes
-  - Reorganizada sección de documentación sin referencias rotas
-  - Corregido conteo de figuras Step 2: "73" → "21" (5 básicas + 16 detalladas)
+#### PHASE 3.1: User Documentation
+- **README.md corrections:**
+  - Typographical error fixed: "datas´" → "data"
+  - Removed 11 broken references to non-existent files
+  - Reorganized documentation section without broken references
+  - Fixed Step 2 figure count: "73" → "21" (5 basic + 16 detailed)
 
-- **Versión consistente:**
-  - `config/config.yaml.example` actualizado de "1.0.0" → "1.0.1"
+- **Consistent version:**
+  - `config/config.yaml.example` updated from "1.0.0" → "1.0.1"
 
-- **QUICK_START.md actualizado:**
-  - Eliminadas referencias rotas
-  - Reemplazadas con referencias útiles a secciones específicas de README.md
+- **QUICK_START.md updated:**
+  - Removed broken references
+  - Replaced with useful references to specific sections of README.md
 
-### 🔄 Changed (Refactorización Menor - Versión Inicial 1.0.1)
+### 🔄 Changed (Minor Refactoring - Initial Version 1.0.1)
 
-- Mejoras en comentarios y documentación interna
-- Pequeños ajustes en lógica de visualizaciones
-- Mejoras en mensajes de log y salida
+- Improvements in comments and internal documentation
+- Minor adjustments in visualization logic
+- Improvements in log messages and output
 
 ---
 
 ## [1.0.0] - 2025-01-21
 
 ### Initial Release
-- Pipeline completo funcional (Steps 0-7)
-- Revisión exhaustiva completa de todos los scripts
-- Documentación completa
-- Sistema flexible de grupos
-- Análisis estadístico robusto con validación de suposiciones
-- Análisis de efectos de batch y confundidores
+- Complete functional pipeline (Steps 0-7)
+- Complete exhaustive review of all scripts
+- Complete documentation
+- Flexible group system
+- Robust statistical analysis with assumption validation
+- Batch effects and confounders analysis
 
 ---
 
-## Notas de Versión
+## Version Notes
 
-### Versión 1.0.1
-- **Fecha de lanzamiento:** 2025-01-21
-- **Tipo de release:** Bugfix, mejoras y refactorización mayor (revisión perfeccionista)
-- **Compatibilidad:** Requiere ggplot2 3.4+ para mejor experiencia (pero compatible con versiones anteriores)
-- **Cambios breaking:** Ninguno
-- **Recomendación:** Actualizar inmediatamente debido a corrección crítica de VAF y mejoras masivas de código
-- **Mejoras principales:**
-  - Corrección crítica de cálculo VAF en Step 2
-  - Eliminación de ~2000 líneas de código duplicado
-  - Estandarización completa de colores, temas y dimensiones de figuras
-  - Mejora de robustez en validación de datos y manejo de errores
-  - Mejora de claridad científica en todas las figuras
-  - Documentación de usuario actualizada y corregida
+### Version 1.0.1
+- **Release date:** 2025-01-21
+- **Release type:** Bugfix, improvements and major refactoring (perfectionist review)
+- **Compatibility:** Requires ggplot2 3.4+ for best experience (but compatible with earlier versions)
+- **Breaking changes:** None
+- **Recommendation:** Update immediately due to critical VAF fix and massive code improvements
+- **Main improvements:**
+  - Critical VAF calculation fix in Step 2
+  - Elimination of ~2000 lines of duplicate code
+  - Complete standardization of colors, themes and figure dimensions
+  - Improved robustness in data validation and error handling
+  - Improved scientific clarity in all figures
+  - Updated and corrected user documentation
 
-### Versión 1.0.0
-- **Fecha de lanzamiento:** 2025-01-21
-- **Tipo de release:** Estable
-- **Estado:** Pipeline completo y funcional
-
----
-
-## Estado de Problemas Críticos
-
-**Todos los problemas críticos identificados originalmente han sido resueltos o mejorados.**  
-Ver `ESTADO_PROBLEMAS_CRITICOS.md` para detalles completos:
-
-1. ✅ **Inconsistencia en archivos de entrada (Step 1)** - **RESUELTO**
-   - Todos los paneles ahora usan `processed_clean.csv` consistentemente
-   - `rules/step1.smk` actualizado para usar `INPUT_DATA_CLEAN` en todos los paneles
-
-2. 🟡 **Inconsistencia en métricas (Step 1)** - **MEJORADO**
-   - Diferentes métricas son intencionales y apropiadas (diversidad vs abundancia)
-   - Documentación agregada explicando las diferencias y su propósito
-
-3. ✅ **Métrica 1 Panel E (G-Content Landscape)** - **RESUELTO**
-   - Lógica corregida: ahora suma solo reads de la posición específica
-   - Caption actualizado para claridad
-
-4. ✅ **Asunción sobre estructura de datos (Step 0)** - **DOCUMENTADO**
-   - Documentación clara agregada sobre estructura de `processed_clean.csv`
-   - Validación mejorada con logs descriptivos
-
-5. ✅ **Datos no utilizados en figuras** - **RESUELTO**
-   - Cálculos innecesarios eliminados (Panel B, F de Step 1)
-   - Cálculos necesarios para otras visualizaciones mantenidos y documentados
+### Version 1.0.0
+- **Release date:** 2025-01-21
+- **Release type:** Stable
+- **Status:** Complete and functional pipeline
 
 ---
 
-**Formato del changelog:** Basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+## Critical Issues Status
+
+**All originally identified critical issues have been resolved or improved.**  
+See `CRITICAL_ISSUES_STATUS.md` for complete details:
+
+1. ✅ **Input file inconsistency (Step 1)** - **RESOLVED**
+   - All panels now use `processed_clean.csv` consistently
+   - `rules/step1.smk` updated to use `INPUT_DATA_CLEAN` in all panels
+
+2. 🟡 **Metric inconsistency (Step 1)** - **IMPROVED**
+   - Different metrics are intentional and appropriate (diversity vs abundance)
+   - Documentation added explaining the differences and their purpose
+
+3. ✅ **Panel E Metric 1 (G-Content Landscape)** - **RESOLVED**
+   - Corrected logic: now sums only reads from the specific position
+   - Caption updated for clarity
+
+4. ✅ **Data structure assumption (Step 0)** - **DOCUMENTED**
+   - Clear documentation added about `processed_clean.csv` structure
+   - Improved validation with descriptive logs
+
+5. ✅ **Unused data in figures** - **RESOLVED**
+   - Unnecessary calculations removed (Panel B, F from Step 1)
+   - Calculations necessary for other visualizations maintained and documented
+
+---
+
+**Changelog format:** Based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 

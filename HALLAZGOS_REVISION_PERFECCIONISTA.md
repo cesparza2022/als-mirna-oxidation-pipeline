@@ -413,7 +413,7 @@
      - `config/config.yaml.example` for configuration and data format
      - `README.md` for complete documentation
      - `sample_metadata_template.tsv` for metadata format
-     - `CHANGELOG.md`, `RELEASE_NOTES_v1.0.1.md`, `ESTADO_PROBLEMAS_CRITICOS.md` for release information
+     - `CHANGELOG.md`, `RELEASE_NOTES_v1.0.1.md`, `CRITICAL_ISSUES_STATUS.md` for release information
 
 3. **Version inconsistency:**
    - ❌ `config/config.yaml.example` had version `"1.0.0"` while README.md mentioned `"1.0.1"`
@@ -430,7 +430,7 @@
    - ✅ Reorganized into useful subsections:
      - Getting Started (Quick Start Guide, README)
      - Configuration and Data Format (existing files)
-     - Release Information (CHANGELOG, RELEASE_NOTES, ESTADO_PROBLEMAS_CRITICOS)
+     - Release Information (CHANGELOG, RELEASE_NOTES, CRITICAL_ISSUES_STATUS)
      - Technical Notes (statistical methods, batch effects analysis, confounders)
 
 6. **QUICK_START.md Updated:**
@@ -480,7 +480,7 @@
    - ❌ CHANGELOG and RELEASE_NOTES did not reflect the current state of the pipeline
    - ❌ Mentioned problems as "pending" when they were already resolved
    - ✅ Both documents now reflect the current state (all problems resolved)
-   - ✅ Cross-references Updated to `ESTADO_PROBLEMAS_CRITICOS.md`
+   - ✅ Cross-references Updated to `CRITICAL_ISSUES_STATUS.md`
 
 **Files modified:**
 - `CHANGELOG.md`: Updated with all the PHASES 1.1-3.1 from the perfectionist review
@@ -562,9 +562,9 @@
 ### **Issues identified and fixed:**
 
 1. **Referencias inconsistentes between documents:**
-   - ❌ `CHANGELOG.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "ESTADO_PROBLEMAS_CRITICOS.md"
-   - ❌ `RELEASE_NOTES_v1.0.1.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "ESTADO_PROBLEMAS_CRITICOS.md"
-   - ✅ Fixed all references to "ESTADO_PROBLEMAS_CRITICOS.md" in `CHANGELOG.md` and `RELEASE_NOTES_v1.0.1.md`
+   - ❌ `CHANGELOG.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "CRITICAL_ISSUES_STATUS.md"
+   - ❌ `RELEASE_NOTES_v1.0.1.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "CRITICAL_ISSUES_STATUS.md"
+   - ✅ Fixed all references to "CRITICAL_ISSUES_STATUS.md" in `CHANGELOG.md` and `RELEASE_NOTES_v1.0.1.md`
 
 2. **DOCUMENTATION missing in README.md:**
    - ❌ `README.md` DID NOT mention "HALLAZGOS_REVISION_PERFECCIONISTA.md" in the section from DOCUMENTATION
@@ -577,8 +577,8 @@
    - ✅ Verified that all dates are consistent (2025-01-21)
 
 **Files modified:**
-- `CHANGELOG.md`: Fixed reference from "PROBLEMAS_CRITICOS_COHESION.md" to "ESTADO_PROBLEMAS_CRITICOS.md"
-- `RELEASE_NOTES_v1.0.1.md`: Fixed reference from "PROBLEMAS_CRITICOS_COHESION.md" to "ESTADO_PROBLEMAS_CRITICOS.md"
+- `CHANGELOG.md`: Fixed reference from "PROBLEMAS_CRITICOS_COHESION.md" to "CRITICAL_ISSUES_STATUS.md"
+- `RELEASE_NOTES_v1.0.1.md`: Fixed reference from "PROBLEMAS_CRITICOS_COHESION.md" to "CRITICAL_ISSUES_STATUS.md"
 - `README.md`: Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" and section detailed from "Major Refactoring (Perfectionist Review)"
 - `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Updated status to "PHASE 3.4 completed" and Added section documenting the corrections
 
@@ -611,7 +611,7 @@
      - `QUICK_START.md` ✅
      - `CHANGELOG.md` ✅
      - `RELEASE_NOTES_v1.0.1.md` ✅
-     - `ESTADO_PROBLEMAS_CRITICOS.md` ✅
+     - `CRITICAL_ISSUES_STATUS.md` ✅
      - `HALLAZGOS_REVISION_PERFECCIONISTA.md` ✅
      - `config/config.yaml.example` ✅
      - `sample_metadata_template.tsv` ✅

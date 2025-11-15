@@ -339,7 +339,7 @@ See `config/config.yaml.example` for detailed documentation.
 * **[RESUMEN_REVISION_v1.0.1.md](RESUMEN_REVISION_v1.0.1.md)** - Executive summary of improvements in version 1.0.1
 * **[CHANGELOG.md](CHANGELOG.md)** - Detailed change history
 * **[RELEASE_NOTES_v1.0.1.md](RELEASE_NOTES_v1.0.1.md)** - Release notes for version 1.0.1
-* **[ESTADO_PROBLEMAS_CRITICOS.md](ESTADO_PROBLEMAS_CRITICOS.md)** - Status of critical cohesion issues (all resolved ✅)
+* **[CRITICAL_ISSUES_STATUS.md](CRITICAL_ISSUES_STATUS.md)** - Status of critical cohesion issues (all resolved ✅)
 * **[HALLAZGOS_REVISION_PERFECCIONISTA.md](HALLAZGOS_REVISION_PERFECCIONISTA.md)** - Detailed findings from comprehensive code review (PHASES 1-5)
 
 ### Technical Notes
@@ -450,7 +450,7 @@ All 5 critical cohesion issues identified have been addressed:
 - ✅ Removed unused calculations
 - ✅ Documented data structure assumptions in Step 0
 
-See [ESTADO_PROBLEMAS_CRITICOS.md](ESTADO_PROBLEMAS_CRITICOS.md) for detailed status.
+See [CRITICAL_ISSUES_STATUS.md](CRITICAL_ISSUES_STATUS.md) for detailed status.
 
 ---
 

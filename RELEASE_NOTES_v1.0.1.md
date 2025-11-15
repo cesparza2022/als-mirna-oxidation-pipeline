@@ -1,167 +1,167 @@
 # 🎉 Release Notes v1.0.1
 
-**Fecha:** 2025-01-21  
-**Tipo:** Bugfix y Mejoras  
-**Prioridad:** 🔴 **Actualización Crítica Recomendada**
+**Date:** 2025-01-21  
+**Type:** Bugfix and Improvements  
+**Priority:** 🔴 **Critical Update Recommended**
 
 ---
 
-## 📋 Resumen Ejecutivo
+## 📋 Executive Summary
 
-Esta versión incluye una **corrección crítica** del cálculo de VAF en Step 2, además de una **revisión perfeccionista completa** que mejora significativamente la calidad, robustez y consistencia del código y las visualizaciones. Incluye eliminación masiva de código duplicado, estandarización completa de estilos y mejoras de claridad científica.
+This version includes a **critical fix** for VAF calculation in Step 2, plus a **comprehensive perfectionist review** that significantly improves the quality, robustness and consistency of code and visualizations. Includes massive elimination of duplicate code, complete style standardization and improvements in scientific clarity.
 
-### ⚠️ **ACTUALIZACIÓN RECOMENDADA INMEDIATAMENTE**
+### ⚠️ **IMMEDIATE UPDATE RECOMMENDED**
 
-Si estás usando el pipeline para análisis de datos, debes actualizar a esta versión porque:
-- **Corrección crítica:** Los resultados de Step 2 estaban usando métricas incorrectas (counts en lugar de VAF)
-- Sin esta corrección, todas las figuras y análisis estadísticos de Step 2 son incorrectos
-- **Mejoras masivas:** ~2000 líneas de código duplicado eliminadas, estandarización completa de colores y dimensiones, mejoras de robustez y claridad científica
+If you are using the pipeline for data analysis, you must update to this version because:
+- **Critical fix:** Step 2 results were using incorrect metrics (counts instead of VAF)
+- Without this fix, all figures and statistical analyses from Step 2 are incorrect
+- **Massive improvements:** ~2000 lines of duplicate code eliminated, complete standardization of colors and dimensions, robustness and scientific clarity improvements
 
 ---
 
-## 🔴 Correcciones Críticas
+## 🔴 Critical Fixes
 
-### 1. Cálculo de VAF en Step 2 (Crítico)
+### 1. VAF Calculation in Step 2 (Critical)
 
-**Problema:**
-- Los scripts detallados de Step 2 esperaban valores VAF (Variant Allele Frequency) como entrada
-- Estaban recibiendo solo SNV counts, sin columnas Total
-- **Resultado:** Las figuras mostraban valores incorrectos (counts en lugar de VAF)
-- **Impacto:** Todos los análisis estadísticos y visualizaciones de Step 2 estaban usando métricas incorrectas
+**Problem:**
+- Detailed Step 2 scripts expected VAF (Variant Allele Frequency) values as input
+- They were receiving only SNV counts, without Total columns
+- **Result:** Figures showed incorrect values (counts instead of VAF)
+- **Impact:** All statistical analyses and visualizations from Step 2 were using incorrect metrics
 
-**Solución:**
-- Detección automática de columnas Total en `processed_clean.csv`
-- Cálculo correcto: `VAF = SNV_Count / Total_Count`
-- Filtrado automático de VAF >= 0.5 (artefactos técnicos) → NA
-- Reemplazo de SNV counts con valores VAF calculados
-- Los scripts ahora reciben VAF directamente, como esperaban
+**Solution:**
+- Automatic detection of Total columns in `processed_clean.csv`
+- Correct calculation: `VAF = SNV_Count / Total_Count`
+- Automatic filtering of VAF >= 0.5 (technical artifacts) → NA
+- Replacement of SNV counts with calculated VAF values
+- Scripts now receive VAF directly, as expected
 
-**Archivos modificados:**
-- `scripts/step2_figures/run_all_step2_figures.R` - Lógica principal
-- `rules/step2_figures.smk` - Cambio de input a `processed_clean.csv`
+**Files modified:**
+- `scripts/step2_figures/run_all_step2_figures.R` - Main logic
+- `rules/step2_figures.smk` - Input change to `processed_clean.csv`
 
-**Cómo verificar:**
-1. Ejecutar Step 2: `snakemake -j 1 all_step2_figures`
-2. Revisar log: Debe mostrar "VAF calculated and filtered"
-3. Verificar figuras: Deben mostrar valores entre 0 y 0.5 (rango válido de VAF)
+**How to verify:**
+1. Run Step 2: `snakemake -j 1 all_step2_figures`
+2. Check log: Should show "VAF calculated and filtered"
+3. Verify figures: Should show values between 0 and 0.5 (valid VAF range)
 
-### 2. Combinación de Heatmaps FIG_2.15
+### 2. Heatmap Combination FIG_2.15
 
-**Problema:**
-- ALS y Control tienen diferente número de columnas (23 vs 21)
-- No se pueden combinar directamente con `+` o `%v%` en patchwork
+**Problem:**
+- ALS and Control have different number of columns (23 vs 21)
+- Cannot be combined directly with `+` or `%v%` in patchwork
 
-**Solución:**
-- Implementado fallback usando `grid.layout` para layout lado a lado
-- FIG_2.15 ahora se genera correctamente
+**Solution:**
+- Implemented fallback using `grid.layout` for side-by-side layout
+- FIG_2.15 now generates correctly
 
-**Archivo modificado:**
+**File modified:**
 - `scripts/step2_figures/original_scripts/generate_FIG_2.13-15_DENSITY.R`
 
 ---
 
-## 🔧 Correcciones de Compatibilidad
+## 🔧 Compatibility Fixes
 
-### Compatibilidad ggplot2 3.4+
+### ggplot2 3.4+ Compatibility
 
-**Problema:**
-- ggplot2 3.4+ deprecó el parámetro `size` en favor de `linewidth`
-- El código usaba `size` en `geom_tile()`, `geom_hline()`, etc.
+**Problem:**
+- ggplot2 3.4+ deprecated the `size` parameter in favor of `linewidth`
+- Code used `size` in `geom_tile()`, `geom_hline()`, etc.
 
-**Solución:**
-- Reemplazado `size` por `linewidth` en todos los scripts afectados
-- Compatible con versiones anteriores y futuras de ggplot2
+**Solution:**
+- Replaced `size` with `linewidth` in all affected scripts
+- Compatible with earlier and future versions of ggplot2
 
-**Archivos modificados:** 11 scripts en total
+**Files modified:** 11 scripts total
 - Steps 0, 1, 1.5, 2, 5
 
 ---
 
-## ✨ Mejoras (Revisión Perfeccionista)
+## ✨ Improvements (Perfectionist Review)
 
-### 🔧 Mejoras de Código (FASE 1)
+### 🔧 Code Improvements (PHASE 1)
 
-#### Eliminación de Código Duplicado Masivo
-- **~2000 líneas de código duplicado eliminadas:**
-  - `logging.R`: 1067 → 356 líneas (67% reducción)
-  - `validate_input.R`: 1144 → 383 líneas (67% reducción)
-  - `build_step1_viewer.R`: 1015 → 338 líneas (67% reducción)
-- **Centralización de estilos:**
-  - Creado `colors.R` centralizado con todas las definiciones de colores
-  - Eliminada definición duplicada de `theme_professional`
-  - Todos los scripts ahora usan colores y temas centralizados
+#### Massive Duplicate Code Elimination
+- **~2000 lines of duplicate code eliminated:**
+  - `logging.R`: 1067 → 356 lines (67% reduction)
+  - `validate_input.R`: 1144 → 383 lines (67% reduction)
+  - `build_step1_viewer.R`: 1015 → 338 lines (67% reduction)
+- **Style centralization:**
+  - Created centralized `colors.R` with all color definitions
+  - Removed duplicate definition of `theme_professional`
+  - All scripts now use centralized colors and themes
 
-#### Robustez y Validación
-- **Namespaces explícitos:** `readr::read_csv()`, `stringr::str_detect()` en todos los scripts
-- **Validación robusta:** Validación de data frames vacíos y columnas faltantes en todos los scripts
-- **Robustez en bucles:** Reemplazado `1:n` con `seq_len(n)` y `seq_along()` para evitar errores
+#### Robustness and Validation
+- **Explicit namespaces:** `readr::read_csv()`, `stringr::str_detect()` in all scripts
+- **Robust validation:** Validation of empty data frames and missing columns in all scripts
+- **Loop robustness:** Replaced `1:n` with `seq_len(n)` and `seq_along()` to avoid errors
 
-#### Estandarización de Patrones
-- 30+ scripts actualizados para usar colores centralizados
-- Funciones helper creadas para gradientes de heatmap
-- Namespaces de `stringr` estandarizados
+#### Pattern Standardization
+- 30+ scripts updated to use centralized colors
+- Helper functions created for heatmap gradients
+- `stringr` namespaces standardized
 
-### 🎨 Mejoras Visuales (FASE 2)
+### 🎨 Visual Improvements (PHASE 2)
 
-#### Calidad Visual
-- **Estandarización completa de colores:** 30+ scripts actualizados
-- **Dimensiones consistentes:** 13 scripts actualizados para usar `config.yaml`
-- **Fondo blanco:** Todos los `png()` calls ahora incluyen `bg = "white"`
+#### Visual Quality
+- **Complete color standardization:** 30+ scripts updated
+- **Consistent dimensions:** 13 scripts updated to use `config.yaml`
+- **White background:** All `png()` calls now include `bg = "white"`
 
-#### Consistencia entre Figuras
-- **Escalas de ejes estandarizadas:** X-axis breaks, ángulo, Y-axis expand consistentes
-- **Formato explícito:** `scales::comma` y `scales::percent` para consistencia
-- **Traducción completa:** Todos los textos ahora en inglés
+#### Consistency Between Figures
+- **Standardized axis scales:** X-axis breaks, angle, Y-axis expand consistent
+- **Explicit formatting:** `scales::comma` and `scales::percent` for consistency
+- **Complete translation:** All text now in English
 
-#### Claridad Científica
-- **Títulos y subtítulos mejorados:** 13 scripts con explicaciones biológicas consistentes
-- **Captions mejorados:** Explicación de métodos estadísticos (FDR, Cohen's d, Wilcoxon, ROC, AUC)
-- **Terminología estandarizada:** "seed region (functional binding domain)", "oxidative signature"
+#### Scientific Clarity
+- **Improved titles and subtitles:** 13 scripts with consistent biological explanations
+- **Improved captions:** Explanation of statistical methods (FDR, Cohen's d, Wilcoxon, ROC, AUC)
+- **Standardized terminology:** "seed region (functional binding domain)", "oxidative signature"
 
-### 📚 Mejoras de Documentación (FASE 3)
+### 📚 Documentation Improvements (PHASE 3)
 
-#### Documentación de Usuario
-- **README.md corregido:** Error tipográfico, referencias rotas eliminadas, conteo de figuras corregido
-- **QUICK_START.md actualizado:** Referencias rotas reemplazadas con referencias útiles
-- **Versión consistente:** `config.yaml.example` actualizado a "1.0.1"
+#### User Documentation
+- **README.md corrected:** Typographical error, broken references removed, figure count corrected
+- **QUICK_START.md updated:** Broken references replaced with useful references
+- **Consistent version:** `config.yaml.example` updated to "1.0.1"
 
-### Mejoras Visuales (Versión Inicial)
-- **Destacar G>T en rojo** en QC FIGURE 2 para consistencia con estándar del pipeline
-- Mejor visibilidad de outliers (`outlier.size` aumentado a 1.0)
-- Captions explicando aproximaciones en cálculos
-- Clarificación en QC FIGURE 4 sobre valores aproximados
+#### Visual Improvements (Initial Version)
+- **Highlight G>T in red** in QC FIGURE 2 for consistency with pipeline standard
+- Better outlier visibility (`outlier.size` increased to 1.0)
+- Captions explaining approximations in calculations
+- Clarification in QC FIGURE 4 about approximate values
 
 ---
 
-## 📚 Nueva Documentación
+## 📚 New Documentation
 
 ### 1. COMPARACION_LOCAL_vs_GITHUB.md
-- Comparación detallada entre versiones local y remota
-- Resumen de cambios y su importancia
-- Plan de acción recomendado
+- Detailed comparison between local and remote versions
+- Summary of changes and their importance
+- Recommended action plan
 
 ### 2. CORRECCION_STEP2_VAF.md
-- Documentación técnica detallada de la corrección de VAF
-- Explicación del problema y solución
-- Flujo de datos corregido
+- Detailed technical documentation of VAF fix
+- Explanation of problem and solution
+- Corrected data flow
 
-### 3. ESTADO_PROBLEMAS_CRITICOS.md
-- Identificación de 5 problemas críticos pendientes
-- Guía para correcciones futuras
-- Plan de acción recomendado
+### 3. CRITICAL_ISSUES_STATUS.md
+- Identification of 5 critical cohesion issues in the pipeline
+- All issues identified have been resolved or improved
+- Guide for future corrections
 
 ---
 
-## 🔄 Cambios Técnicos Detallados
+## 🔄 Detailed Technical Changes
 
-### Archivos Modificados (18 archivos)
+### Files Modified (18 files)
 
-#### Correcciones Críticas (3 archivos)
-1. `scripts/step2_figures/run_all_step2_figures.R` - Cálculo VAF
-2. `scripts/step2_figures/original_scripts/generate_FIG_2.13-15_DENSITY.R` - Layout heatmaps
+#### Critical Fixes (3 files)
+1. `scripts/step2_figures/run_all_step2_figures.R` - VAF calculation
+2. `scripts/step2_figures/original_scripts/generate_FIG_2.13-15_DENSITY.R` - Heatmap layout
 3. `rules/step2_figures.smk` - Input configuration
 
-#### Compatibilidad ggplot2 (11 archivos)
+#### ggplot2 Compatibility (11 files)
 - `scripts/step0/01_generate_overview.R`
 - `scripts/step1/01_panel_b_gt_count_by_position.R`
 - `scripts/step1/02_panel_c_gx_spectrum.R`
@@ -174,92 +174,91 @@ Si estás usando el pipeline para análisis de datos, debes actualizar a esta ve
 - `scripts/step2/05_position_specific_analysis.R`
 - `scripts/step5/02_family_comparison_visualization.R`
 
-#### Otros cambios menores (4 archivos)
-- `rules/step1.smk` - Ajustes menores
+#### Other minor changes (4 files)
+- `rules/step1.smk` - Minor adjustments
 
-### Estadísticas (Versión Completa 1.0.1)
-- **Líneas agregadas:** +831 (inicial) + ~500 (revisión perfeccionista)
-- **Líneas eliminadas:** -96 (inicial) + ~2000 (código duplicado eliminado)
-- **Neto:** -~765 líneas (reducción significativa)
-- **Archivos nuevos:** 3 (documentación inicial) + 1 (`colors.R`)
-- **Archivos modificados:** 18 (inicial) + 70+ (revisión perfeccionista)
-- **Scripts revisados:** Todos los scripts del pipeline (100% cobertura)
+### Statistics (Complete Version 1.0.1)
+- **Lines added:** +831 (initial) + ~500 (perfectionist review)
+- **Lines removed:** -96 (initial) + ~2000 (duplicate code eliminated)
+- **Net:** -~765 lines (significant reduction)
+- **New files:** 3 (initial documentation) + 1 (`colors.R`)
+- **Files modified:** 18 (initial) + 70+ (perfectionist review)
+- **Scripts reviewed:** All pipeline scripts (100% coverage)
 
 ---
 
-## ⚙️ Instalación y Actualización
+## ⚙️ Installation and Update
 
-### Si ya tienes el pipeline instalado:
+### If you already have the pipeline installed:
 
 ```bash
 cd miRNA-oxidation-pipeline
 git pull origin main
 ```
 
-### Si es una nueva instalación:
+### If this is a new installation:
 
 ```bash
 git clone https://github.com/cesparza2022/miRNA-oxidation-pipeline.git
 cd miRNA-oxidation-pipeline
-bash setup.sh --mamba  # o --conda
+bash setup.sh --mamba  # or --conda
 ```
 
-### Verificación después de actualizar:
+### Verification after updating:
 
 ```bash
-# Verificar que los cambios están presentes
+# Verify that changes are present
 git log --oneline -3
 
-# Debe mostrar:
-# 7d6ea94 fix: Correcciones críticas VAF Step 2 y mejoras de compatibilidad
+# Should show:
+# 7d6ea94 fix: Critical VAF Step 2 fixes and compatibility improvements
 ```
 
 ---
 
-## ⚠️ Notas Importantes
+## ⚠️ Important Notes
 
-### Si ya ejecutaste Step 2 con la versión anterior:
+### If you already ran Step 2 with the previous version:
 
-1. **Re-ejecutar Step 2** con esta versión:
+1. **Re-run Step 2** with this version:
    ```bash
    snakemake -j 1 all_step2_figures --forceall
    ```
 
-2. **Revisar los resultados:**
-   - Las figuras deben mostrar valores entre 0 y 0.5 (VAF)
-   - Los análisis estadísticos deben ser diferentes (ahora correctos)
+2. **Review the results:**
+   - Figures should show values between 0 and 0.5 (VAF)
+   - Statistical analyses should be different (now correct)
 
-### Estado de Problemas Críticos:
+### Critical Issues Status:
 
-**Todos los problemas críticos identificados originalmente han sido resueltos o mejorados.**  
-Ver `ESTADO_PROBLEMAS_CRITICOS.md` para detalles completos:
+**All originally identified critical issues have been resolved or improved.**  
+See `CRITICAL_ISSUES_STATUS.md` for complete details:
 
-- ✅ **Inconsistencia en archivos de entrada (Step 1)** - RESUELTO
-- 🟡 **Inconsistencia en métricas (Step 1)** - MEJORADO (diferentes métricas son apropiadas)
-- ✅ **Métrica 1 Panel E (suma incorrecta)** - RESUELTO
-- ✅ **Asunción sobre estructura de datos (Step 0)** - DOCUMENTADO
-- ✅ **Datos no utilizados en figuras** - RESUELTO
-
----
-
-## 🙏 Agradecimientos
-
-Gracias a la revisión exhaustiva que identificó estos problemas críticos, especialmente:
-- Revisión de lógica de cálculos
-- Identificación de incompatibilidades con ggplot2
-- Documentación de problemas pendientes
+- ✅ **Input file inconsistency (Step 1)** - RESOLVED
+- 🟡 **Metric inconsistency (Step 1)** - IMPROVED (different metrics are appropriate)
+- ✅ **Panel E Metric 1 (incorrect sum)** - RESOLVED
+- ✅ **Data structure assumption (Step 0)** - DOCUMENTED
+- ✅ **Unused data in figures** - RESOLVED
 
 ---
 
-## 📞 Soporte
+## 🙏 Acknowledgments
 
-Si encuentras problemas después de actualizar:
-1. Revisar `CORRECCION_STEP2_VAF.md` para detalles técnicos
-2. Revisar logs en `results/step2/final/logs/`
-3. Verificar que `processed_clean.csv` tiene columnas Total
+Thanks to the exhaustive review that identified these critical issues, especially:
+- Review of calculation logic
+- Identification of incompatibilities with ggplot2
+- Documentation of pending issues
 
 ---
 
-**Última actualización:** 2025-01-21  
+## 📞 Support
+
+If you encounter problems after updating:
+1. Review `CORRECCION_STEP2_VAF.md` for technical details
+2. Review logs in `results/step2/final/logs/`
+3. Verify that `processed_clean.csv` has Total columns
+
+---
+
+**Last updated:** 2025-01-21  
 **Commit:** 7d6ea94
-
