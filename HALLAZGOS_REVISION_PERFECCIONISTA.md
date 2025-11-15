@@ -310,7 +310,7 @@
 
 **FASE 2.2 COMPLETADA ✅**
 
-### **FASE 2.3: Mensaje y claridad científica - EN PROGRESO**
+### **FASE 2.3: Mensaje y claridad científica - COMPLETADA ✅**
 - ✅ Captions mejorados en step1:
   - Panel D: Agregado caption explicando SNVs únicos vs read counts
   - Panel G: Cambiado 'Based on' a 'Shows percentage based on' para consistencia
@@ -320,7 +320,47 @@
   - Effect size: Incluye fórmula de Cohen's d y umbrales de interpretación (Large, Medium, Small)
   - Position-specific: Especifica método estadístico (Wilcoxon rank-sum) y FDR correction
 - ✅ Captions mejorados en step6:
-  - Correlation visualization: Explica método (Pearson correlation test) y regresión lineal con 95% CI
+  - Correlation visualization: Explica método (Pearson correlation test) y regresión lineal con intervalos de confianza
+- ✅ **Títulos y subtítulos perfeccionados:**
+  - Todos los panels de step1 ahora tienen letras (B., C., D., E., F., G.) para consistencia
+  - Subtítulos mejorados: Explican seed region como "functional binding domain" o "functional miRNA binding domain"
+  - Término "oxidative signature" agregado consistentemente para contexto biológico de G>T
+  - Etiquetas de ejes mejoradas: Más descriptivas y científicamente precisas
+- ✅ **Leyendas mejoradas:**
+  - Panel D: "Region (Seed vs Non-seed)" en lugar de solo "Region"
+  - Panel F: Etiquetas de ejes más descriptivas
+- ✅ **Anotaciones mejoradas:**
+  - Panel C: Agregado texto explicativo para seed region
+  - Panels B, E: Anotaciones mejoradas con explicación de seed region
+  - step4/03: Anotaciones de seed region mejoradas
+- ✅ **Consistencia terminológica:**
+  - Estandarizado "Non-Seed" a "Non-seed" (minúscula) para consistencia
+  - Explicación consistente de seed region (positions 2-8: functional binding domain) en todos los scripts
+  - Término "oxidative signature" usado consistentemente para G>T mutations
+  - RPM explicado como "Reads Per Million" donde aparece
+- ✅ **Clustering y heatmaps:**
+  - step2/06: Título mejorado con "(Oxidative Signature)"
+  - step2/07: Título y tabla de resumen mejorados con explicación de seed region
+- ✅ **Step4 functional analysis:**
+  - Subtítulos mejorados: Explican "oxidized miRNAs" y seed region
+  - Captions mejorados: Incluyen explicaciones biológicas completas
+- ✅ **Step5 family analysis:**
+  - Subtítulo mejorado: Explica seed region como functional binding domain
+- ✅ **Step6 correlation:**
+  - Subtítulos mejorados: Explican RPM y seed region
+  - Etiqueta de eje X: Incluye explicación de RPM
+- ✅ **Step7 biomarker:**
+  - Subtítulo mejorado: Incluye "oxidative signature" y explicación de seed region
+
+**Scripts actualizados (Total: 21 scripts):**
+- step1: 6 scripts (panels B-G)
+- step2: 4 scripts (volcano, effect size, position-specific, clustering)
+- step4: 1 script (complex functional visualization)
+- step5: 1 script (family comparison)
+- step6: 1 script (correlation visualization)
+- step7: 1 script (ROC analysis)
+
+**Próximo paso:** FASE 2.4 - Revisar calidad técnica de gráficas lineal con 95% CI
 - ✅ Captions mejorados en step7:
   - ROC analysis: Explica método (pROC package), AUC (0.5 = random, 1.0 = perfect), y Combined signature
 - ✅ Corrección técnica:
