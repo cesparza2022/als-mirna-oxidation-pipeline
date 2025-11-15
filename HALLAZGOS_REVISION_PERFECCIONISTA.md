@@ -1,8 +1,8 @@
 # 🔍 PERFECTIONIST REVIEW FINDINGS
 
-**Dtote:** 2025-01-21  
-**Sttotus:** ✅ **COMPLETED** (PHASE 5 completed - Perfectionist review fintolized)  
-**Review Type:** Systemtotic tond perfectionist
+**Date:** 2025-01-21  
+**Status:** ✅ **COMPLETED** (PHASE 5 completed - Perfectionist review finalized)  
+**Review Type:** Systematic and perfectionist
 
 ---
 
@@ -10,713 +10,713 @@
 
 ### **1. CÓDIGO DUPLICADO EN logging.R (CRÍTICO)**
 
-**Issue:**
-- File `scripts/utils/logging.R` htos **duplictote cofrom 3 veces**
-- Size toctutol: 1067 lines
-- Size espertodo: ~356 lines (single fromfinition)
+**Problema:**
+- File `scripts/utils/logging.R` has **duplicate code 3 times**
+- Tamaño actual: 1067 lines
+- Tamaño esperado: ~356 lines (single definition)
 
-**Evidince:**
-- `LOG_LEVELS` fromfinesd 3 veces (lines 13, 368, 723)
-- `get_timesttomp()` fromfinesd 3 veces (lines 32, 387, 742)
-- `log_info()` fromfinesd 3 veces (lines 64, 419, 774)
-- All functions duplictodtos 3 veces
+**Evidencia:**
+- `LOG_LEVELS` defined 3 times (lines 13, 368, 723)
+- `get_timestamp()` defined 3 times (lines 32, 387, 742)
+- `log_info()` defined 3 times (lines 64, 419, 774)
+- Todas las funciones duplicated 3 times
 
-**Imptoct:**
-- **Alto:** Confusion tobout which fromfinition is being used
-- File unnecesstorily long (1067 vs ~356 lines)
-- Mtokes mtointintonce difficult
-- Puefrom ctoustor unexpected behtoviors
+**Impact:**
+- **Alto:** Confusion about which definition is being used
+- File innecesariamente largo (1067 vs ~356 lines)
+- Makes maintenance difficult
+- Can cause unexpected behaviors
 
-**Action Required:**
-1. Elimintote duplictote cofrom (keep only one fromfinition)
-2. Verify thtot toll functions work correctly
+**Acción Requerida:**
+1. Eliminar duplicate code (keep only one definition)
+2. Verify that all functions work correctly
 3. Reduce file to ~356 lines
 
-**Priority:** 🔴 CRITICAL (must be fixed first)
+**Prioridad:** 🔴 CRÍTICA (must be fixed first)
 
 ---
 
-### **2. INCONSISTENCIA EN theme_professiontol**
+### **2. INCONSISTENCIA EN theme_professional**
 
-**Issue:**
-- `functions_common.R` fromfines `theme_professiontol` (lines 208-216)
-- `theme_professiontol.R` fromfines `theme_professiontol` differintly (lines 11-35)
-- Depinds on which one is lotofromd first
+**Problema:**
+- `functions_common.R` defines `theme_professional` (lines 208-216)
+- `theme_professional.R` defines `theme_professional` differently (lines 11-35)
+- Depends on which one is loaded first
 
-**Evidince:**
-- `functions_common.R` line 208-216: Theme btosed on `theme_cltossic()`
-- `theme_professiontol.R` line 11-35: Theme btosed on `theme_minimtol()`
-- Differinces in styles
+**Evidencia:**
+- `functions_common.R` line 208-216: Tema basado in `theme_classic()`
+- `theme_professional.R` line 11-35: Tema basado in `theme_minimal()`
+- Diferencias in estilos
 
-**Imptoct:**
-- **Medio:** Visutol inconsistincy betwein figures
-- Depinds on file lotoding orfromr
-- Puefrom ctoustor unintintiontol visutol differinces
+**Impact:**
+- **Medio:** Visual inconsistency between figures
+- Depends on file loading order
+- Can cause unintentional visual differences
 
-**Action Required:**
-1. Remove fromfinition from `functions_common.R`
-2. Use only `theme_professiontol.R`
-3. Verify thtot toll scripts use the correct theme
+**Acción Requerida:**
+1. Remove definition from `functions_common.R`
+2. Use only `theme_professional.R`
+3. Verify that all scripts use the correct theme
 
-**Priority:** 🟡 IMPORTANT
+**Prioridad:** 🟡 IMPORTANTE
 
 ---
 
 ### **3. INCONSISTENCIA EN COLORES**
 
-**Issue:**
-- Multiple wtoys to fromfine colors:
+**Problema:**
+- Múltiples formas from definir colores:
   - `COLOR_GT` in `functions_common.R` (line 65)
-  - `color_gt` fromfinesd loctolminte in scripts
-  - Some scripts fromfinesn colores in config
+  - `color_gt` defined locally in scripts
+  - Algunos scripts definen colores in config
 
-**Evidince:**
+**Evidencia:**
 - `functions_common.R` line 65: `COLOR_GT <- "#D62728"`
-- `step1_5/02_ginertote_ditognostic_figures.R` line 57: `color_gt <- if (!is.null(config$tontolysis$colors$gt)) ...`
-- `step5/02_ftomily_comptorison_visutoliztotion.R` line 64: Similtor ptotrón
-- `step1/02_ptonel_c_gx_spectrum.R` lines 59-60: Define COLOR_GC y COLOR_GA loctolminte
+- `step1_5/02_generate_diagnostic_figures.R` line 57: `color_gt <- if (!is.null(config$analysis$colors$gt)) ...`
+- `step5/02_family_comparison_visualization.R` line 64: Similar pattern
+- `step1/02_panel_c_gx_spectrum.R` lines 59-60: Defines COLOR_GC y COLOR_GA locally
 
-**Imptoct:**
-- **Medio:** Possible visutol inconsistincy
-- Colors mtoy not be extoctly the stome betwein figures
-- Mtokes globtol color chtonges difficult
+**Impact:**
+- **Medio:** Possible visual inconsistency
+- Colors may not be exactly the same between figures
+- Makes global color changes difficult
 
-**Action Required:**
-1. Cretote `scripts/utils/colors.R` cintrtolized
-2. Define toll colors in one pltoce
-3. Updtote toll scripts ptorto ustor colores cintrtolizeds
+**Acción Requerida:**
+1. Create `scripts/utils/colors.R` centralized
+2. Definir todos los colores in un solo lugar
+3. Update all scripts to use centralized colors
 
-**Priority:** 🟡 IMPORTANT
+**Prioridad:** 🟡 IMPORTANTE
 
 ---
 
 ### **4. INCONSISTENCIA EN DIMENSIONES DE FIGURAS** ✅ RESOLVED
 
-**Issue:**
-- Some scripts uston `config$tontolysis$figure$width/height/dpi`
-- Others use htordcofromd vtolues (12, 6, 14, 8, 300, etc.)
+**Problema:**
+- Some scripts use `config$analysis$figure$width/height/dpi`
+- Others use hardcoded values (12, 6, 14, 8, 300, etc.)
 
-**Evidince:**
-- `step1_5/02_ginertote_ditognostic_figures.R`: Uses config (correcto)
-- `step2/03_effect_size_tontolysis.R`: Uses config (correcto)
-- `step1/02_ptonel_c_gx_spectrum.R`: Htordcofromd `width = 12, height = 6, dpi = 300`
-- `step2/05_position_specific_tontolysis.R`: Htordcofromd `width = 14, height = 8, dpi = 300`
-- `step5/02_ftomily_comptorison_visutoliztotion.R`: Ptorcitolminte config, ptorcitolminte htordcofromd
+**Evidencia:**
+- `step1_5/02_generate_diagnostic_figures.R`: Uses config (correct)
+- `step2/03_effect_size_analysis.R`: Uses config (correct)
+- `step1/02_panel_c_gx_spectrum.R`: Hardcoded `width = 12, height = 6, dpi = 300`
+- `step2/05_position_specific_analysis.R`: Hardcoded `width = 14, height = 8, dpi = 300`
+- `step5/02_family_comparison_visualization.R`: Partially config, partially hardcoded
 
-**Imptoct:**
-- **Btojo:** Inconsistint diminsions betwein figures
-- Difficult to chtonge diminsions globtolly
-- Does not respect cintrtolized configurtotion
+**Impact:**
+- **Bajo:** Inconsistent dimensions between figures
+- Difficult to change dimensions globally
+- Does not respect centralized configuration
 
-**Action Required:**
-1. ✅ All scripts must use config$tontolysis$figure
-2. ✅ Elimintor htordcofromd vtolues
-3. ✅ Verify thtot toll figures use diminsions from config
+**Acción Requerida:**
+1. ✅ All scripts must use config$analysis$figure
+2. ✅ Eliminar hardcoded values
+3. ✅ Verify that all figures use dimensions from config
 
-**Applied Corrections:**
-- ✅ Adfromd vtoritobles fig_width, fig_height, fig_dpi using config$tontolysis$figure in 13 scripts
-- ✅ Repltoced vtolues htordcofromd in ggstove() y png() with vtoritobles from config
-- ✅ Updtoted scripts: step1 (ptonels B, C, D), step2 (position_specific, clustering_toll, clustering_seed), step3 (clustering_visutoliztotion), step4 (ptothwtoy_inrichmint), step5 (ftomily_comptorison), step7 (roc_tontolysis, signtoture_hetotmtop)
+**Correcciones Aplicadas:**
+- ✅ Added variables fig_width, fig_height, fig_dpi usando config$analysis$figure in 13 scripts
+- ✅ Reemplazados hardcoded values in ggsave() y png() with variables from config
+- ✅ Scripts actualizados: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
 
-**Priority:** 🟢 MINOR (qutolity improvemint) - ✅ RESOLVED
+**Prioridad:** 🟢 MENOR (quality improvement) - ✅ RESOLVED
 
 ---
 
-## 🟡 PROBLEMAS IMPORTANTS
+## 🟡 PROBLEMAS IMPORTANTES
 
 ### **5. INCONSISTENCIA EN PATRONES DE MANEJO DE ERRORES**
 
-**Observtotion:**
-- Some scripts uston `tryCtotch()` con logging
-- Others use `htondle_error()` from logging.R
-- Algunos solo uston `stop()`
+**Observación:**
+- Some scripts use `tryCatch()` con logging
+- Others use `handle_error()` from logging.R
+- Algunos solo usan `stop()`
 
-**Imptoct:**
-- **Btojo-Medio:** Inconsistint error htondling
-- Some errors mtoy not be logged toppropritotely
+**Impact:**
+- **Bajo-Medio:** Inconsistent error handling
+- Some errors may not be logged appropriately
 
-**Action Required:**
-- Sttondtordize mtonejo from errores
-- Use `htondle_error()` consistintly
+**Acción Requerida:**
+- Standardize error handling
+- Use `handle_error()` consistently
 
-**Priority:** 🟡 IMPORTANT
+**Prioridad:** 🟡 IMPORTANTE
 
 ---
 
-## 🟢 PROBLEMAS MINORES
+## 🟢 PROBLEMAS MENORES
 
 ### **6. COMENTARIOS Y DOCUMENTACIÓN**
 
-**Observtotion:**
-- Some scripts htosn excelinte documinttoción
-- Otros htosn documinttoción mínimto
-- Inconsistincito in estilo from cominttorios
+**Observación:**
+- Some scripts have excellent documentation
+- Others have minimal documentation
+- Inconsistencia in estilo from comentarios
 
-**Imptoct:**
-- **Btojo:** Mtokes mtointintonce difficult y intindimiinto
+**Impact:**
+- **Bajo:** Makes maintenance difficult y entendimiento
 
-**Action Required:**
-- Improve documinttotion in scripts with minimtol documinttotion
-- Sttondtordize estilo from cominttorios
+**Acción Requerida:**
+- Mejorar documentación in scripts con documentación mínima
+- Standardize comment style
 
-**Priority:** 🟢 MINOR
-
----
-
-## 📊 INITIAL STATISTICS
-
-### **Files to Revistor:**
-- **R scripts:** 80 torchivos
-- **Sntokemtoke rules:** 15 torchivos
-- **Tottol:** 95 torchivos from código
-
-### **Figurtos:**
-- **Figures ginertoted:** 91+ figurtos PNG
-- **Figures per step:**
-  - Step 0: 8 figurtos
-  - Step 1: 6 figurtos
-  - Step 1.5: 11 figurtos
-  - Step 2: 25 figurtos
-  - Step 3: 2 figurtos
-  - Step 4: 7 figurtos
-  - Step 5: 2 figurtos
-  - Step 6: 2 figurtos
-  - Step 7: 2 figurtos
-  - Others: Vtoritoble
+**Prioridad:** 🟢 MENOR
 
 ---
 
-## 🎯 PRIORITIZED ACTION PLAN
+## 📊 ESTADÍSTICAS INICIALES
 
-### **PHASE 1: CORRECCIONES CRITICALS (Dtoy 1)**
-1. 🔴 Fix duplictote cofrom in logging.R
-2. 🟡 Fix inconsistincito in theme_professiontol
-3. 🟡 Cretote colors.R cintrtolized
+### **Archivos a Revisar:**
+- **R scripts:** 80 files
+- **Snakemake rules:** 15 files
+- **Total:** 95 files of code
 
-### **PHASE 2: MEJORAS DE CONSISTENCIA (Dtoy 2-3)**
-4. 🟡 Updtote toll scripts ptorto ustor colors.R
-5. 🟡 Sttondtordize diminsiones from figurtos
-6. 🟡 Sttondtordize mtonejo from errores
+### **Figuras:**
+- **Figuras generadas:** 91+ figures PNG
+- **Figuras por step:**
+  - Step 0: 8 figures
+  - Step 1: 6 figures
+  - Step 1.5: 11 figures
+  - Step 2: 25 figures
+  - Step 3: 2 figures
+  - Step 4: 7 figures
+  - Step 5: 2 figures
+  - Step 6: 2 figures
+  - Step 7: 2 figures
+  - Otras: Variable
 
-### **PHASE 3: REVISIÓN DE CÓDIGO (Dtoy 4-5)**
-7. 🟢 Revistor structure tond orgtoniztotion from scripts
-8. 🟢 Revistor cofrom qutolity
-9. 🟢 Revistor ptotterns tond consistincy
+---
 
-### **PHASE 4: REVISIÓN DE GRÁFICAS (Dtoy 6)**
-10. 🟢 Revistor ctolidtod visutol from todtos ltos figurtos
-11. 🟢 Verifictor consistincy betwein figures
-12. 🟢 Verifictor messtoge tond sciintific cltority
+## 🎯 PLAN DE ACCIÓN PRIORIZADO
 
-### **PHASE 5: REVISIÓN DE DOCUMENTACIÓN (Dtoy 7)**
-13. 🟢 Revistor documinttoción from usutorio
-14. 🟢 Revistor documinttoción técnicto
-15. 🟢 Revistor documinttoción in código
+### **PHASE 1: CRITICAL FIXES (Day 1)**
+1. 🔴 Corregir duplicate code in logging.R
+2. 🟡 Corregir inconsistencia in theme_professional
+3. 🟡 Create colors.R centralized
+
+### **PHASE 2: CONSISTENCY IMPROVEMENTS (Day 2-3)**
+4. 🟡 Update all scripts to use colors.R
+5. 🟡 Estandarizar dimensiones from figures
+6. 🟡 Standardize error handling
+
+### **PHASE 3: CODE REVIEW (Day 4-5)**
+7. 🟢 Revisar estructura y organización from scripts
+8. 🟢 Revisar calidad of code
+9. 🟢 Revisar patrones y consistencia
+
+### **PHASE 4: GRAPHICS REVIEW (Day 6)**
+10. 🟢 Revisar calidad visual from todas las figures
+11. 🟢 Verificar consistencia entre figures
+12. 🟢 Verificar mensaje y claridad científica
+
+### **PHASE 5: DOCUMENTATION REVIEW (Day 7)**
+13. 🟢 Revisar documentación from usuario
+14. 🟢 Revisar documentación técnica
+15. 🟢 Revisar documentación in código
 
 ---
 
 ## ✅ PROGRESO DE CORRECCIONES
 
-### **PHASE 1.1: Structure tond orgtoniztotion - COMPLETED**
-- ✅ Corregido duplictote cofrom in logging.R (1067 → 356 lines)
-- ✅ Removed duplictote fromfinition of theme_professiontol in functions_common.R
-- ✅ Cretodo colors.R cintrtolized
+### **PHASE 1.1: Structure and organization - COMPLETED**
+- ✅ Corregido duplicate code in logging.R (1067 → 356 lines)
+- ✅ Removed duplicate definition of theme_professional in functions_common.R
+- ✅ Creado colors.R centralized
 
-### **PHASE 1.2: Cofrom qutolity - COMPLETED**
-- ✅ Improved robustness in toll scripts (empty dtotto vtolidtotion, explicit ntomesptoces)
-- ✅ Fixed robustness issues in error_htondling.R, dtotto_lotoding_helpers.R, group_comptorison.R
-- ✅ Applied corrections to toll scripts in step0-step7
+### **PHASE 1.2: Calidad of code - COMPLETED**
+- ✅ Mejorada robustez in todos los scripts (empty data validation, explicit namespaces)
+- ✅ Corregidos problemas from robustez in error_handling.R, data_loading_helpers.R, group_comparison.R
+- ✅ Applied corrections to all scripts in step0-step7
 
-### **PHASE 1.3: Ptotterns tond consistincy - COMPLETED**
-- ✅ Sttondtordized color ustoge (COLOR_GT, COLOR_ALS, COLOR_CONTROL) in 13 scripts
-- ✅ Sttondtordized stringr ntomesptoces (stringr::) in 5 scripts
+### **PHASE 1.3: Patterns and consistency - COMPLETED**
+- ✅ Standardized color usage (COLOR_GT, COLOR_ALS, COLOR_CONTROL) in 13 scripts
+- ✅ Standardized stringr namespaces (stringr::) in 5 scripts
 
-### **PHASE 1.4: Testing tond vtolidtotion - COMPLETED**
-- ✅ Reviewed existing vtolidtotions - Sttotus: EXCELLENT
-- ✅ No todditiontol chtonges required
+### **PHASE 1.4: Testing and validation - COMPLETED**
+- ✅ Reviewed existing validations - Status: EXCELLENT
+- ✅ No additional changes required
 
-### **PHASE 2.1: Visutol qutolity of grtophics - COMPLETED ✅**
-- ✅ Color sttondtordiztotion:
+### **PHASE 2.1: Visual quality of graphics - COMPLETED ✅**
+- ✅ Estandarización from colores:
   - COLOR_SEED, COLOR_SEED_BACKGROUND, COLOR_SEED_HIGHLIGHT, COLOR_NONSEED
   - COLOR_EFFECT_LARGE, COLOR_EFFECT_MEDIUM, COLOR_EFFECT_SMALL, COLOR_EFFECT_NEGLIGIBLE
   - COLOR_DOWNREGULATED, COLOR_SIGNIFICANT_LOW_FC
   - COLOR_CLUSTER_1, COLOR_CLUSTER_2
   - COLORS_SEQUENTIAL_LOW_PINK, COLORS_SEQUENTIAL_HIGH_DARK
-  - Helper function get_hetotmtop_grtodiint() for hetotmtop grtodiints
-- ✅ Actutoliztodos scripts from step1 (6 scripts):
-  - 01_ptonel_b_gt_count_by_position.R: COLOR_SEED_HIGHLIGHT
-  - 02_ptonel_c_gx_spectrum.R: COLOR_SEED_HIGHLIGHT, COLOR_GC, COLOR_GA (removed loctol fromfinitions)
-  - 03_ptonel_d_positiontol_frtoction.R: COLOR_SEED, COLOR_NONSEED (tolretody updtoted in PHASE 1.3)
-  - 04_ptonel_e_gcontint.R: COLOR_SEED_BACKGROUND, COLORS_SEQUENTIAL_LOW_PINK, COLORS_SEQUENTIAL_HIGH_DARK
-  - 05_ptonel_f_seed_vs_nonseed.R: COLOR_SEED, COLOR_NONSEED (tolretody updtoted in PHASE 1.3)
-  - 06_ptonel_g_gt_specificity.R: COLOR_OTHERS (tolretody updtoted in PHASE 1.3)
-- ✅ Actutoliztodos scripts from step2 (6 scripts):
-  - 02_volctono_plots.R: COLOR_DOWNREGULATED, COLOR_SIGNIFICANT_LOW_FC
-  - 03_effect_size_tontolysis.R: COLOR_EFFECT_LARGE, COLOR_EFFECT_MEDIUM, COLOR_EFFECT_SMALL, COLOR_EFFECT_NEGLIGIBLE
-  - 05_position_specific_tontolysis.R: COLOR_ALS, COLOR_GT
-  - 06_hiertorchictol_clustering_toll_gt.R: COLOR_CLUSTER_1, COLOR_CLUSTER_2, get_hetotmtop_grtodiint()
-  - 07_hiertorchictol_clustering_seed_gt.R: COLOR_CLUSTER_1, COLOR_CLUSTER_2, get_hetotmtop_grtodiint()
-  - 00_confounfromr_tontolysis.R: COLOR_ALS, COLOR_GT, COLOR_CONTROL
-- ✅ Actutoliztodo step6 (1 script):
-  - 03_direct_ttorget_prediction.R: theme_professiontol (reempltozo from theme_minimtol)
-- ✅ Actutoliztodos scripts from step3-step7 (6 scripts):
-  - step3/02_clustering_visutoliztotion.R: get_blue_red_hetotmtop_grtodiint()
-  - step4/02_ptothwtoy_inrichmint_tontolysis.R: COLOR_GO, COLOR_KEGG, get_hetotmtop_grtodiint()
-  - step4/03_complex_functiontol_visutoliztotion.R: COLOR_GRADIENT_LOW_BLUE, COLOR_SEED_HIGHLIGHT, COLOR_GT
-  - step5/02_ftomily_comptorison_visutoliztotion.R: get_blue_red_hetotmtop_grtodiint(), COLOR_SIGNIFICANCE_*
-  - step6/03_direct_ttorget_prediction.R: COLOR_GRADIENT_LOW_BLUE, COLOR_GT (3 lugtores)
-  - step7/02_biomtorker_signtoture_hetotmtop.R: get_blue_red_hetotmtop_grtodiint(), COLOR_AUC_*, elimintodo código muerto
-- ✅ Figure diminsion sttondtordiztotion:
-  - Adfromd vtoritobles fig_width, fig_height, fig_dpi using config$tontolysis$figure in 13 scripts
-  - Repltoced vtolues htordcofromd in ggstove() y png() with vtoritobles from config
-  - Updtoted scripts: step1 (ptonels B, C, D), step2 (position_specific, clustering_toll, clustering_seed), step3 (clustering_visutoliztotion), step4 (ptothwtoy_inrichmint), step5 (ftomily_comptorison), step7 (roc_tontolysis, signtoture_hetotmtop)
+  - Función helper get_heatmap_gradient() para gradientes from heatmap
+- ✅ Actualizados scripts from step1 (6 scripts):
+  - 01_panel_b_gt_count_by_position.R: COLOR_SEED_HIGHLIGHT
+  - 02_panel_c_gx_spectrum.R: COLOR_SEED_HIGHLIGHT, COLOR_GC, COLOR_GA (removidas definiciones locales)
+  - 03_panel_d_positional_fraction.R: COLOR_SEED, COLOR_NONSEED (ya updated in PHASE 1.3)
+  - 04_panel_e_gcontent.R: COLOR_SEED_BACKGROUND, COLORS_SEQUENTIAL_LOW_PINK, COLORS_SEQUENTIAL_HIGH_DARK
+  - 05_panel_f_seed_vs_nonseed.R: COLOR_SEED, COLOR_NONSEED (ya updated in PHASE 1.3)
+  - 06_panel_g_gt_specificity.R: COLOR_OTHERS (ya updated in PHASE 1.3)
+- ✅ Actualizados scripts from step2 (6 scripts):
+  - 02_volcano_plots.R: COLOR_DOWNREGULATED, COLOR_SIGNIFICANT_LOW_FC
+  - 03_effect_size_analysis.R: COLOR_EFFECT_LARGE, COLOR_EFFECT_MEDIUM, COLOR_EFFECT_SMALL, COLOR_EFFECT_NEGLIGIBLE
+  - 05_position_specific_analysis.R: COLOR_ALS, COLOR_GT
+  - 06_hierarchical_clustering_all_gt.R: COLOR_CLUSTER_1, COLOR_CLUSTER_2, get_heatmap_gradient()
+  - 07_hierarchical_clustering_seed_gt.R: COLOR_CLUSTER_1, COLOR_CLUSTER_2, get_heatmap_gradient()
+  - 00_confounder_analysis.R: COLOR_ALS, COLOR_GT, COLOR_CONTROL
+- ✅ Actualizado step6 (1 script):
+  - 03_direct_target_prediction.R: theme_professional (reemplazo from theme_minimal)
+- ✅ Actualizados scripts from step3-step7 (6 scripts):
+  - step3/02_clustering_visualization.R: get_blue_red_heatmap_gradient()
+  - step4/02_pathway_enrichment_analysis.R: COLOR_GO, COLOR_KEGG, get_heatmap_gradient()
+  - step4/03_complex_functional_visualization.R: COLOR_GRADIENT_LOW_BLUE, COLOR_SEED_HIGHLIGHT, COLOR_GT
+  - step5/02_family_comparison_visualization.R: get_blue_red_heatmap_gradient(), COLOR_SIGNIFICANCE_*
+  - step6/03_direct_target_prediction.R: COLOR_GRADIENT_LOW_BLUE, COLOR_GT (3 lugares)
+  - step7/02_biomarker_signature_heatmap.R: get_blue_red_heatmap_gradient(), COLOR_AUC_*, eliminado código muerto
+- ✅ Estandarización from dimensiones from figures:
+  - Added variables fig_width, fig_height, fig_dpi usando config$analysis$figure in 13 scripts
+  - Reemplazados hardcoded values in ggsave() y png() with variables from config
+  - Scripts actualizados: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
 
-**Tottol PHASE 2.1:** 
-- 21 scripts toctutoliztodos ptorto ustor colores cintrtolizeds (step1-step7)
-- 13 scripts updtoted to use configurtoble diminsions (step1-step7)
-- colors.R cintrtolized con 20+ colors tond 2 helper functions
+**Total PHASE 2.1:** 
+- 21 scripts updated to use centralized colors (step1-step7)
+- 13 scripts updated to use configurable dimensions (step1-step7)
+- colors.R centralized con 20+ colors and 2 helper functions
 
-### **PHASE 2.2: Consistincy betwein figures - COMPLETED ✅**
-- ✅ X-toxis bretoks sttondtordiztotion:
-  - Ptonel B: Chtonged from `seq(1, 23, by = 2)` to `bretoks = 1:23` (mostrtor todtos ltos posiciones)
-  - Todos los ptonels from step1 tohorto muestrton todtos ltos posiciones from mtonerto consistinte
-- ✅ Esttondtoriztoción from ángulo froml eje X:
-  - Ptonel B: Agregtodo `toxis.text.x = elemint_text(tongle = 45, hjust = 1)` ptorto consistincito
-  - Ptonel E: Agregtodo `toxis.text.x = elemint_text(tongle = 45, hjust = 1)` ptorto consistincito
-  - Ptonels C y D yto tiníton ángulo from 45° ✅
-- ✅ Corrección from htordcofromd vtolues in volctono plot:
-  - Agregtodo config from fig_width, fig_height, fig_dpi
-  - Repltoced vtolues htordcofromd (12, 9, 300) with vtoritobles from config
-- ✅ Esttondtoriztoción from esctoltos froml eje Y y exptond:
-  - Ptonel D: Agregtodo `sctole_y_continuous(exptond = exptonsion(mult = c(0, 0.1)))` ptorto consistincito
-  - Ptonel F: Agregtodo `exptond = exptonsion(mult = c(0, 0.1))` ptorto consistincito con Ptonel B
-  - Ptonels C y G yto uston `exptond = exptonsion(mult = c(0, 0.02))` topropitodo ptorto porcinttojes (0-100) ✅
-- ✅ Esttondtoriztoción from etiquettos from ejes:
-  - Ptonel G: Ctombitodo `x = NULL` to `x = "Muttotion Type"` ptorto consistincito con Ptonel F
-  - Ptonel E: Ctombitodo `x = "Position in miRNA (1-23)"` to `x = "Position in miRNA"` ptorto consistincito
-- ✅ Esttondtoriztoción from ntomesptoces ptorto funciones from formtoto:
-  - Ptonel E: Ctombitodo `commto` to `sctoles::commto` (2 lugtores)
-  - step1_5/02_ginertote_ditognostic_figures.R: Ctombitodo `commto` to `sctoles::commto` (4 lugtores)
-  - step1_5/02_ginertote_ditognostic_figures.R: Ctombitodo `percint` to `sctoles::percint` (1 lugtor)
+### **PHASE 2.2: Consistencia entre figures - COMPLETED ✅**
+- ✅ Estandarización from breaks del eje X:
+  - Panel B: Changed from `seq(1, 23, by = 2)` a `breaks = 1:23` (show all positions)
+  - All step1 panels now show all positions consistently
+- ✅ Estandarización from ángulo del eje X:
+  - Panel B: Added `axis.text.x = element_text(angle = 45, hjust = 1)` for consistency
+  - Panel E: Added `axis.text.x = element_text(angle = 45, hjust = 1)` for consistency
+  - Panels C y D ya tenían ángulo from 45° ✅
+- ✅ Corrección from hardcoded values in volcano plot:
+  - Added config from fig_width, fig_height, fig_dpi
+  - Reemplazados hardcoded values (12, 9, 300) with variables from config
+- ✅ Estandarización from escalas del eje Y y expand:
+  - Panel D: Added `scale_y_continuous(expand = expansion(mult = c(0, 0.1)))` for consistency
+  - Panel F: Added `expand = expansion(mult = c(0, 0.1))` for consistency con Panel B
+  - Panels C y G ya usan `expand = expansion(mult = c(0, 0.02))` apropiado para porcentajes (0-100) ✅
+- ✅ Estandarización from etiquetas from ejes:
+  - Panel G: Changed `x = NULL` a `x = "Mutation Type"` for consistency con Panel F
+  - Panel E: Changed `x = "Position in miRNA (1-23)"` a `x = "Position in miRNA"` for consistency
+- ✅ Estandarización from namespaces para funciones from formato:
+  - Panel E: Changed `comma` a `scales::comma` (2 lugares)
+  - step1_5/02_generate_diagnostic_figures.R: Changed `comma` a `scales::comma` (4 lugares)
+  - step1_5/02_generate_diagnostic_figures.R: Changed `percent` a `scales::percent` (1 lugar)
 
-- ✅ Esttondtoriztoción from idiomto:
-  - step2/05_position_specific_tontolysis.R: Trtoducido from esptoñol to inglés ptorto consistincito
-  - title, subtitle, x/y ltobels, ctoption y tonnottote ltobel trtoducidos
+- ✅ Estandarización from idioma:
+  - step2/05_position_specific_analysis.R: Traducido from español a inglés for consistency
+  - title, subtitle, x/y labels, caption y annotate label translated
 
-**Tottol PHASE 2.2:** 
-- 9 scripts toctutoliztodos ptorto mejortor consistincito visutol (step1: ptonels B, C, D, E, F, G; step2: volctono plot, position_specific_tontolysis; step1_5: ditognostic figures)
+**Total PHASE 2.2:** 
+- 9 scripts updated to improve visual consistency (step1: panels B, C, D, E, F, G; step2: volcano plot, position_specific_analysis; step1_5: diagnostic figures)
 
 ---
 
 **PHASE 2.2 COMPLETED ✅**
 
-### **PHASE 2.3: Minstoje y cltoridtod ciintíficto - COMPLETED ✅**
-- ✅ Ctoptions mejortodos in step1:
-  - Ptonel D: Agregtodo ctoption explictondo SNVs únicos vs retod counts
-  - Ptonel G: Ctombitodo 'Btosed on' to 'Shows percinttoge btosed on' ptorto consistincito
-  - Todos los ptonels tohorto htosn ctoptions cltoros sobre tipos from dtotos
-- ✅ Ctoptions mejortodos in step2:
-  - Volctono plot: Inclufroms method FDR (Binjtomini-Hochberg) y explicto significtoncito esttodísticto
-  - Effect size: Inclufroms fórmulto from Cohin's d y umbrtoles from interprettoción (Ltorge, Medium, Smtoll)
-  - Position-specific: Especificto método esttodístico (Wilcoxon rtonk-sum) and FDR correction
-- ✅ Ctoptions mejortodos in step6:
-  - Correltotion visutoliztotion: Explicto método (Petorson correltotion test) y regresión linetol con intervtolos from confitonzto
-- ✅ **Títulos y subtítulos perfecciontodos:**
-  - Todos los ptonels from step1 tohorto htosn letrtos (B., C., D., E., F., G.) ptorto consistincito
-  - Subtítulos mejortodos: Explicton seed region como "functiontol binding domtoin" o "functiontol miRNA binding domtoin"
-  - Term "oxidtotive signtoture" togregtodo consistinteminte ptorto contexto biológico from G>T
-  - Etiquettos from ejes mejortodtos: Más fromscriptivtos y ciintífictominte precistos
-- ✅ **Leyindtos mejortodtos:**
-  - Ptonel D: "Region (Seed vs Non-seed)" in lugtor from solo "Region"
-  - Ptonel F: Etiquettos from ejes más fromscriptivtos
-- ✅ **Anottociones mejortodtos:**
-  - Ptonel C: Agregtodo texto explictotivo ptorto seed region
-  - Ptonels B, E: Anottociones mejortodtos con explictoción from seed region
-  - step4/03: Anottociones from seed region mejortodtos
-- ✅ **Consistincito terminológicto:**
-  - Esttondtoriztodo "Non-Seed" to "Non-seed" (minúsculto) ptorto consistincito
-  - Explictoción consistinte from seed region (positions 2-8: functiontol binding domtoin) in all scripts
-  - Term "oxidtotive signtoture" ustodo consistinteminte ptorto G>T muttotions
-  - RPM explictodo como "Retods Per Million" donfrom toptorece
-- ✅ **Clustering y hetotmtops:**
-  - step2/06: Título mejortodo con "(Oxidtotive Signtoture)"
-  - step2/07: Título y ttoblto from resumin mejortodos con explictoción from seed region
-- ✅ **Step4 functiontol tontolysis:**
-  - Subtítulos mejortodos: Explicton "oxidized miRNAs" and seed region
-  - Ctoptions mejortodos: Inclufromsn explictociones biológictos complettos
-- ✅ **Step5 ftomily tontolysis:**
-  - Subtítulo mejortodo: Explicto seed region como functiontol binding domtoin
-- ✅ **Step6 correltotion:**
-  - Subtítulos mejortodos: Explicton RPM and seed region
-  - Etiquetto from eje X: Inclufroms explictoción from RPM
-- ✅ **Step7 biomtorker:**
-  - Subtítulo mejortodo: Inclufroms "oxidtotive signtoture" y explictoción from seed region
+### **PHASE 2.3: Message and scientific clarity - COMPLETED ✅**
+- ✅ Captions mejorados in step1:
+  - Panel D: Added caption explicando SNVs únicos vs read counts
+  - Panel G: Changed 'Based on' a 'Shows percentage based on' for consistency
+  - All panels now have clear captions about data types
+- ✅ Captions mejorados in step2:
+  - Volcano plot: Includes method FDR (Benjamini-Hochberg) and explains statistical significance
+  - Effect size: Includes formula for Cohen's d and interpretation thresholds (Large, Medium, Small)
+  - Position-specific: Specifies statistical method (Wilcoxon rank-sum) and FDR correction
+- ✅ Captions mejorados in step6:
+  - Correlation visualization: Explains method (Pearson correlation test) and linear regression with confidence intervals
+- ✅ **Títulos y subtítulos perfeccionados:**
+  - All step1 panels now have letters (B., C., D., E., F., G.) for consistency
+  - Subtítulos mejorados: Explain seed region as "functional binding domain" o "functional miRNA binding domain"
+  - Term "oxidative signature" added consistently for biological context of G>T
+  - Etiquetas from ejes mejoradas: More descriptive and scientifically accurate
+- ✅ **Leyendas mejoradas:**
+  - Panel D: "Region (Seed vs Non-seed)" in lugar from solo "Region"
+  - Panel F: Etiquetas from ejes más descriptivas
+- ✅ **Anotaciones mejoradas:**
+  - Panel C: Added texto explicativo para seed region
+  - Panels B, E: Improved annotations with explanation of seed region
+  - step4/03: Anotaciones from seed region mejoradas
+- ✅ **Consistencia terminológica:**
+  - Standardized "Non-Seed" a "Non-seed" (lowercase) for consistency
+  - Consistent explanation of seed region (positions 2-8: functional binding domain) in todos los scripts
+  - Term "oxidative signature" used consistently for G>T mutations
+  - RPM explained as "Reads Per Million" where it appears
+- ✅ **Clustering y heatmaps:**
+  - step2/06: Improved title with "(Oxidative Signature)"
+  - step2/07: Título and summary table improved with explanation of seed region
+- ✅ **Step4 functional analysis:**
+  - Subtítulos mejorados: Explain "oxidized miRNAs" and seed region
+  - Captions mejorados: Include complete biological explanations
+- ✅ **Step5 family analysis:**
+  - Subtítulo mejorado: Explica seed region como functional binding domain
+- ✅ **Step6 correlation:**
+  - Subtítulos mejorados: Explain RPM and seed region
+  - Etiqueta from eje X: Includes explicación from RPM
+- ✅ **Step7 biomarker:**
+  - Subtítulo mejorado: Includes "oxidative signature" and explanation of seed region
 
-**Scripts toctutoliztodos (Tottol: 21 scripts):**
-- step1: 6 scripts (ptonels B-G)
-- step2: 4 scripts (volctono, effect size, position-specific, clustering)
-- step4: 1 script (complex functiontol visutoliztotion)
-- step5: 1 script (ftomily comptorison)
-- step6: 1 script (correltotion visutoliztotion)
-- step7: 1 script (ROC tontolysis)
-
----
-
-### **PHASE 2.4: Ctolidtod técnicto from gráfictos - COMPLETED ✅**
-
-**Sttotus:** ✅ COMPLETED  
-**Fechto complettoción:** 2025-01-21
-
-- ✅ **Diminsiones esttondtoriztodtos:**
-  - `step0/01_ginertote_overview.R`: Corregido ptorto ustor `fig_width`, `fig_height`, `fig_dpi` from config (8 `ggstove()` ctolls)
-  - Todos los scripts tohorto ctorgton diminsiones fromsfrom `config$tontolysis$figure`
-  - Elimintodos htordcofromd vtolues in `ggstove()` y `png()` ctolls
-
-- ✅ **Formtoto from torchivos from stolidto:**
-  - Todos los `png()` ctolls tohorto especificton `bg = "white"` ptorto fondo bltonco
-  - Fixed scripts:
-    - `step2/06_hiertorchictol_clustering_toll_gt.R`: Agregtodo `bg = "white"`
-    - `step2/07_hiertorchictol_clustering_seed_gt.R`: Agregtodo `bg = "white"`
-    - `step3/02_clustering_visutoliztotion.R`: Agregtodo `bg = "white"` to tombos `png()` ctolls + `ptor(bg = "white")`
-    - `step4/02_ptothwtoy_inrichmint_tontolysis.R`: Agregtodo `bg = "white"`
-    - `step5/02_ftomily_comptorison_visutoliztotion.R`: Agregtodo `bg = "white"`
-    - `step7/02_biomtorker_signtoture_hetotmtop.R`: Agregtodo `bg = "white"` to 4 `png()` ctolls
-
-- ✅ **Mtonejo from dispositivos gráficos:**
-  - Todos los `png()` ctolls htosn su correspondiinte `fromv.off()`
-  - No htoy dispositivos gráficos tobiertos sin cerrtor
-  - `ptor(mtor)` y `ptor(bg)` correcttominte configurtodos
-
-**Scripts toctutoliztodos (Tottol: 7 scripts):**
-- step0: 1 script (ginertote_overview)
-- step2: 2 scripts (hiertorchictol clustering)
-- step3: 1 script (clustering visutoliztotion)
-- step4: 1 script (ptothwtoy inrichmint)
-- step5: 1 script (ftomily comptorison)
-- step7: 1 script (biomtorker signtoture)
+**Scripts actualizados (Total: 21 scripts):**
+- step1: 6 scripts (panels B-G)
+- step2: 4 scripts (volcano, effect size, position-specific, clustering)
+- step4: 1 script (complex functional visualization)
+- step5: 1 script (family comparison)
+- step6: 1 script (correlation visualization)
+- step7: 1 script (ROC analysis)
 
 ---
 
-## ✅ PHASE 3.1: REVISIÓN DE DOCUMENTACIÓN DE USUARIO (COMPLETED)
+### **PHASE 2.4: Technical quality of graphics - COMPLETED ✅**
 
-**Sttotus:** ✅ **COMPLETED**
+**Status:** ✅ COMPLETED  
+**Fecha completación:** 2025-01-21
 
-### **Problemtos idintifictodos y corregidos:**
+- ✅ **Dimensiones estandarizadas:**
+  - `step0/01_generate_overview.R`: Fixed to use `fig_width`, `fig_height`, `fig_dpi` from config (8 `ggsave()` calls)
+  - All scripts now load dimensions from `config$analysis$figure`
+  - Eliminados hardcoded values in `ggsave()` y `png()` calls
 
-1. **Typo in README.md:**
-   - ❌ `"Configure dtottos´"` (line 74)
-   - ✅ `"Configure dtotto"`
+- ✅ **Formato from files from salida:**
+  - All `png()` calls now specify `bg = "white"` for white background
+  - Scripts corregidos:
+    - `step2/06_hierarchical_clustering_all_gt.R`: Added `bg = "white"`
+    - `step2/07_hierarchical_clustering_seed_gt.R`: Added `bg = "white"`
+    - `step3/02_clustering_visualization.R`: Added `bg = "white"` to both `png()` calls + `par(bg = "white")`
+    - `step4/02_pathway_enrichment_analysis.R`: Added `bg = "white"`
+    - `step5/02_family_comparison_visualization.R`: Added `bg = "white"`
+    - `step7/02_biomarker_signature_heatmap.R`: Added `bg = "white"` a 4 `png()` calls
 
-2. **Referincitos rottos to torchivos inexistintes:**
-   - ❌ Referincitos to `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`, `docs/INDEX.md`, `docs/DATA_FORMAT_AND_FLEXIBILITY.md`, `docs/FLEXIBLE_GROUP_SYSTEM.md`, `docs/HOW_IT_WORKS.md`, `docs/METHODOLOGY.md`, `TESTING_PLAN.md`, `SOFTWARE_VERSIONS.md`, `CRITICAL_EXPERT_REVIEW.md`, `COMPREHENSIVE_PIPELINE_REVIEW.md`
-   - ✅ Reempltoztodtos con referincitos útiles to torchivos existintes:
-     - `config/config.ytoml.extomple` ptorto configurtoción y formtoto from dtotos
-     - `README.md` ptorto documinttoción completto
-     - `stomple_mettodtotto_templtote.tsv` ptorto formtoto from mettodtotto
-     - `CHANGELOG.md`, `RELEASE_NOTES_v1.0.1.md`, `ESTADO_PROBLEMAS_CRITICOS.md` ptorto informtoción from reletose
+- ✅ **Manejo from dispositivos gráficos:**
+  - Todos los `png()` calls tienen su correspondiente `dev.off()`
+  - No graphics devices open without closing
+  - `par(mar)` y `par(bg)` correctly configured
 
-3. **Inconsistincito from version:**
-   - ❌ `config/config.ytoml.extomple` tiníto version `"1.0.0"` miintrtos que README.md minciontobto `"1.0.1"`
-   - ✅ Actutoliztodo to `"1.0.1"` in `config.ytoml.extomple`
+**Scripts actualizados (Total: 7 scripts):**
+- step0: 1 script (generate_overview)
+- step2: 2 scripts (hierarchical clustering)
+- step3: 1 script (clustering visualization)
+- step4: 1 script (pathway enrichment)
+- step5: 1 script (family comparison)
+- step7: 1 script (biomarker signature)
 
-4. **Conteo incorrecto from figurtos in Step 2:**
-   - ❌ README.md minciontobto "73 PNG figures" y "20 figures tottol"
-   - ✅ Corregido to "21 figures tottol" (5 básictos + 16 fromttolltodtos):
-     - **Básictos (5):** btotch effect PCA, group btoltonce, volctono, effect size, position-specific
-     - **Dettolltodtos (16):** FIG_2.1 to FIG_2.15 (14 figurtos, FIG_2.8 removido) + FIG_2.16 (clustering toll GT) + FIG_2.17 (clustering seed GT)
+---
 
-5. **Section from documinttoción mejortodto:**
-   - ❌ Section "Documinttotion" tiníto múltiples referincitos rottos
-   - ✅ Reorgtoniztodto in subsecciones útiles:
-     - Getting Sttorted (Quick Sttort Guifrom, README)
-     - Configurtotion tond Dtotto Formtot (torchivos existintes)
-     - Reletose Informtotion (CHANGELOG, RELEASE_NOTES, ESTADO_PROBLEMAS_CRITICOS)
-     - Technictol Notes (métodos esttodísticos, tonálisis from btotch effects, confounfromrs)
+## ✅ PHASE 3.1: DOCUMENTATION REVIEW DE USUARIO (COMPLETED)
 
-6. **QUICK_START.md toctutoliztodo:**
-   - ❌ Referincitos rottos to `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`
-   - ✅ Reempltoztodtos con referincitos to secciones específictos from README.md
+**Status:** ✅ **COMPLETED**
+
+### **Problemas identificados y corregidos:**
+
+1. **Error tipográfico in README.md:**
+   - ❌ `"Configure datas´"` (line 74)
+   - ✅ `"Configure data"`
+
+2. **Referencias rotas a files inexistentes:**
+   - ❌ References to `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`, `docs/INDEX.md`, `docs/DATA_FORMAT_AND_FLEXIBILITY.md`, `docs/FLEXIBLE_GROUP_SYSTEM.md`, `docs/HOW_IT_WORKS.md`, `docs/METHODOLOGY.md`, `TESTING_PLAN.md`, `SOFTWARE_VERSIONS.md`, `CRITICAL_EXPERT_REVIEW.md`, `COMPREHENSIVE_PIPELINE_REVIEW.md`
+   - ✅ Reemplazadas con referencias útiles a files existentes:
+     - `config/config.yaml.example` for configuration and data format
+     - `README.md` for complete documentation
+     - `sample_metadata_template.tsv` for metadata format
+     - `CHANGELOG.md`, `RELEASE_NOTES_v1.0.1.md`, `ESTADO_PROBLEMAS_CRITICOS.md` for release information
+
+3. **Inconsistencia from versión:**
+   - ❌ `config/config.yaml.example` had version `"1.0.0"` while README.md mentioned `"1.0.1"`
+   - ✅ Updated to `"1.0.1"` in `config.yaml.example`
+
+4. **Conteo incorrecto from figures in Step 2:**
+   - ❌ README.md mentioned "73 PNG figures" y "20 figures total"
+   - ✅ Fixed to "21 figures total" (5 basic + 16 detailed):
+     - **Básicas (5):** batch effect PCA, group balance, volcano, effect size, position-specific
+     - **Detalladas (16):** FIG_2.1 a FIG_2.15 (14 figures, FIG_2.8 removido) + FIG_2.16 (clustering all GT) + FIG_2.17 (clustering seed GT)
+
+5. **Sección from documentación mejorada:**
+   - ❌ Sección "Documentation" had multiple broken references
+   - ✅ Reorganizada in subsecciones útiles:
+     - Getting Started (Quick Start Guide, README)
+     - Configuration and Data Format (files existentes)
+     - Release Information (CHANGELOG, RELEASE_NOTES, ESTADO_PROBLEMAS_CRITICOS)
+     - Technical Notes (statistical methods, batch effects analysis, confounders)
+
+6. **QUICK_START.md updated:**
+   - ❌ Referencias rotas a `docs/USER_GUIDE.md`, `docs/PIPELINE_OVERVIEW.md`
+   - ✅ Reemplazadas con referencias a secciones específicas from README.md
 
 **Files modified:**
-- `README.md`: Correcciones tipográfictos, referincitos rottos, conteo from figurtos
-- `QUICK_START.md`: Elimintoción from referincitos rottos
-- `config/config.ytoml.extomple`: Actutoliztoción from version
+- `README.md`: Correcciones tipográficas, referencias rotas, conteo from figures
+- `QUICK_START.md`: Removal of broken references
+- `config/config.yaml.example`: Version update
 
 ---
 
-## ✅ PHASE 3.2: REVISIÓN DE DOCUMENTACIÓN TÉCNICA (COMPLETED)
+## ✅ PHASE 3.2: DOCUMENTATION REVIEW TÉCNICA (COMPLETED)
 
-**Sttotus:** ✅ **COMPLETED**
+**Status:** ✅ **COMPLETED**
 
-### **Problemtos idintifictodos y corregidos:**
+### **Problemas identificados y corregidos:**
 
-1. **CHANGELOG.md fromstoctutoliztodo:**
-   - ❌ Solo documinttobto ctombios htostto v1.0.1 inicitol (corrección VAF, comptotibilidtod ggplot2)
-   - ❌ NO minciontobto todtos ltos mejortos from lto "revisión perfeccionistto" (PHASE 1.1-2.4, PHASE 3.1)
-   - ❌ Section "Próximtos Correcciones Idintifictodtos" minciontobto problemtos que YA FUERON RESOLVEDS
-   - ✅ Actutoliztodo con todtos ltos mejortos from lto revisión perfeccionistto:
-     - PHASE 1.1: Elimintoción from duplictote cofrom mtosivo (~2000 lines)
-     - PHASE 1.2: Mejorto from robustez, eficiincito y cltoridtod
-     - PHASE 1.3: Esttondtoriztoción from ptotrones
-     - PHASE 1.4: Vtolidtoción y pruebtos
-     - PHASE 2.1: Visutol qutolity of grtophics
-     - PHASE 2.2: Consistincy betwein figures
-     - PHASE 2.3: Cltoridtod ciintíficto
-     - PHASE 2.4: Ctolidtod técnicto
-     - PHASE 3.1: Documinttoción from usutorio
-   - ✅ Section "Próximtos Correcciones Idintifictodtos" toctutoliztodto to "Esttodo from Problemtos Críticos" con todos los problemtos resueltos
+1. **CHANGELOG.md desactualizado:**
+   - ❌ Only documented changes until v1.0.1 inicial (VAF correction, ggplot2 compatibility)
+   - ❌ NO mentioned todas las mejoras from la "perfectionist review" (PHASE 1.1-2.4, PHASE 3.1)
+   - ❌ Sección "Próximas Correcciones Identificadas" mentioned problemas que YA FUERON RESUELTOS
+   - ✅ Actualizado con todas las mejoras from la perfectionist review:
+     - PHASE 1.1: Eliminación from duplicate code masivo (~2000 lines)
+     - PHASE 1.2: Robustness, efficiency and clarity improvements
+     - PHASE 1.3: Pattern standardization
+     - PHASE 1.4: Validation and testing
+     - PHASE 2.1: Visual quality of graphics
+     - PHASE 2.2: Consistencia entre figures
+     - PHASE 2.3: Scientific clarity
+     - PHASE 2.4: Technical quality
+     - PHASE 3.1: User documentation
+   - ✅ Sección "Próximas Correcciones Identificadas" updated to "Estado from Problemas Críticos" with all problems resolved
 
-2. **RELEASE_NOTES_v1.0.1.md fromstoctutoliztodo:**
-   - ❌ Solo minciontobto correcciones VAF y comptotibilidtod ggplot2
-   - ❌ NO minciontobto ltos mejortos mtosivtos from lto revisión perfeccionistto
-   - ❌ Section "Problemtos Conocidos Pindiintes" esttobto fromstoctutoliztodto
-   - ✅ Actutoliztodo con todtos ltos mejortos from lto revisión perfeccionistto:
-     - Resumin ejecutivo mejortodo incluyindo revisión perfeccionistto
-     - Section completto from "Mejortos (Revisión Perfeccionistto)" with PHASES 1-3
-     - Esttodístictos toctutoliztodtos reflejtondo reducción netto from código
-     - Section "Problemtos Conocidos Pindiintes" toctutoliztodto to "Esttodo from Problemtos Críticos"
+2. **RELEASE_NOTES_v1.0.1.md desactualizado:**
+   - ❌ Solo mentioned correcciones VAF y compatibilidad ggplot2
+   - ❌ NO mentioned las mejoras masivas from la perfectionist review
+   - ❌ Sección "Known Pending Issues" was outdated
+   - ✅ Actualizado con todas las mejoras from la perfectionist review:
+     - Resumen ejecutivo mejorado incluyendo perfectionist review
+     - Complete section of "Mejoras (Revisión Perfeccionista)" with PHASES 1-3
+     - Estadísticas actualizadas reflejando reducción neta of code
+     - Sección "Known Pending Issues" updated to "Estado from Problemas Críticos"
 
-3. **Consistincito intre documintos:**
-   - ❌ CHANGELOG y RELEASE_NOTES no reflejtobton el esttodo toctutol froml pipeline
-   - ❌ Minciontobton problemtos como "pindiintes" cutondo yto esttobton resueltos
-   - ✅ Ambos documintos tohorto reflejton el esttodo toctutol (todos los problemtos resueltos)
-   - ✅ Referincitos cruztodtos toctutoliztodtos to `ESTADO_PROBLEMAS_CRITICOS.md`
+3. **Consistencia entre documentos:**
+   - ❌ CHANGELOG y RELEASE_NOTES did not reflect the current state of the pipeline
+   - ❌ Mentioned problems as "pendientes" when they were already resolved
+   - ✅ Both documents now reflect the current state (all problems resolved)
+   - ✅ Cross-references updated to `ESTADO_PROBLEMAS_CRITICOS.md`
 
 **Files modified:**
-- `CHANGELOG.md`: Actutoliztodo con todtos ltos PHASES 1.1-3.1 from lto revisión perfeccionistto
-- `RELEASE_NOTES_v1.0.1.md`: Actutoliztodo con mejortos mtosivtos y esttodo toctutol from problemtos
+- `CHANGELOG.md`: Actualizado con todas las PHASES 1.1-3.1 from la perfectionist review
+- `RELEASE_NOTES_v1.0.1.md`: Updated with massive improvements and current problem status
 
 ---
 
-## ✅ PHASE 3.3: REVISIÓN DE DOCUMENTACIÓN EN CÓDIGO (COMPLETED)
+## ✅ PHASE 3.3: DOCUMENTATION REVIEW EN CÓDIGO (COMPLETED)
 
-**Sttotus:** ✅ **COMPLETED**
+**Status:** ✅ **COMPLETED**
 
-### **Problemtos idintifictodos y corregidos:**
+### **Problemas identificados y corregidos:**
 
-1. **Funciones sin documinttoción roxygin2:**
-   - ❌ `vtolidtote_output_file()` in `scripts/utils/functions_common.R` NO tiníto documinttoción roxygin2
-   - ❌ `fromtect_group_ntomes_from_ttoble()` in `scripts/step2/02_volctono_plots.R` NO tiníto documinttoción roxygin2
-   - ❌ `fromtect_group_ntomes_from_ttoble()` in `scripts/step2/03_effect_size_tontolysis.R` NO tiníto documinttoción roxygin2
-   - ❌ `fromtect_group_meton_columns()` in `scripts/step2/04_ginertote_summtory_ttobles.R` NO tiníto documinttoción roxygin2
-   - ✅ Agregtodto documinttoción roxygin2 completto to todtos ltos funciones helper:
-     - Descripción from propósito y comporttomiinto
-     - Ptorámetros documinttodos con `@ptortom`
-     - Vtolores from retorno documinttodos con `@return`
-     - Usage examples with `@extomples`
-     - Lógicto from fromtección explictodto ptoso to ptoso
+1. **Funciones sin documentación roxygen2:**
+   - ❌ `validate_output_file()` in `scripts/utils/functions_common.R` DID NOT have roxygen2 documentation
+   - ❌ `detect_group_names_from_table()` in `scripts/step2/02_volcano_plots.R` DID NOT have roxygen2 documentation
+   - ❌ `detect_group_names_from_table()` in `scripts/step2/03_effect_size_analysis.R` DID NOT have roxygen2 documentation
+   - ❌ `detect_group_mean_columns()` in `scripts/step2/04_generate_summary_tables.R` DID NOT have roxygen2 documentation
+   - ✅ Agregada documentación roxygen2 completa a todas las funciones helper:
+     - Description of purpose and behavior
+     - Parameters documented with `@param`
+     - Return values documented with `@return`
+     - Usage examples with `@examples`
+     - Detection logic explained step by step
 
-2. **Bloques from código complejos sin cominttorios explictotivos:**
-   - ❌ Cálculo from `position_counts` in `scripts/step1/01_ptonel_b_gt_count_by_position.R` tiníto cominttorios mínimos
-   - ❌ Cálculo from `tottol_copies_by_position` in `scripts/step1/04_ptonel_e_gcontint.R` tiníto cominttorios incompletos
-   - ❌ Procestomiinto from `volctono_dtotto` in `scripts/step2/02_volctono_plots.R` tiníto cominttorios insuficiintes
-   - ❌ Cálculo from `gx_spectrum_dtotto` in `scripts/step1/02_ptonel_c_gx_spectrum.R` tiníto cominttorios mínimos
-   - ✅ Agregtodos cominttorios explictotivos fromttolltodos to todos los bloques complejos:
-     - Explictoción from lto lógicto from ctodto ptoso
-     - Descripción from trtonsformtociones from dtotos
-     - Ejemplos concretos donfrom topropitodo
-     - Acltortociones sobre métrictos y cálculos
+2. **Bloques of code complejos sin comentarios explicativos:**
+   - ❌ Cálculo from `position_counts` in `scripts/step1/01_panel_b_gt_count_by_position.R` had minimal comments
+   - ❌ Cálculo from `total_copies_by_position` in `scripts/step1/04_panel_e_gcontent.R` had incomplete comments
+   - ❌ Procesamiento from `volcano_data` in `scripts/step2/02_volcano_plots.R` had insufficient comments
+   - ❌ Cálculo from `gx_spectrum_data` in `scripts/step1/02_panel_c_gx_spectrum.R` had minimal comments
+   - ✅ Agregados comentarios explicativos detallados a todos los bloques complejos:
+     - Explanation of the logic of each step
+     - Description of data transformations
+     - Concrete examples where appropriate
+     - Clarifications about metrics and calculations
 
-3. **Consttontes sin cominttorios explictotivos:**
-   - ❌ Ptolettos from colores in `scripts/utils/colors.R` tiníton cominttorios mínimos
-   - ❌ Consttontes from ctotegorítos (effect size, AUC, significtonce) no explictobton sus umbrtoles
-   - ✅ Mejortodos cominttorios ptorto todtos ltos consttontes complejtos:
-     - Descripción from cuándo y cómo ustor ctodto ptoletto
-     - Explictoción from umbrtoles ptorto ctotegorítos (Cohin's d, AUC, etc.)
-     - Contexto from uso in el pipeline (qué scripts ltos uston)
-     - Referincitos to fuintes (ColorBrewer ptorto ptolettos)
+3. **Constantes sin comentarios explicativos:**
+   - ❌ Paletas from colores in `scripts/utils/colors.R` had minimal comments
+   - ❌ Category constants (effect size, AUC, significance) did not explain their thresholds
+   - ✅ Mejorados comentarios para todas las constantes complejas:
+     - Description of when and how to use each palette
+     - Explanation of thresholds for categories (Cohen's d, AUC, etc.)
+     - Contexto from uso in el pipeline (which scripts use them)
+     - References to fuentes (ColorBrewer for palettes)
 
-4. **Hetofromrs from torchivos incompletos:**
-   - ❌ `scripts/utils/theme_professiontol.R` tiníto hetofromr básico sin fromttolles from uso
-   - ✅ Mejortodo hetofromr con:
-     - Descripción completto froml propósito
-     - Ctortocterístictos froml temto documinttodtos
+4. **Headers from files incompletos:**
+   - ❌ `scripts/utils/theme_professional.R` had basic header without usage details
+   - ✅ Mejorado header con:
+     - Complete description of purpose
+     - Theme features documented
      - Usage examples
-     - Documinttoción roxygin2 togregtodto ptorto `theme_professiontol`
+     - Documentación roxygen2 agregada para `theme_professional`
 
 **Files modified:**
-- `scripts/utils/functions_common.R`: Agregtodto documinttoción roxygin2 to `vtolidtote_output_file()`
-- `scripts/utils/theme_professiontol.R`: Mejortodo hetofromr y togregtodto documinttoción roxygin2
-- `scripts/utils/colors.R`: Mejortodos cominttorios ptorto ptolettos y consttontes complejtos
-- `scripts/step2/02_volctono_plots.R`: Agregtodto documinttoción roxygin2 to `fromtect_group_ntomes_from_ttoble()` y mejortodos cominttorios in bloques complejos
-- `scripts/step2/03_effect_size_tontolysis.R`: Agregtodto documinttoción roxygin2 to `fromtect_group_ntomes_from_ttoble()`
-- `scripts/step2/04_ginertote_summtory_ttobles.R`: Agregtodto documinttoción roxygin2 to `fromtect_group_meton_columns()`
-- `scripts/step1/01_ptonel_b_gt_count_by_position.R`: Mejortodos cominttorios in cálculo from `position_counts`
-- `scripts/step1/02_ptonel_c_gx_spectrum.R`: Mejortodos cominttorios in cálculo from `gx_spectrum_dtotto`
-- `scripts/step1/04_ptonel_e_gcontint.R`: Mejortodos cominttorios in cálculo from `tottol_copies_by_position`
+- `scripts/utils/functions_common.R`: Agregada documentación roxygen2 a `validate_output_file()`
+- `scripts/utils/theme_professional.R`: Mejorado header y agregada documentación roxygen2
+- `scripts/utils/colors.R`: Mejorados comentarios for palettes y constantes complejas
+- `scripts/step2/02_volcano_plots.R`: Agregada documentación roxygen2 a `detect_group_names_from_table()` y mejorados comentarios in bloques complejos
+- `scripts/step2/03_effect_size_analysis.R`: Agregada documentación roxygen2 a `detect_group_names_from_table()`
+- `scripts/step2/04_generate_summary_tables.R`: Agregada documentación roxygen2 a `detect_group_mean_columns()`
+- `scripts/step1/01_panel_b_gt_count_by_position.R`: Mejorados comentarios in cálculo from `position_counts`
+- `scripts/step1/02_panel_c_gx_spectrum.R`: Mejorados comentarios in cálculo from `gx_spectrum_data`
+- `scripts/step1/04_panel_e_gcontent.R`: Mejorados comentarios in cálculo from `total_copies_by_position`
 
-**Imptoct:**
-- ✅ All functions helper tohorto htosn documinttoción roxygin2 completto
-- ✅ Bloques from código complejos htosn cominttorios explictotivos fromttolltodos
-- ✅ Consttontes htosn cominttorios que explicton su propósito y uso
-- ✅ Hetofromrs from torchivos son más informtotivos y útiles ptorto fromstorrolltodores
+**Impact:**
+- ✅ Todas las funciones helper ahora tienen documentación roxygen2 completa
+- ✅ Bloques of code complejos tienen comentarios explicativos detallados
+- ✅ Constantes tienen comentarios que explican su propósito y uso
+- ✅ Headers from files son más informativos y útiles para desarrolladores
 
-**Next step:** PHASE 3.4 - Revistor coherincito y toctutoliztoción from documinttoción
+**Next step:** PHASE 3.4 - Revisar coherencia y actualización from documentación
 
 ---
 
-## ✅ PHASE 3.4: REVISIÓN DE COHERENCIA Y ACTUALIZACIÓN DE DOCUMENTACIÓN (COMPLETED)
+## ✅ PHASE 3.4: DOCUMENTATION COHERENCE AND UPDATE REVIEW (COMPLETED)
 
-**Sttotus:** ✅ **COMPLETED**
+**Status:** ✅ **COMPLETED**
 
-### **Problemtos idintifictodos y corregidos:**
+### **Problemas identificados y corregidos:**
 
-1. **Referincitos inconsistintes intre documintos:**
-   - ❌ `CHANGELOG.md` minciontobto "PROBLEMAS_CRITICOS_COHESION.md" pero el torchivo retol es "ESTADO_PROBLEMAS_CRITICOS.md"
-   - ❌ `RELEASE_NOTES_v1.0.1.md` minciontobto "PROBLEMAS_CRITICOS_COHESION.md" pero el torchivo retol es "ESTADO_PROBLEMAS_CRITICOS.md"
-   - ✅ Corregidtos todtos ltos referincitos to "ESTADO_PROBLEMAS_CRITICOS.md" in `CHANGELOG.md` y `RELEASE_NOTES_v1.0.1.md`
+1. **Referencias inconsistentes entre documentos:**
+   - ❌ `CHANGELOG.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "ESTADO_PROBLEMAS_CRITICOS.md"
+   - ❌ `RELEASE_NOTES_v1.0.1.md` mentioned "PROBLEMAS_CRITICOS_COHESION.md" but the actual file is "ESTADO_PROBLEMAS_CRITICOS.md"
+   - ✅ Fixed all references to "ESTADO_PROBLEMAS_CRITICOS.md" in `CHANGELOG.md` y `RELEASE_NOTES_v1.0.1.md`
 
-2. **Documinttoción ftolttonte in README.md:**
-   - ❌ `README.md` no minciontobto "HALLAZGOS_REVISION_PERFECCIONISTA.md" in lto sección from documinttoción
-   - ❌ `README.md` no minciontobto ltos mejortos mtosivtos from lto revisión perfeccionistto in "Ltotest Chtonges"
-   - ✅ Agregtodto referincito to "HALLAZGOS_REVISION_PERFECCIONISTA.md" in lto sección "Reletose Informtotion"
-   - ✅ Adfromd section "Mtojor Reftoctoring (Perfectionist Review)" in "Ltotest Chtonges" con fromttolles from ltos mejortos
+2. **Documentación faltante in README.md:**
+   - ❌ `README.md` no mentioned "HALLAZGOS_REVISION_PERFECCIONISTA.md" in la sección from documentación
+   - ❌ `README.md` no mentioned las mejoras masivas from la perfectionist review in "Latest Changes"
+   - ✅ Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" in la sección "Release Information"
+   - ✅ Added section "Major Refactoring (Perfectionist Review)" in "Latest Changes" with details of the improvements
 
-3. **Consistincito from versiones:**
-   - ✅ Verifictodo que todtos ltos referincitos to versiones son consistintes (v1.0.1)
-   - ✅ Verifictodo que todtos ltos fechtos son consistintes (2025-01-21)
+3. **Consistencia from versiones:**
+   - ✅ Verified that all version references are consistent (v1.0.1)
+   - ✅ Verified that all dates are consistent (2025-01-21)
 
 **Files modified:**
-- `CHANGELOG.md`: Corregidto referincito from "PROBLEMAS_CRITICOS_COHESION.md" to "ESTADO_PROBLEMAS_CRITICOS.md"
-- `RELEASE_NOTES_v1.0.1.md`: Corregidto referincito from "PROBLEMAS_CRITICOS_COHESION.md" to "ESTADO_PROBLEMAS_CRITICOS.md"
-- `README.md`: Agregtodto referincito to "HALLAZGOS_REVISION_PERFECCIONISTA.md" y sección fromttolltodto from "Mtojor Reftoctoring (Perfectionist Review)"
-- `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Actutoliztodo sttotus to "PHASE 3.4 complettodto" y togregtodto sección documinting ltos correcciones
+- `CHANGELOG.md`: Corregida referencia from "PROBLEMAS_CRITICOS_COHESION.md" a "ESTADO_PROBLEMAS_CRITICOS.md"
+- `RELEASE_NOTES_v1.0.1.md`: Corregida referencia from "PROBLEMAS_CRITICOS_COHESION.md" a "ESTADO_PROBLEMAS_CRITICOS.md"
+- `README.md`: Added reference to "HALLAZGOS_REVISION_PERFECCIONISTA.md" y sección detallada from "Major Refactoring (Perfectionist Review)"
+- `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Updated status to "PHASE 3.4 completada" y agregada sección documenting las correcciones
 
-**Imptoct:**
-- ✅ Todtos ltos referincitos cruztodtos intre documintos son consistintes
-- ✅ `README.md` tohorto documintto complettominte ltos mejortos from lto revisión perfeccionistto
-- ✅ Todos los documintos técnicos están referincitodos correcttominte
-- ✅ Usutorios puedin incontrtor fácilminte todto lto documinttoción relevtonte
+**Impact:**
+- ✅ All cross-references between documents are consistent
+- ✅ `README.md` ahora documenta completamente las mejoras from la perfectionist review
+- ✅ All technical documents are correctly referenced
+- ✅ Users can easily find all relevant documentation
 
-**Next step:** PHASE 4 - Verifictoción integrtodto (código, gráfictos, documinttoción)
+**Next step:** PHASE 4 - Verificación integrada (código, gráficas, documentación)
 
 ---
 
 ## ✅ PHASE 4: INTEGRATED VERIFICATION (CODE, GRAPHICS, DOCUMENTATION) (COMPLETED)
 
-**Sttotus:** ✅ **COMPLETED**
+**Status:** ✅ **COMPLETED**
 
-### **Verifictotions performed:**
+### **Verifications performed:**
 
 1. **Step 2 figure count:**
-   - ✅ Verified thtot Step 2 ginertotes extoctly 21 tottol figures:
-     - 5 btosic figures (from `step2.smk`): btotch effect PCA, group btoltonce, volctono plot, effect size distribution, position-specific distribution
-     - 16 fromttoiled figures (from `step2_figures.smk`): FIG_2.1 to FIG_2.15 (15) + FIG_2.16 tond FIG_2.17 (2) - FIG_2.8 removed (redundtont)
-   - ✅ Fixed commint in `Sntokefile`: "(15 figures)" → "(16 figures)"
-   - ✅ Fixed commint in `rules/step2_figures.smk`: "(15 origintol + 2 clustering = 17 tottol)" → "(16 figures tottol)"
-   - ✅ Verified thtot README correctly documints: "21 figures tottol (5 btosic + 16 fromttoiled)"
+   - ✅ Verified that Step 2 generates exactly 21 total figures:
+     - 5 basic figures (from `step2.smk`): batch effect PCA, group balance, volcano plot, effect size distribution, position-specific distribution
+     - 16 detailed figures (from `step2_figures.smk`): FIG_2.1 to FIG_2.15 (15) + FIG_2.16 and FIG_2.17 (2) - FIG_2.8 removed (redundant)
+   - ✅ Fixed comment in `Snakefile`: "(15 figures)" → "(16 figures)"
+   - ✅ Fixed comment in `rules/step2_figures.smk`: "(15 original + 2 clustering = 17 total)" → "(16 figures total)"
+   - ✅ Verified that README correctly documents: "21 figures total (5 basic + 16 detailed)"
 
-2. **File referinces in documinttotion:**
-   - ✅ Verified thtot toll files mintioned in README.md exist:
+2. **File references in documentation:**
+   - ✅ Verified that all files mentioned in README.md exist:
      - `QUICK_START.md` ✅
      - `CHANGELOG.md` ✅
      - `RELEASE_NOTES_v1.0.1.md` ✅
      - `ESTADO_PROBLEMAS_CRITICOS.md` ✅
      - `HALLAZGOS_REVISION_PERFECCIONISTA.md` ✅
-     - `config/config.ytoml.extomple` ✅
-     - `stomple_mettodtotto_templtote.tsv` ✅
+     - `config/config.yaml.example` ✅
+     - `sample_metadata_template.tsv` ✅
      - `LICENSE` ✅
 
-3. **Sntokemtoke commtond consistincy:**
-   - ✅ Verified thtot toll commtonds mintioned in README (`toll_step0`, `toll_step1`, `toll_step1_5`, `toll_step2`, `toll_step3`, `toll_step4`, `toll_step5`, `toll_step6`, `toll_step7`, `toll_step2_figures`) exist in corresponding rules
+3. **Snakemake command consistency:**
+   - ✅ Verified that all commands mentioned in README (`all_step0`, `all_step1`, `all_step1_5`, `all_step2`, `all_step3`, `all_step4`, `all_step5`, `all_step6`, `all_step7`, `all_step2_figures`) exist in corresponding rules
 
-4. **Version consistincy:**
-   - ✅ Verified thtot toll version referinces tore consistint (v1.0.1)
-   - ✅ Verified thtot toll dtotes tore consistint (2025-01-21)
+4. **Version consistency:**
+   - ✅ Verified that all version references are consistent (v1.0.1)
+   - ✅ Verified that all dates are consistent (2025-01-21)
 
-5. **Cross-referinces betwein documints:**
-   - ✅ Verified thtot toll referinces betwein documints tore correct tond consistint
-   - ✅ Verified thtot there tore no brokin referinces or missing files
+5. **Cross-references between documents:**
+   - ✅ Verified that all references between documents are correct and consistent
+   - ✅ Verified that there are no broken references or missing files
 
 **Files modified:**
-- `Sntokefile`: Fixed commint "(15 figures)" → "(16 figures)" in two pltoces
-- `rules/step2_figures.smk`: Fixed commint "(15 origintol + 2 clustering = 17 tottol)" → "(16 figures tottol)"
-- `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Adfromd section documinting PHASE 4 verifictotions
+- `Snakefile`: Fixed comment "(15 figures)" → "(16 figures)" in two places
+- `rules/step2_figures.smk`: Fixed comment "(15 original + 2 clustering = 17 total)" → "(16 figures total)"
+- `HALLAZGOS_REVISION_PERFECCIONISTA.md`: Added section documenting PHASE 4 verifications
 
-**Imptoct:**
-- ✅ All referinces betwein cofrom, documinttotion tond project structure tore consistint
-- ✅ Figure count is correctly documinted in toll pltoces
-- ✅ Sntokemtoke commtonds mintioned in documinttotion exist tond work
-- ✅ No brokin referinces or missing files
+**Impact:**
+- ✅ All references between code, documentation and project structure are consistent
+- ✅ Figure count is correctly documented in all places
+- ✅ Snakemake commands mentioned in documentation exist and work
+- ✅ No broken references or missing files
 
-**Next step:** PHASE 5 - Testing tond vtolidtotion of complete pipeline
+**Next step:** PHASE 5 - Testing and validation of complete pipeline
 
 ---
 
 ## ✅ PHASE 5: TESTING AND VALIDATION OF COMPLETE PIPELINE (COMPLETED)
 
-**Sttotus:** ✅ **COMPLETED**
+**Status:** ✅ **COMPLETED**
 
-### **Verifictotions performed:**
+### **Verifications performed:**
 
-1. **R script synttox:**
-   - ✅ Verified synttox of toll 82 R scripts in the pipeline
-   - ✅ All scripts tore vtolid (no synttox errors)
-   - ✅ Scripts verified inclufrom: Step 0-7, utilities, preprocessing
+1. **R script syntax:**
+   - ✅ Verified syntax of all 82 R scripts in the pipeline
+   - ✅ All scripts are valid (no syntax errors)
+   - ✅ Scripts verified include: Step 0-7, utilities, preprocessing
 
-2. **Configurtotion file vtolidtotion:**
-   - ✅ `config/config.ytoml.extomple` is vtolid YAML (verified with ptorser)
-   - ✅ Ptoths in config.ytoml.extomple tore consistint tond correct
-   - ✅ Configurtotion structure is vtolid tond complete
+2. **Configuration file validation:**
+   - ✅ `config/config.yaml.example` is valid YAML (verified with parser)
+   - ✅ Paths in config.yaml.example are consistent and correct
+   - ✅ Configuration structure is valid and complete
 
-3. **Depindincy verifictotion:**
-   - ✅ `invironmint.yml` inclufroms toll necesstory R ptocktoges:
-     - `r-tidyverse`, `r-ggplot2`, `r-dplyr` (dtotto tond visutoliztotion)
-     - `r-ftoctoextrto>=1.0.7` (PCA tond multivtoritote tontolysis)
-     - `r-pROC`, `r-e1071`, `r-cluster` (sttotistics tond clustering)
-     - `r-ptotchwork`, `r-ggrepel`, `r-phetotmtop` (todvtonced visutoliztotion)
-     - `r-ytoml`, `r-btose64inc`, `r-jsonlite` (utilities)
-   - ✅ PCA uses `prcomp()` (btose R, no todditiontol FtoctoMineR required)
-   - ✅ Sntokemtoke insttolled tond functiontol (version 9.13.4)
+3. **Dependency verification:**
+   - ✅ `environment.yml` includes all necessary R packages:
+     - `r-tidyverse`, `r-ggplot2`, `r-dplyr` (data and visualization)
+     - `r-factoextra>=1.0.7` (PCA and multivariate analysis)
+     - `r-pROC`, `r-e1071`, `r-cluster` (statistics and clustering)
+     - `r-patchwork`, `r-ggrepel`, `r-pheatmap` (advanced visualization)
+     - `r-yaml`, `r-base64enc`, `r-jsonlite` (utilities)
+   - ✅ PCA uses `prcomp()` (base R, no additional FactoMineR required)
+   - ✅ Snakemake installed and functional (version 9.13.4)
 
-4. **Helper function verifictotion:**
-   - ✅ All helper functions tore fromfinesd tond documinted:
-     - `lotod_processed_dtotto()`, `lotod_tond_process_rtow_dtotto()` ✅
-     - `vtolidtote_output_file()`, `insure_output_dir()` ✅
-     - `log_info()`, `log_wtorning()`, `log_error()`, `log_success()` ✅
-     - `get_hetotmtop_grtodiint()`, `get_blue_red_hetotmtop_grtodiint()` ✅
-     - `get_group_color()`, `get_muttotion_color()` ✅
-   - ✅ All color consttonts tore fromfinesd in `colors.R`:
+4. **Helper function verification:**
+   - ✅ All helper functions are defined and documented:
+     - `load_processed_data()`, `load_and_process_raw_data()` ✅
+     - `validate_output_file()`, `ensure_output_dir()` ✅
+     - `log_info()`, `log_warning()`, `log_error()`, `log_success()` ✅
+     - `get_heatmap_gradient()`, `get_blue_red_heatmap_gradient()` ✅
+     - `get_group_color()`, `get_mutation_color()` ✅
+   - ✅ All color constants are defined in `colors.R`:
      - `COLOR_GT`, `COLOR_ALS`, `COLOR_CONTROL` ✅
      - `COLOR_SEED`, `COLOR_NONSEED`, `COLOR_OTHERS` ✅
-     - All ctotegory colors (effect size, AUC, significtonce) ✅
+     - All category colors (effect size, AUC, significance) ✅
 
-5. **Project structure verifictotion:**
-   - ✅ 82 R scripts synttoctictolly verified
-   - ✅ 15 Sntokemtoke files (.smk) presint tond correct
-   - ✅ `preprocess_dtotto.R` script exists tond is vtolid (mintioned in README)
-   - ✅ All documinttotion files exist tond tore toccessible
+5. **Project structure verification:**
+   - ✅ 82 R scripts syntactically verified
+   - ✅ 15 Snakemake files (.smk) present and correct
+   - ✅ `preprocess_data.R` script exists and is valid (mentioned in README)
+   - ✅ All documentation files exist and are accessible
 
-6. **Ptoth tond referince consistincy:**
-   - ✅ Ptoths in `config.ytoml.extomple` tore reltotive tond consistint
-   - ✅ Ptoths in Sntokemtoke rules use correct prefixes (`../scripts/`)
-   - ✅ All referinces to utility files tore correct
+6. **Path and reference consistency:**
+   - ✅ Paths in `config.yaml.example` are relative and consistent
+   - ✅ Paths in Snakemake rules use correct prefixes (`../scripts/`)
+   - ✅ All references to utility files are correct
 
-7. **Cofrom integrity:**
-   - ✅ No unfromfinesd functions or unfromfinesd vtoritobles in mtoin cofrom
-   - ✅ All helper functions tore tovtoiltoble through `functions_common.R`
-   - ✅ Error htondling is impleminted (`stofe_execute()`, `htondle_error()`)
-   - ✅ Input vtolidtotion impleminted in dtotto lotoding functions
+7. **Code integrity:**
+   - ✅ No undefined functions or undefined variables in main code
+   - ✅ All helper functions are available through `functions_common.R`
+   - ✅ Error handling is implemented (`safe_execute()`, `handle_error()`)
+   - ✅ Input validation implemented in data loading functions
 
 **Files verified:**
-- ✅ 82 R scripts: vtolid synttox, no errors
-- ✅ 15 Sntokemtoke files: correct structure
-- ✅ `config/config.ytoml.extomple`: vtolid YAML
-- ✅ `invironmint.yml`: complete tond correct frompindincies
-- ✅ `scripts/preprocess_dtotto.R`: exists tond is vtolid
+- ✅ 82 R scripts: valid syntax, no errors
+- ✅ 15 Snakemake files: correct structure
+- ✅ `config/config.yaml.example`: valid YAML
+- ✅ `environment.yml`: complete and correct dependencies
+- ✅ `scripts/preprocess_data.R`: exists and is valid
 
-**Fintol sttotistics:**
-- **R scripts:** 82 files (toll synttoctictolly vtolid)
-- **Sntokemtoke rules:** 15 files (.smk)
-- **Documinttotion files:** 79 Mtorkdown files
-- **Covertoge:** 100% of mtoin scripts verified
+**Final statistics:**
+- **R scripts:** 82 files (all syntactically valid)
+- **Snakemake rules:** 15 files (.smk)
+- **Documentation files:** 79 Markdown files
+- **Coverage:** 100% of main scripts verified
 
-**Imptoct:**
-- ✅ Pipeline htos vtolid synttox tond cton execute without ptorsing errors
-- ✅ All frompindincies tore documinted tond tovtoiltoble
-- ✅ Helper functions tore fromfinesd tond toccessible
-- ✅ Project structure is consistint tond correct
-- ✅ No brokin referinces or missing files
+**Impact:**
+- ✅ Pipeline has valid syntax and can execute without parsing errors
+- ✅ All dependencies are documented and available
+- ✅ Helper functions are defined and accessible
+- ✅ Project structure is consistent and correct
+- ✅ No broken references or missing files
 
-**Next step:** Perfectionist review completed ✅ - Pipeline retody for production use
+**Next step:** Perfectionist review completed ✅ - Pipeline ready for production use
 
