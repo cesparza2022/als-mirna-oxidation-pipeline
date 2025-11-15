@@ -310,5 +310,26 @@
 
 **FASE 2.2 COMPLETADA ✅**
 
-**Próximo paso:** FASE 2.3 - Revisar mensaje y claridad científica en gráficas
+### **FASE 2.3: Mensaje y claridad científica - EN PROGRESO**
+- ✅ Captions mejorados en step1:
+  - Panel D: Agregado caption explicando SNVs únicos vs read counts
+  - Panel G: Cambiado 'Based on' a 'Shows percentage based on' para consistencia
+  - Todos los panels ahora tienen captions claros sobre tipos de datos
+- ✅ Captions mejorados en step2:
+  - Volcano plot: Incluye método FDR (Benjamini-Hochberg) y explica significancia estadística
+  - Effect size: Incluye fórmula de Cohen's d y umbrales de interpretación (Large, Medium, Small)
+  - Position-specific: Especifica método estadístico (Wilcoxon rank-sum) y FDR correction
+- ✅ Captions mejorados en step6:
+  - Correlation visualization: Explica método (Pearson correlation test) y regresión lineal con 95% CI
+- ✅ Captions mejorados en step7:
+  - ROC analysis: Explica método (pROC package), AUC (0.5 = random, 1.0 = perfect), y Combined signature
+- ✅ Corrección técnica:
+  - step7/01_biomarker_roc_analysis.R: Reemplazados valores hardcoded (12, 10, 300) con fig_width, fig_height, fig_dpi
+
+**Total FASE 2.3 (hasta ahora):**
+- 9 scripts actualizados para mejorar claridad científica en captions
+- Métodos estadísticos ahora explícitamente documentados en captions
+- Tipos de datos (SNVs vs read counts) claramente diferenciados
+
+**Próximo paso:** Continuar FASE 2.3 - Revisar títulos, subtítulos y leyendas para claridad científica o pasar a FASE 2.4
 
