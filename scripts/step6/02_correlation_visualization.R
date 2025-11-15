@@ -48,7 +48,9 @@ output_figure_b <- snakemake@output[["figure_b"]]
 config <- snakemake@config
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
 
 fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
 fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10

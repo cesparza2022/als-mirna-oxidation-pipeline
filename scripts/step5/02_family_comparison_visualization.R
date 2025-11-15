@@ -61,9 +61,11 @@ config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
-color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
-color_als <- if (!is.null(config$analysis$colors$als)) config$analysis$colors$als else "#D62728"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT, COLOR_ALS, COLOR_CONTROL
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
+color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else COLOR_CONTROL
+color_als <- if (!is.null(config$analysis$colors$als)) config$analysis$colors$als else COLOR_ALS
 
 fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
 fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
@@ -114,9 +116,9 @@ family_comparison <- tryCatch({
 
 # Detect group names from family_comparison columns
 # Try to extract from column names in family_summary first (most reliable)
-mean_cols <- names(family_summary)[str_detect(names(family_summary), "avg_.*_mean$")]
+mean_cols <- names(family_summary)[stringr::str_detect(names(family_summary), "avg_.*_mean$")]
 if (length(mean_cols) >= 2) {
-  group_names <- str_replace(mean_cols, "avg_|_mean", "")
+  group_names <- stringr::str_replace(mean_cols, "avg_|_mean", "")
   # Remove backward compatibility columns if dynamic names exist
   group_names <- group_names[!group_names %in% c("ALS", "Control")]
   if (length(group_names) >= 2) {

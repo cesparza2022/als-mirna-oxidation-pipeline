@@ -38,8 +38,10 @@ source(snakemake@input[["functions"]], local = TRUE)
 # Get configuration
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
-color_als <- if (!is.null(config$analysis$colors$als)) config$analysis$colors$als else "#D62728"
-color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "#666666"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_ALS, COLOR_CONTROL
+color_als <- if (!is.null(config$analysis$colors$als)) config$analysis$colors$als else COLOR_ALS
+color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else COLOR_CONTROL
 
 log_info("═══════════════════════════════════════════════════════════════════")
 log_info("STEP 2.6: Hierarchical Clustering - ALL G>T SNVs")

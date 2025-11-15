@@ -71,10 +71,10 @@ extract_mirna_family <- function(mirna_name) {
   #   hsa-let-7d-5p → let-7
   #   hsa-miR-1-3p → miR-1
   
-  if (str_detect(mirna_name, "let-\\d+")) {
+  if (stringr::str_detect(mirna_name, "let-\\d+")) {
     return("let-7")
-  } else if (str_detect(mirna_name, "miR-(\\d+)")) {
-    family_num <- str_extract(mirna_name, "miR-(\\d+)") %>% str_remove("miR-")
+  } else if (stringr::str_detect(mirna_name, "miR-(\\d+)")) {
+    family_num <- stringr::str_extract(mirna_name, "miR-(\\d+)") %>% stringr::str_remove("miR-")
     return(paste0("miR-", family_num))
   } else {
     return("Other")
@@ -192,10 +192,10 @@ log_info(paste("Group 1 (", group1_name, ") samples:", length(group1_samples)))
 log_info(paste("Group 2 (", group2_name, ") samples:", length(group2_samples)))
 
 # For backward compatibility
-if (group1_name == "ALS" || str_detect(group1_name, regex("als|disease", ignore_case = TRUE))) {
+if (group1_name == "ALS" || stringr::str_detect(group1_name, stringr::regex("als|disease", ignore_case = TRUE))) {
   als_samples <- group1_samples
   control_samples <- group2_samples
-} else if (group2_name == "ALS" || str_detect(group2_name, regex("als|disease", ignore_case = TRUE))) {
+} else if (group2_name == "ALS" || stringr::str_detect(group2_name, stringr::regex("als|disease", ignore_case = TRUE))) {
   als_samples <- group2_samples
   control_samples <- group1_samples
 } else {
@@ -213,7 +213,7 @@ log_subsection("Identifying miRNA families")
 statistical_results <- statistical_results %>%
   mutate(
     family = map_chr(miRNA_name, extract_mirna_family),
-    position = as.numeric(str_extract(pos.mut, "^\\d+")),
+    position = as.numeric(stringr::str_extract(pos.mut, "^\\d+")),
     in_seed = position >= seed_start & position <= seed_end
   )
 
@@ -221,7 +221,7 @@ statistical_results <- statistical_results %>%
 vaf_data <- vaf_data %>%
   mutate(
     family = map_chr(miRNA_name, extract_mirna_family),
-    position = as.numeric(str_extract(pos.mut, "^\\d+")),
+    position = as.numeric(stringr::str_extract(pos.mut, "^\\d+")),
     in_seed = position >= seed_start & position <= seed_end
   )
 

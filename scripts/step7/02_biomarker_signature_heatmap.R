@@ -75,8 +75,10 @@ input_vaf_filtered <- snakemake@input[["vaf_filtered"]]
 output_heatmap <- snakemake@output[["heatmap"]]
 
 config <- snakemake@config
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
-color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT, COLOR_CONTROL
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
+color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else COLOR_CONTROL
 
 log_info(paste("Input ROC:", input_roc))
 log_info(paste("Input VAF filtered:", input_vaf_filtered))
@@ -228,8 +230,8 @@ for (i in seq_len(nrow(top_biomarkers))) {
   
   # Handle cases where pos.mut contains multiple mutations (e.g., "6:TC,13:GT")
   # For now, use the first mutation or try to match exactly
-  if (str_detect(pos_mut, ",")) {
-    pos_mut_clean <- str_split(pos_mut, ",")[[1]][1]  # Take first mutation if multiple
+  if (stringr::str_detect(pos_mut, ",")) {
+    pos_mut_clean <- stringr::str_split(pos_mut, ",")[[1]][1]  # Take first mutation if multiple
   } else {
     pos_mut_clean <- pos_mut
   }
@@ -354,16 +356,16 @@ if (length(heatmap_matrix_list) > 0) {
     ) %>%
       mutate(
         # Extract base name (before any _index suffix)
-        base_name = str_replace(Biomarker, "_\\d+$", ""),
+        base_name = stringr::str_replace(Biomarker, "_\\d+$", ""),
         # Extract miRNA and position from base name
-        miRNA_from_label = str_extract(base_name, "^[^_]+"),
-        pos_from_label = str_extract(base_name, "(?<=_)[^-]+$")
+        miRNA_from_label = stringr::str_extract(base_name, "^[^_]+"),
+        pos_from_label = stringr::str_extract(base_name, "(?<=_)[^-]+$")
       )
     
     biomarker_annotation <- top_biomarkers %>%
       mutate(
-        pos_mut_clean = ifelse(str_detect(pos.mut, ","), 
-                               str_split(pos.mut, ",", simplify = TRUE)[1,1], 
+        pos_mut_clean = ifelse(stringr::str_detect(pos.mut, ","), 
+                               stringr::str_split(pos.mut, ",", simplify = TRUE)[1,1], 
                                pos.mut),
         base_name = paste0(miRNA_name, "_", gsub(":", "-", pos_mut_clean)),
         Biomarker = base_name,

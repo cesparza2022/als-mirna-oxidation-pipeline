@@ -50,7 +50,9 @@ output_heatmap <- snakemake@output[["heatmap"]]
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
 pathway_padjust_threshold <- if (!is.null(config$analysis$pathway_enrichment$padjust_threshold)) config$analysis$pathway_enrichment$padjust_threshold else 0.1
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
 
 log_info(paste("Input:", input_targets))
 log_info(paste("Pathway significance threshold (p.adjust):", pathway_padjust_threshold))

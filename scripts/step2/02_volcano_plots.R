@@ -80,7 +80,9 @@ output_figure <- snakemake@output[["figure"]]
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
 log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step2)) config$analysis$log2fc_threshold_step2 else 0.58
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
 
 log_info(paste("Input table:", input_table))
 log_info(paste("Output figure:", output_figure))

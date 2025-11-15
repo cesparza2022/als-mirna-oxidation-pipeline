@@ -333,7 +333,7 @@ significant_gt <- statistical_results %>%
     log2_fold_change > log2fc_threshold  # Higher in ALS (configurable threshold)
   ) %>%
   mutate(
-    position = as.numeric(str_extract(pos.mut, "^\\d+")),
+    position = as.numeric(stringr::str_extract(pos.mut, "^\\d+")),
     in_seed = position >= seed_start & position <= seed_end
   ) %>%
   filter(in_seed == TRUE) %>%

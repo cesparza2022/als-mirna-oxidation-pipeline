@@ -73,8 +73,10 @@ alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
 log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step3)) config$analysis$log2fc_threshold_step3 else 1.0
 seed_start <- if (!is.null(config$analysis$seed_region$start)) config$analysis$seed_region$start else 2
 seed_end <- if (!is.null(config$analysis$seed_region$end)) config$analysis$seed_region$end else 8
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
-color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else "grey60"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT, COLOR_CONTROL
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
+color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$colors$control else COLOR_CONTROL
 
 log_info(paste("Significance threshold (FDR):", alpha))
 log_info(paste("Log2FC threshold (minimum):", log2fc_threshold))
@@ -223,14 +225,14 @@ log_subsection("Preparing data for ROC analysis")
 # Filter significant G>T mutations in seed region (same criteria as Step 3)
 significant_gt <- statistical_results %>%
   filter(
-    str_detect(pos.mut, ":GT$"),
+    stringr::str_detect(pos.mut, ":GT$"),
     !is.na(t_test_fdr) | !is.na(wilcoxon_fdr),
     (t_test_fdr < alpha | wilcoxon_fdr < alpha),
     !is.na(log2_fold_change),
     log2_fold_change > log2fc_threshold  # Higher in ALS (configurable threshold)
   ) %>%
   mutate(
-    position = as.numeric(str_extract(pos.mut, "^\\d+")),
+    position = as.numeric(stringr::str_extract(pos.mut, "^\\d+")),
     in_seed = position >= seed_start & position <= seed_end
   ) %>%
   filter(in_seed == TRUE) %>%
@@ -344,12 +346,12 @@ for (i in seq_len(min(nrow(significant_gt), 30))) {  # Top 30 for computational 
       n_group1 = sum(roc_data$group == group1_name),
       n_group2 = sum(roc_data$group == group2_name),
       # Backward compatibility columns
-      n_ALS = if (group1_name == "ALS" || str_detect(group1_name, regex("als|disease", ignore_case = TRUE))) {
+      n_ALS = if (group1_name == "ALS" || stringr::str_detect(group1_name, stringr::regex("als|disease", ignore_case = TRUE))) {
         sum(roc_data$group == group1_name)
       } else {
         sum(roc_data$group == group2_name)
       },
-      n_Control = if (group2_name == "Control" || str_detect(group2_name, regex("control|ctrl", ignore_case = TRUE))) {
+      n_Control = if (group2_name == "Control" || stringr::str_detect(group2_name, stringr::regex("control|ctrl", ignore_case = TRUE))) {
         sum(roc_data$group == group2_name)
       } else {
         sum(roc_data$group == group1_name)
@@ -448,12 +450,12 @@ if (nrow(top_biomarkers) > 0) {
           n_group1 = sum(signature_data$group == group1_name),
           n_group2 = sum(signature_data$group == group2_name),
           # Backward compatibility
-          n_ALS = if (group1_name == "ALS" || str_detect(group1_name, regex("als|disease", ignore_case = TRUE))) {
+          n_ALS = if (group1_name == "ALS" || stringr::str_detect(group1_name, stringr::regex("als|disease", ignore_case = TRUE))) {
             sum(signature_data$group == group1_name)
           } else {
             sum(signature_data$group == group2_name)
           },
-          n_Control = if (group2_name == "Control" || str_detect(group2_name, regex("control|ctrl", ignore_case = TRUE))) {
+          n_Control = if (group2_name == "Control" || stringr::str_detect(group2_name, stringr::regex("control|ctrl", ignore_case = TRUE))) {
             sum(signature_data$group == group2_name)
           } else {
             sum(signature_data$group == group1_name)
@@ -567,7 +569,7 @@ if (exists("combined_roc") && exists("combined_auc")) {
 # Combine all ROC curves
 all_roc <- bind_rows(roc_curves, .id = "index") %>%
   mutate(
-    is_combined = Label %>% str_detect("Combined"),
+    is_combined = Label %>% stringr::str_detect("Combined"),
     Label = factor(Label, levels = unique(Label))
   )
 

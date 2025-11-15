@@ -54,7 +54,9 @@ output_mutation_summary <- snakemake@output[["mutation_summary"]]
 
 # Load configuration
 config <- snakemake@config
-color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else "#D62728"
+# Use standardized colors from colors.R (loaded via functions_common.R)
+# Allow override from config if specified, otherwise use COLOR_GT
+color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
 fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
 fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
 fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
