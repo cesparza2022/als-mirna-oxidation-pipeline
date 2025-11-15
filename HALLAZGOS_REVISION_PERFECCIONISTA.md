@@ -1,7 +1,7 @@
 # 🔍 HALLAZGOS DE REVISIÓN PERFECCIONISTA
 
 **Fecha:** 2025-01-21  
-**Status:** 🟡 En progreso  
+**Status:** 🟡 En progreso (FASE 2 completada, FASE 3 pendiente)  
 **Revisión:** Sistemática y perfeccionista
 
 ---
@@ -235,7 +235,7 @@
 - ✅ Revisadas validaciones existentes - Estado: EXCELENTE
 - ✅ No se requieren cambios adicionales
 
-### **FASE 2.1: Calidad visual de gráficas - EN PROGRESO**
+### **FASE 2.1: Calidad visual de gráficas - COMPLETADA ✅**
 - ✅ Estandarización de colores:
   - COLOR_SEED, COLOR_SEED_BACKGROUND, COLOR_SEED_HIGHLIGHT, COLOR_NONSEED
   - COLOR_EFFECT_LARGE, COLOR_EFFECT_MEDIUM, COLOR_EFFECT_SMALL, COLOR_EFFECT_NEGLIGIBLE
@@ -276,7 +276,7 @@
 - 13 scripts actualizados para usar dimensiones configurables (step1-step7)
 - colors.R centralizado con 20+ colores y 2 funciones helper
 
-### **FASE 2.2: Consistencia entre figuras - EN PROGRESO**
+### **FASE 2.2: Consistencia entre figuras - COMPLETADA ✅**
 - ✅ Estandarización de breaks del eje X:
   - Panel B: Cambiado de `seq(1, 23, by = 2)` a `breaks = 1:23` (mostrar todas las posiciones)
   - Todos los panels de step1 ahora muestran todas las posiciones de manera consistente
@@ -360,5 +360,40 @@
 - step6: 1 script (correlation visualization)
 - step7: 1 script (ROC analysis)
 
-**Próximo paso:** FASE 2.4 - Revisar calidad técnica de gráficas
+---
+
+### **FASE 2.4: Calidad técnica de gráficas - COMPLETADA ✅**
+
+**Status:** ✅ COMPLETADA  
+**Fecha completación:** 2025-01-21
+
+- ✅ **Dimensiones estandarizadas:**
+  - `step0/01_generate_overview.R`: Corregido para usar `fig_width`, `fig_height`, `fig_dpi` del config (8 `ggsave()` calls)
+  - Todos los scripts ahora cargan dimensiones desde `config$analysis$figure`
+  - Eliminados valores hardcoded en `ggsave()` y `png()` calls
+
+- ✅ **Formato de archivos de salida:**
+  - Todos los `png()` calls ahora especifican `bg = "white"` para fondo blanco
+  - Scripts corregidos:
+    - `step2/06_hierarchical_clustering_all_gt.R`: Agregado `bg = "white"`
+    - `step2/07_hierarchical_clustering_seed_gt.R`: Agregado `bg = "white"`
+    - `step3/02_clustering_visualization.R`: Agregado `bg = "white"` a ambos `png()` calls + `par(bg = "white")`
+    - `step4/02_pathway_enrichment_analysis.R`: Agregado `bg = "white"`
+    - `step5/02_family_comparison_visualization.R`: Agregado `bg = "white"`
+    - `step7/02_biomarker_signature_heatmap.R`: Agregado `bg = "white"` a 4 `png()` calls
+
+- ✅ **Manejo de dispositivos gráficos:**
+  - Todos los `png()` calls tienen su correspondiente `dev.off()`
+  - No hay dispositivos gráficos abiertos sin cerrar
+  - `par(mar)` y `par(bg)` correctamente configurados
+
+**Scripts actualizados (Total: 7 scripts):**
+- step0: 1 script (generate_overview)
+- step2: 2 scripts (hierarchical clustering)
+- step3: 1 script (clustering visualization)
+- step4: 1 script (pathway enrichment)
+- step5: 1 script (family comparison)
+- step7: 1 script (biomarker signature)
+
+**Próximo paso:** FASE 3.1 - Revisar documentación de usuario
 
