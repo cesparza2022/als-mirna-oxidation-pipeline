@@ -444,7 +444,7 @@ if (length(heatmap_matrix_list) > 0) {
     log_subsection("Generating comprehensive heatmap")
     
     if (nrow(heatmap_matrix_norm) > 0 && ncol(heatmap_matrix_norm) > 0 && nrow(biomarker_annotation) > 0) {
-      png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi)
+      png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
       
       # Calculate gap position (between groups)
       n_group2 <- sum(sample_annotation$Group == group2_name)
@@ -492,7 +492,7 @@ if (length(heatmap_matrix_list) > 0) {
       log_success(paste("Heatmap saved:", output_heatmap))
     } else {
       log_warning("Insufficient data for heatmap generation")
-      png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi)
+      png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
       plot.new()
       text(0.5, 0.5, "Insufficient biomarkers for heatmap", cex = 1.5)
       dev.off()
@@ -500,7 +500,7 @@ if (length(heatmap_matrix_list) > 0) {
   } else {
     log_warning("No biomarker columns found for heatmap")
     # Create empty placeholder
-    png(output_heatmap, width = 10, height = 8, units = "in", res = 300)
+    png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
     plot.new()
     text(0.5, 0.5, "No biomarker columns found", cex = 1.5)
     dev.off()
@@ -508,7 +508,7 @@ if (length(heatmap_matrix_list) > 0) {
 } else {
   log_warning("No biomarkers found for heatmap")
   # Create empty placeholder
-  png(output_heatmap, width = 10, height = 8, units = "in", res = 300)
+  png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
   plot.new()
   text(0.5, 0.5, "No biomarkers found", cex = 1.5)
   dev.off()

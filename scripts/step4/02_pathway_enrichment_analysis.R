@@ -225,7 +225,7 @@ heatmap_matrix <- heatmap_data %>%
 color_palette <- colorRampPalette(c("white", color_gt))(100)
 
 # Generate heatmap
-png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi)
+png(output_heatmap, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
 
 pheatmap(
   heatmap_matrix,

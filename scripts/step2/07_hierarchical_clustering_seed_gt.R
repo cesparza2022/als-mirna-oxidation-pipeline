@@ -302,7 +302,7 @@ vaf_matrix_viz <- vaf_matrix_viz[, sample_order, drop = FALSE]
 annotation_col <- annotation_col[sample_order, , drop = FALSE]
 
 # Generate heatmap
-png(output_figure, width = fig_width, height = fig_height, units = "in", res = fig_dpi)
+png(output_figure, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
 
 pheatmap(
   vaf_matrix_viz,

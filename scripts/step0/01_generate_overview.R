@@ -30,6 +30,12 @@ suppressPackageStartupMessages({
 # Load shared helpers / logging utilities
 source(snakemake@params[["functions"]], local = TRUE)
 
+# Load configuration
+config <- snakemake@config
+fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
+fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
+
 # Initialise logging ---------------------------------------------------------
 log_file <- if (length(snakemake@log) > 0) snakemake@log[[1]] else {
   file.path(tempdir(), "step0_overview.log")
@@ -178,7 +184,7 @@ fig_samples <- ggplot(sample_summary_long, aes(x = value, fill = group)) +
   theme_professional +
   theme(plot.caption = element_text(size = 9, hjust = 0, color = "grey40"))
 
-ggsave(output_fig_samples, fig_samples, width = 10, height = 12, dpi = 300, bg = "white")
+ggsave(output_fig_samples, fig_samples, width = fig_width, height = fig_height, dpi = fig_dpi, bg = "white")
 log_success(paste("Sample summary figure saved:", output_fig_samples))
 
 # Boxplot: Number of SNVs per sample by group
@@ -201,7 +207,7 @@ fig_samples_box <- sample_summary %>%
   theme(legend.position = "none",
         plot.caption = element_text(size = 9, hjust = 0, color = "grey40"))
 
-ggsave(output_fig_samples_box, fig_samples_box, width = 8, height = 6, dpi = 300, bg = "white")
+ggsave(output_fig_samples_box, fig_samples_box, width = fig_width * 0.8, height = fig_height * 0.6, dpi = fig_dpi, bg = "white")
 log_success(paste("Sample boxplot figure saved:", output_fig_samples_box))
 
 # Pie chart: Sample distribution by group
@@ -223,7 +229,7 @@ fig_samples_group <- sample_group_summary %>%
   theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
         plot.subtitle = element_text(hjust = 0.5, size = 11, color = "grey50"))
 
-ggsave(output_fig_samples_group, fig_samples_group, width = 6, height = 6, dpi = 300, bg = "white")
+ggsave(output_fig_samples_group, fig_samples_group, width = fig_height * 0.6, height = fig_height * 0.6, dpi = fig_dpi, bg = "white")
 log_success(paste("Sample group pie chart saved:", output_fig_samples_group))
 
 # miRNA-level summary -------------------------------------------------------
@@ -265,7 +271,7 @@ fig_miRNA <- mirna_summary %>%
   theme_professional +
   theme(plot.caption = element_text(size = 9, hjust = 0, color = "grey40"))
 
-ggsave(output_fig_miRNA, fig_miRNA, width = 10, height = 6, dpi = 300, bg = "white")
+ggsave(output_fig_miRNA, fig_miRNA, width = fig_width, height = fig_height * 0.6, dpi = fig_dpi, bg = "white")
 log_success(paste("miRNA summary figure saved:", output_fig_miRNA))
 
 # Mutation-type counts ------------------------------------------------------
@@ -320,7 +326,7 @@ fig_mutation_bar <- mutation_summary %>%
   theme(legend.position = "none",
         plot.caption = element_text(size = 9, hjust = 0, color = "grey40"))
 
-ggsave(output_fig_mutation_bar, fig_mutation_bar, width = 10, height = 8, dpi = 300, bg = "white")
+ggsave(output_fig_mutation_bar, fig_mutation_bar, width = fig_width, height = fig_height * 0.8, dpi = fig_dpi, bg = "white")
 log_success(paste("Mutation distribution figure saved:", output_fig_mutation_bar))
 
 # ============================================================================
@@ -396,7 +402,7 @@ fig_prop_comparison <- mutation_summary_prop %>%
         strip.text = element_text(size = 11, face = "bold", color = "#2E86AB"),
         strip.background = element_rect(fill = "#f0f4f8", color = NA))
 
-ggsave(output_fig_mutation_pie_snvs, fig_prop_comparison, width = 10, height = 10, dpi = 300, bg = "white")
+ggsave(output_fig_mutation_pie_snvs, fig_prop_comparison, width = fig_width, height = fig_width, dpi = fig_dpi, bg = "white")
 log_success(paste("Mutation proportional comparison saved:", output_fig_mutation_pie_snvs))
 
 # ============================================================================
@@ -433,7 +439,7 @@ fig_ratio_analysis <- mutation_summary_ratio %>%
   theme(legend.position = "none",
         plot.caption = element_text(size = 9, hjust = 0, color = "grey40"))
 
-ggsave(output_fig_mutation_pie_counts, fig_ratio_analysis, width = 10, height = 8, dpi = 300, bg = "white")
+ggsave(output_fig_mutation_pie_counts, fig_ratio_analysis, width = fig_width, height = fig_height * 0.8, dpi = fig_dpi, bg = "white")
 log_success(paste("Mutation ratio analysis saved:", output_fig_mutation_pie_counts))
 
 # Dataset Coverage Analysis --------------------------------------------------------
@@ -494,7 +500,7 @@ fig_coverage <- coverage_data %>%
   theme(legend.position = "none",
         plot.caption = element_text(size = 9, hjust = 0, color = "grey40"))
 
-ggsave(output_fig_coverage, fig_coverage, width = 10, height = 6, dpi = 300, bg = "white")
+ggsave(output_fig_coverage, fig_coverage, width = fig_width, height = fig_height * 0.6, dpi = fig_dpi, bg = "white")
 log_success(paste("Dataset coverage figure saved:", output_fig_coverage))
 
 # Summary log ---------------------------------------------------------------

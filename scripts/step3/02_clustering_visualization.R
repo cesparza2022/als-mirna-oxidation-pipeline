@@ -258,7 +258,7 @@ names(cluster_colors) <- as.character(1:n_clusters)
 # Validate output directory exists before saving
 ensure_output_dir(dirname(output_figure_a))
 
-png(output_figure_a, width = fig_width, height = fig_height, units = "in", res = fig_dpi)
+png(output_figure_a, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
 
 # Colors are defined in colors.R (sourced via functions_common.R)
 # Gradient function is defined in colors.R
@@ -298,9 +298,9 @@ dist_matrix <- dist(heatmap_matrix_norm, method = "euclidean")
 hc <- hclust(dist_matrix, method = "ward.D2")
 
 # Create dendrogram plot using base R plot (simpler, no extra packages)
-png(output_figure_b, width = fig_width, height = fig_height, units = "in", res = fig_dpi)
+png(output_figure_b, width = fig_width, height = fig_height, units = "in", res = fig_dpi, bg = "white")
 
-par(mar = c(8, 4, 4, 2))
+par(mar = c(8, 4, 4, 2), bg = "white")
 plot(hc, 
      main = "miRNA Clustering Dendrogram",
      sub = paste("Hierarchical clustering (Ward.D2) |", nrow(cluster_assignments), 
