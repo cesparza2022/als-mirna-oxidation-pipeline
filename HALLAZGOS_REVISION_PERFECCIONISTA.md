@@ -68,7 +68,7 @@
 - Multiple ways to define colors:
   - `COLOR_GT` in `functions_common.R` (line 65)
   - `color_gt` defined locally in scripts
-  - Some scripts definen colors in config
+  - Some scripts define colors in config
 
 **Evidence:**
 - `functions_common.R` line 65: `COLOR_GT <- "#D62728"`
@@ -118,7 +118,7 @@
 - ✅ Replaced hardcoded values in ggsave() and png() with variables from config
 - ✅ Scripts Updated: step1 (panels B, C, D), step2 (position_specific, clustering_all, clustering_seed), step3 (clustering_visualization), step4 (pathway_enrichment), step5 (family_comparison), step7 (roc_analysis, signature_heatmap)
 
-**Priority:** 🟢 MENOR (quality improvement) - ✅ RESOLVED
+**Priority:** 🟢 MINOR (quality improvement) - ✅ RESOLVED
 
 ---
 
@@ -159,13 +159,13 @@
 - Mejorar DOCUMENTATION in scripts with DOCUMENTATION mínima
 - Standardize comment style
 
-**Priority:** 🟢 MENOR
+**Priority:** 🟢 MINOR
 
 ---
 
-## 📊 ESTADÍSTICAS INICIALES
+## 📊 INITIAL STATISTICS
 
-### **Archivos to Review:**
+### **Files to Review:**
 - **R scripts:** 80 files
 - **Snakemake rules:** 15 files
 - **Total:** 95 files of code
@@ -215,7 +215,7 @@
 
 ---
 
-## ✅ PROGRESO DE CORRECCIONES
+## ✅ CORRECTION PROGRESS
 
 ### **PHASE 1.1: Structure and organization - COMPLETED**
 - ✅ Fixed duplicate code in logging.R (1067 → 356 lines)
@@ -453,7 +453,7 @@
 1. **CHANGELOG.md outdated:**
    - ❌ Only documented changes until v1.0.1 inicial (VAF correction, ggplot2 compatibility)
    - ❌ DID NOT mention all the improvements from the "perfectionist review" (PHASE 1.1-2.4, PHASE 3.1)
-   - ❌ Section "Next Corrections Identificadas" mentioned issues que YA FUERON RESUELTOS
+   - ❌ Section "Next Identified Corrections" mentioned issues that WERE ALREADY RESOLVED
    - ✅ Updated with all the improvements from the perfectionist review:
      - PHASE 1.1: Elimination of massive duplicate code (~2000 lines)
      - PHASE 1.2: Robustness, efficiency and clarity improvements
@@ -464,17 +464,17 @@
      - PHASE 2.3: Scientific clarity
      - PHASE 2.4: Technical quality
      - PHASE 3.1: User documentation
-   - ✅ Section "Next Corrections Identificadas" Updated to "Status from Issues Critical" with all problems resolved
+   - ✅ Section "Next Identified Corrections" Updated to "Critical Issues Status" with all problems resolved
 
 2. **RELEASE_NOTES_v1.0.1.md outdated:**
-   - ❌ Only mentioned corrections VAF and compatibilidad ggplot2
+   - ❌ Only mentioned corrections VAF and ggplot2 compatibility
    - ❌ DID NOT mention the improvements massive from the perfectionist review
    - ❌ Section "Known Pending Issues" was outdated
    - ✅ Updated with all the improvements from the perfectionist review:
-     - Resumen executive improved incluyendo perfectionist review
-     - Complete section of "improvements (Review Perfectionist)" with PHASES 1-3
-     - Statistics actualizadas reflecting reduction net of code
-     - Section "Known Pending Issues" Updated to "Status from Issues Critical"
+     - Improved executive summary including perfectionist review
+     - Complete section of "Improvements (Perfectionist Review)" with PHASES 1-3
+     - Updated statistics reflecting net code reduction
+     - Section "Known Pending Issues" Updated to "Critical Issues Status"
 
 3. **Consistency between documents:**
    - ❌ CHANGELOG and RELEASE_NOTES did not reflect the current state of the pipeline

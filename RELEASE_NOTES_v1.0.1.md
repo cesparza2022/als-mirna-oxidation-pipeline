@@ -135,20 +135,15 @@ If you are using the pipeline for data analysis, you must update to this version
 
 ## 📚 New Documentation
 
-### 1. COMPARACION_LOCAL_vs_GITHUB.md
-- Detailed comparison between local and remote versions
-- Summary of changes and their importance
-- Recommended action plan
-
-### 2. CORRECCION_STEP2_VAF.md
-- Detailed technical documentation of VAF fix
-- Explanation of problem and solution
-- Corrected data flow
-
-### 3. CRITICAL_ISSUES_STATUS.md
+### CRITICAL_ISSUES_STATUS.md
 - Identification of 5 critical cohesion issues in the pipeline
-- All issues identified have been resolved or improved
-- Guide for future corrections
+- All issues identified have been resolved or improved:
+  - ✅ Input file inconsistency (Step 1) - RESOLVED
+  - 🟡 Metric inconsistency (Step 1) - IMPROVED (different metrics are appropriate)
+  - ✅ Panel E Metric 1 - RESOLVED
+  - ✅ Data structure assumption (Step 0) - DOCUMENTED
+  - ✅ Unused data in figures - RESOLVED
+- Complete status report of all critical issues
 
 ---
 
@@ -254,7 +249,7 @@ Thanks to the exhaustive review that identified these critical issues, especiall
 ## 📞 Support
 
 If you encounter problems after updating:
-1. Review `CORRECCION_STEP2_VAF.md` for technical details
+1. Review Step 2 VAF calculation logic in `scripts/step2_figures/run_all_step2_figures.R` for technical details
 2. Review logs in `results/step2/final/logs/`
 3. Verify that `processed_clean.csv` has Total columns
 
