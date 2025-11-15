@@ -164,7 +164,7 @@ fig_panelB <- ggplot(position_counts, aes(x = position, y = total_GT_count)) +
   geom_bar(stat = "identity", fill = COLOR_GT, alpha = 0.85, width = 0.7) +
   
   # Scales
-  scale_x_continuous(breaks = seq(1, 23, by = 2)) +
+  scale_x_continuous(breaks = 1:23, minor_breaks = NULL) +
   scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.1))) +
   
   # Labels
@@ -175,7 +175,8 @@ fig_panelB <- ggplot(position_counts, aes(x = position, y = total_GT_count)) +
     y = "Total G>T Read Counts",
     caption = "Shows sum of sequencing reads (not number of unique SNVs). Combined analysis (ALS + Control, no VAF filtering)"
   ) +
-  theme_professional
+  theme_professional +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Save figure
 ggsave(

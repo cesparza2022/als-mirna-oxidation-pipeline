@@ -175,7 +175,8 @@ panel_e <- ggplot(panel_e_final, aes(x = Position, y = total_G_copies)) +
   ) +
   theme_professional +
   theme(
-    legend.position = "right"
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
 log_subsection("Generating figure")

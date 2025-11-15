@@ -80,6 +80,9 @@ output_figure <- snakemake@output[["figure"]]
 config <- snakemake@config
 alpha <- if (!is.null(config$analysis$alpha)) config$analysis$alpha else 0.05
 log2fc_threshold <- if (!is.null(config$analysis$log2fc_threshold_step2)) config$analysis$log2fc_threshold_step2 else 0.58
+fig_width <- if (!is.null(config$analysis$figure$width)) config$analysis$figure$width else 12
+fig_height <- if (!is.null(config$analysis$figure$height)) config$analysis$figure$height else 10
+fig_dpi <- if (!is.null(config$analysis$figure$dpi)) config$analysis$figure$dpi else 300
 # Use standardized colors from colors.R (loaded via functions_common.R)
 # Allow override from config if specified, otherwise use COLOR_GT
 color_gt <- if (!is.null(config$analysis$colors$gt)) config$analysis$colors$gt else COLOR_GT
@@ -220,9 +223,9 @@ volcano_plot <- ggplot(volcano_data, aes(x = log2FC, y = neg_log10_p)) +
 ggsave(
   output_figure,
   volcano_plot,
-  width = 12,
-  height = 9,
-  dpi = 300,
+  width = fig_width,
+  height = fig_height,
+  dpi = fig_dpi,
   bg = "white"
 )
 
