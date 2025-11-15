@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.3 - VOLCANO PLOT CORREGIDO + ANÁLISIS DE CONSISTENCIA
+# FIGURE 2.3 - CORRECTED VOLCANO PLOT + CONSISTENCY ANALYSIS
 # ============================================================================
 
 library(ggplot2)
@@ -10,14 +10,14 @@ library(readr)
 library(stringr)
 library(ggrepel)
 
-# Colores
-COLOR_ALS <- "#D62728"        # Rojo para ALS
-COLOR_CONTROL <- "#404040"    # Gris oscuro para Control
-COLOR_NS <- "gray80"          # Gris claro para no significativo
+# Colors
+COLOR_ALS <- "#D62728"        # Red for ALS
+COLOR_CONTROL <- "#404040"    # Dark gray for Control
+COLOR_NS <- "gray80"          # Light gray for not significant
 
 cat("\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
-cat("  FIGURA 2.3 - VOLCANO PLOT + ANÁLISIS DE CONSISTENCIA\n")
+cat("  FIGURE 2.3 - VOLCANO PLOT + CONSISTENCY ANALYSIS\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
 cat("\n")
 
@@ -25,30 +25,30 @@ cat("\n")
 # LOAD DATA
 # ============================================================================
 
-cat("📂 Cargando datos...\n")
+cat("📂 Loading data...\n")
 data <- read_csv("final_processed_data_CLEAN.csv", show_col_types = FALSE)
 metadata <- read_csv("metadata.csv", show_col_types = FALSE)
 sample_cols <- metadata$Sample_ID
 
-# Filtrar solo G>T en seed
+# Filter only G>T in seed
 vaf_gt_seed <- data %>%
   filter(str_detect(pos.mut, ":GT$")) %>%
-  filter(str_detect(pos.mut, "^(2|3|4|5|6|7|8):GT$")) %>%  # Solo seed (2-8)
+  filter(str_detect(pos.mut, "^(2|3|4|5|6|7|8):GT$")) %>%  # Only seed (2-8)
   select(all_of(c("miRNA_name", "pos.mut", sample_cols))) %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
   left_join(metadata, by = "Sample_ID")
 
-# Lista de miRNAs únicos
+# List of unique miRNAs
 all_seed_gt_mirnas <- unique(vaf_gt_seed$miRNA_name)
 
-cat("   ✅ Datos cargados\n")
-cat("   ✅ miRNAs con G>T en seed:", length(all_seed_gt_mirnas), "\n\n")
+cat("   ✅ Data loaded\n")
+cat("   ✅ miRNAs with G>T in seed:", length(all_seed_gt_mirnas), "\n\n")
 
 # ============================================================================
 # GENERATE VOLCANO DATA
 # ============================================================================
 
-cat("🔢 Generando datos para volcano plot...\n\n")
+cat("🔢 Generating volcano plot data...\n\n")
 
 volcano_data <- data.frame()
 for (mirna in all_seed_gt_mirnas) {
@@ -78,71 +78,71 @@ volcano_data$Sig <- "NS"
 volcano_data$Sig[volcano_data$log2FC > 0.58 & volcano_data$padj < 0.05] <- "ALS"
 volcano_data$Sig[volcano_data$log2FC < -0.58 & volcano_data$padj < 0.05] <- "Control"
 
-cat("   ✅ Volcano data generado para", nrow(volcano_data), "miRNAs\n\n")
+cat("   ✅ Volcano data generated for", nrow(volcano_data), "miRNAs\n\n")
 
 # ============================================================================
-# ANÁLISIS DE CONSISTENCIA CON FIG 2.1-2.2
+# CONSISTENCY ANALYSIS WITH FIG 2.1-2.2
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("🔍 ANÁLISIS DE CONSISTENCIA CON FIGURAS 2.1-2.2\n")
+cat("🔍 CONSISTENCY ANALYSIS WITH FIGURES 2.1-2.2\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
-# Hallazgo de Fig 2.1-2.2
-cat("HALLAZGO PREVIO (Fig 2.1-2.2):\n")
-cat("   • Control > ALS en G>T VAF global\n")
+# Finding from Fig 2.1-2.2
+cat("PREVIOUS FINDING (Fig 2.1-2.2):\n")
+cat("   • Control > ALS in global G>T VAF\n")
 cat("   • Control Mean: 3.69\n")
 cat("   • ALS Mean: 2.58\n")
-cat("   • p = 2.5e-13 (altamente significativo)\n")
+cat("   • p = 2.5e-13 (highly significant)\n")
 cat("\n")
 
-# Conteo en volcano
+# Count in volcano
 count_sig_als <- sum(volcano_data$Sig == "ALS")
 count_sig_control <- sum(volcano_data$Sig == "Control")
 count_ns <- sum(volcano_data$Sig == "NS")
 
-cat("RESULTADOS VOLCANO PLOT:\n")
-cat("   • miRNAs elevados en ALS:", count_sig_als, "\n")
-cat("   • miRNAs elevados en Control:", count_sig_control, "\n")
-cat("   • miRNAs no significativos:", count_ns, "\n")
+cat("VOLCANO PLOT RESULTS:\n")
+cat("   • miRNAs elevated in ALS:", count_sig_als, "\n")
+cat("   • miRNAs elevated in Control:", count_sig_control, "\n")
+cat("   • miRNAs not significant:", count_ns, "\n")
 cat("\n")
 
-# Análisis de dirección global
+# Global direction analysis
 mean_log2fc_all <- mean(volcano_data$log2FC)
 median_log2fc_all <- median(volcano_data$log2FC)
 
-cat("DIRECCIÓN GLOBAL (log2FC):\n")
-cat("   • Media de log2FC:", round(mean_log2fc_all, 3), "\n")
-cat("   • Mediana de log2FC:", round(median_log2fc_all, 3), "\n")
+cat("GLOBAL DIRECTION (log2FC):\n")
+cat("   • Mean log2FC:", round(mean_log2fc_all, 3), "\n")
+cat("   • Median log2FC:", round(median_log2fc_all, 3), "\n")
 cat("\n")
 
 if (median_log2fc_all < 0) {
-  cat("   ✅ CONSISTENTE: Mediana < 0 → Tendencia hacia Control\n")
+  cat("   ✅ CONSISTENT: Median < 0 → Trend toward Control\n")
 } else {
-  cat("   ⚠️  INCONSISTENTE: Mediana > 0 → Tendencia hacia ALS\n")
+  cat("   ⚠️  INCONSISTENT: Median > 0 → Trend toward ALS\n")
 }
 cat("\n")
 
-# Proporción de miRNAs con dirección hacia Control
+# Proportion of miRNAs with direction toward Control
 prop_control_direction <- sum(volcano_data$log2FC < 0) / nrow(volcano_data) * 100
 
-cat("PROPORCIÓN DE miRNAs:\n")
-cat("   • Dirección Control (log2FC < 0):", round(prop_control_direction, 1), "%\n")
-cat("   • Dirección ALS (log2FC > 0):", round(100 - prop_control_direction, 1), "%\n")
+cat("PROPORTION OF miRNAs:\n")
+cat("   • Control direction (log2FC < 0):", round(prop_control_direction, 1), "%\n")
+cat("   • ALS direction (log2FC > 0):", round(100 - prop_control_direction, 1), "%\n")
 cat("\n")
 
 if (prop_control_direction > 50) {
-  cat("   ✅ CONSISTENTE: Mayoría de miRNAs tienen más G>T en Control\n")
+  cat("   ✅ CONSISTENT: Majority of miRNAs have more G>T in Control\n")
 } else {
-  cat("   ⚠️  INCONSISTENTE: Mayoría de miRNAs tienen más G>T en ALS\n")
+  cat("   ⚠️  INCONSISTENT: Majority of miRNAs have more G>T in ALS\n")
 }
 cat("\n")
 
 # ============================================================================
-# EXPLICACIÓN DE LA APARENTE CONTRADICCIÓN
+# EXPLANATION OF APPARENT CONTRADICTION
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
@@ -152,44 +152,44 @@ cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
-cat("DIFERENCIA CLAVE:\n")
+cat("KEY DIFFERENCE:\n")
 cat("\n")
-cat("Fig 2.1-2.2: GLOBAL burden (suma de TODOS los miRNAs)\n")
-cat("   • Métrica: Suma total de VAF por muestra\n")
-cat("   • Pregunta: ¿Qué grupo tiene más G>T en TOTAL?\n")
-cat("   • Respuesta: Control > ALS\n")
+cat("Fig 2.1-2.2: GLOBAL burden (sum of ALL miRNAs)\n")
+cat("   • Metric: Total sum of VAF per sample\n")
+cat("   • Question: Which group has more G>T in TOTAL?\n")
+cat("   • Answer: Control > ALS\n")
 cat("\n")
-cat("Fig 2.3: miRNA-ESPECÍFICO (cada miRNA individualmente)\n")
-cat("   • Métrica: Media de VAF por miRNA\n")
-cat("   • Pregunta: ¿Qué miRNAs ESPECÍFICOS difieren entre grupos?\n")
-cat("   • Respuesta: Depende del miRNA\n")
+cat("Fig 2.3: miRNA-SPECIFIC (each miRNA individually)\n")
+cat("   • Metric: Mean VAF per miRNA\n")
+cat("   • Question: Which SPECIFIC miRNAs differ between groups?\n")
+cat("   • Answer: Depends on the miRNA\n")
 cat("\n")
 
-cat("ESCENARIO POSIBLE (reconcilia ambos hallazgos):\n")
+cat("POSSIBLE SCENARIO (reconciles both findings):\n")
 cat("\n")
-cat("Opción 1: CONTROL tiene más miRNAs afectados (más spread)\n")
-cat("   • Control: 50 miRNAs con G>T moderado cada uno\n")
-cat("   • ALS: 20 miRNAs con G>T alto cada uno\n")
+cat("Option 1: CONTROL has more affected miRNAs (more spread)\n")
+cat("   • Control: 50 miRNAs with moderate G>T each\n")
+cat("   • ALS: 20 miRNAs with high G>T each\n")
 cat("   → Total Control > Total ALS (Fig 2.1-2.2)\n")
-cat("   → Pero algunos miRNAs específicos ALS > Control (Fig 2.3)\n")
+cat("   → But some specific miRNAs ALS > Control (Fig 2.3)\n")
 cat("\n")
-cat("Opción 2: CONTROL tiene algunos miRNAs MUY altos\n")
-cat("   • Unos pocos miRNAs dominan el burden global en Control\n")
-cat("   • Otros miRNAs son más altos en ALS\n")
-cat("   → Volcano muestra la heterogeneidad miRNA-específica\n")
+cat("Option 2: CONTROL has some VERY high miRNAs\n")
+cat("   • A few miRNAs dominate the global burden in Control\n")
+cat("   • Other miRNAs are higher in ALS\n")
+cat("   → Volcano shows miRNA-specific heterogeneity\n")
 cat("\n")
-cat("Opción 3: Diferentes POSICIONES dentro del seed\n")
-cat("   • Algunas posiciones seed más en ALS\n")
-cat("   • Otras posiciones más en Control\n")
-cat("   → Global: Control gana, pero hay miRNAs específicos en ALS\n")
+cat("Option 3: Different POSITIONS within seed\n")
+cat("   • Some seed positions more in ALS\n")
+cat("   • Other positions more in Control\n")
+cat("   → Global: Control wins, but there are specific miRNAs in ALS\n")
 cat("\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
-# Analizar los top miRNAs significativos
+# Analyze top significant miRNAs
 if (count_sig_als > 0) {
-  cat("TOP miRNAs ELEVADOS EN ALS:\n")
+  cat("TOP miRNAs ELEVATED IN ALS:\n")
   top_als <- volcano_data %>% 
     filter(Sig == "ALS") %>% 
     arrange(padj) %>% 
@@ -199,7 +199,7 @@ if (count_sig_als > 0) {
 }
 
 if (count_sig_control > 0) {
-  cat("TOP miRNAs ELEVADOS EN CONTROL:\n")
+  cat("TOP miRNAs ELEVATED IN CONTROL:\n")
   top_control <- volcano_data %>% 
     filter(Sig == "Control") %>% 
     arrange(padj) %>% 
@@ -212,7 +212,7 @@ if (count_sig_control > 0) {
 # GENERATE CORRECTED FIGURE
 # ============================================================================
 
-cat("🎨 Generando volcano plot CORREGIDO (Control = gris oscuro)...\n")
+cat("🎨 Generating CORRECTED volcano plot (Control = dark gray)...\n")
 
 theme_prof <- theme_classic(base_size = 14) +
   theme(
@@ -226,7 +226,7 @@ theme_prof <- theme_classic(base_size = 14) +
     panel.grid.major = element_line(color = "gray90", linewidth = 0.3)
   )
 
-# Top labels (15 más significativos)
+# Top labels (15 most significant)
 top_labels <- volcano_data %>% 
   filter(Sig != "NS") %>% 
   arrange(padj) %>% 
@@ -251,7 +251,7 @@ fig_2_3 <- ggplot(volcano_data, aes(x = log2FC, y = neg_log10_padj, color = Sig)
   ) +
   theme_prof
 
-# Agregar etiquetas para top miRNAs
+# Add labels for top miRNAs
 if (nrow(top_labels) > 0) {
   fig_2_3 <- fig_2_3 + 
     geom_text_repel(
@@ -267,33 +267,33 @@ if (nrow(top_labels) > 0) {
     )
 }
 
-ggsave("figures_paso2_CLEAN/FIG_2.3_VOLCANO_CORRECTED.png", fig_2_3, 
+ggsave("figures_step2_CLEAN/FIG_2.3_VOLCANO_CORRECTED.png", fig_2_3, 
        width = 12, height = 10, dpi = 300, bg = "white")
-cat("   ✅ Volcano plot CORREGIDO guardado\n\n")
+cat("   ✅ CORRECTED volcano plot saved\n\n")
 
 # ============================================================================
-# ANÁLISIS DE CONSISTENCIA DETALLADO
+# DETAILED CONSISTENCY ANALYSIS
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("📊 ANÁLISIS DE CONSISTENCIA CON FIG 2.1-2.2\n")
+cat("📊 CONSISTENCY ANALYSIS WITH FIG 2.1-2.2\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
-# 1. DIRECCIÓN GLOBAL
-cat("1️⃣ DIRECCIÓN GLOBAL:\n")
+# 1. GLOBAL DIRECTION
+cat("1️⃣ GLOBAL DIRECTION:\n")
 cat("   Fig 2.1-2.2: Control > ALS (p = 2.5e-13)\n")
 cat("   Fig 2.3 Volcano:\n")
-cat("      • Media log2FC:", round(mean_log2fc_all, 3), 
+cat("      • Mean log2FC:", round(mean_log2fc_all, 3), 
     ifelse(mean_log2fc_all < 0, "→ Control > ALS ✅", "→ ALS > Control ⚠️"), "\n")
-cat("      • Mediana log2FC:", round(median_log2fc_all, 3),
+cat("      • Median log2FC:", round(median_log2fc_all, 3),
     ifelse(median_log2fc_all < 0, "→ Control > ALS ✅", "→ ALS > Control ⚠️"), "\n")
 cat("\n")
 
-# 2. PROPORCIÓN DE miRNAs
-cat("2️⃣ PROPORCIÓN DE miRNAs POR DIRECCIÓN:\n")
+# 2. PROPORTION OF miRNAs
+cat("2️⃣ PROPORTION OF miRNAs BY DIRECTION:\n")
 cat("   • log2FC < 0 (Control > ALS):", round(prop_control_direction, 1), "% (", 
     sum(volcano_data$log2FC < 0), "/", nrow(volcano_data), ")\n")
 cat("   • log2FC > 0 (ALS > Control):", round(100 - prop_control_direction, 1), "% (", 
@@ -301,49 +301,49 @@ cat("   • log2FC > 0 (ALS > Control):", round(100 - prop_control_direction, 1)
 cat("\n")
 
 if (prop_control_direction > 50) {
-  cat("   ✅ CONSISTENTE: Mayoría de miRNAs con dirección Control\n")
+  cat("   ✅ CONSISTENT: Majority of miRNAs with Control direction\n")
 } else {
-  cat("   ⚠️  Distribución equilibrada o inversa\n")
+  cat("   ⚠️  Balanced or inverse distribution\n")
 }
 cat("\n")
 
-# 3. SIGNIFICATIVOS
-cat("3️⃣ miRNAs SIGNIFICATIVOS:\n")
-cat("   • Elevados en ALS:", count_sig_als, "\n")
-cat("   • Elevados en Control:", count_sig_control, "\n")
+# 3. SIGNIFICANT
+cat("3️⃣ SIGNIFICANT miRNAs:\n")
+cat("   • Elevated in ALS:", count_sig_als, "\n")
+cat("   • Elevated in Control:", count_sig_control, "\n")
 cat("\n")
 
 if (count_sig_control > count_sig_als) {
-  cat("   ✅ CONSISTENTE: Más miRNAs significativos en Control\n")
+  cat("   ✅ CONSISTENT: More significant miRNAs in Control\n")
 } else if (count_sig_control < count_sig_als) {
-  cat("   ⚠️  MÁS miRNAs significativos en ALS (inconsistente con burden global)\n")
+  cat("   ⚠️  MORE significant miRNAs in ALS (inconsistent with global burden)\n")
 } else {
-  cat("   ➖ NEUTRAL: Igual número de miRNAs significativos\n")
+  cat("   ➖ NEUTRAL: Equal number of significant miRNAs\n")
 }
 cat("\n")
 
-# 4. MAGNITUD PROMEDIO
+# 4. AVERAGE MAGNITUDE
 mean_fc_control_mirnas <- volcano_data %>% filter(Sig == "Control") %>% pull(log2FC) %>% abs() %>% mean()
 mean_fc_als_mirnas <- volcano_data %>% filter(Sig == "ALS") %>% pull(log2FC) %>% abs() %>% mean()
 
-cat("4️⃣ MAGNITUD DEL EFECTO:\n")
+cat("4️⃣ EFFECT MAGNITUDE:\n")
 if (count_sig_control > 0) {
-  cat("   • |log2FC| promedio miRNAs Control:", round(mean_fc_control_mirnas, 2), 
+  cat("   • |log2FC| average Control miRNAs:", round(mean_fc_control_mirnas, 2), 
       "(~", round(2^mean_fc_control_mirnas, 1), "x fold change)\n")
 }
 if (count_sig_als > 0) {
-  cat("   • |log2FC| promedio miRNAs ALS:", round(mean_fc_als_mirnas, 2),
+  cat("   • |log2FC| average ALS miRNAs:", round(mean_fc_als_mirnas, 2),
       "(~", round(2^mean_fc_als_mirnas, 1), "x fold change)\n")
 }
 cat("\n")
 
 # ============================================================================
-# INTERPRETACIÓN INTEGRADA
+# INTEGRATED INTERPRETATION
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("🧠 INTERPRETACIÓN INTEGRADA:\n")
+cat("🧠 INTEGRATED INTERPRETATION:\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
@@ -352,59 +352,58 @@ cat("RECONCILING FINDINGS:\n")
 cat("\n")
 
 if (median_log2fc_all < 0 & count_sig_control >= count_sig_als) {
-  cat("✅ TOTALMENTE CONSISTENTE:\n")
+  cat("✅ FULLY CONSISTENT:\n")
   cat("   • Fig 2.1-2.2: Control > ALS (global)\n")
-  cat("   • Fig 2.3: Mayoría de miRNAs Control > ALS (específico)\n")
-  cat("   • Conclusión: El hallazgo global se refleja a nivel de miRNAs individuales\n")
+  cat("   • Fig 2.3: Majority of miRNAs Control > ALS (specific)\n")
+  cat("   • Conclusion: The global finding is reflected at the individual miRNA level\n")
   cat("\n")
   
 } else if (median_log2fc_all < 0 & count_sig_control < count_sig_als) {
-  cat("⚠️  PARCIALMENTE CONSISTENTE:\n")
-  cat("   • Tendencia global hacia Control (mediana < 0)\n")
-  cat("   • PERO: Más miRNAs SIGNIFICATIVOS en ALS\n")
+  cat("⚠️  PARTIALLY CONSISTENT:\n")
+  cat("   • Global trend toward Control (median < 0)\n")
+  cat("   • BUT: More SIGNIFICANT miRNAs in ALS\n")
   cat("\n")
-  cat("   POSIBLE EXPLICACIÓN:\n")
-  cat("   • Control tiene MUCHOS miRNAs con pequeñas elevaciones (no significativas)\n")
-  cat("   • ALS tiene POCOS miRNAs pero con cambios MÁS GRANDES (significativos)\n")
-  cat("   • El burden global lo domina Control (más miRNAs)\n")
-  cat("   • Pero los cambios individuales fuertes están en ALS\n")
+  cat("   POSSIBLE EXPLANATION:\n")
+  cat("   • Control has MANY miRNAs with small elevations (not significant)\n")
+  cat("   • ALS has FEW miRNAs but with LARGER changes (significant)\n")
+  cat("   • Global burden is dominated by Control (more miRNAs)\n")
+  cat("   • But strong individual changes are in ALS\n")
   cat("\n")
   
 } else if (median_log2fc_all > 0) {
-  cat("❌ APARENTEMENTE INCONSISTENTE:\n")
+  cat("❌ APPARENTLY INCONSISTENT:\n")
   cat("   • Fig 2.1-2.2: Control > ALS (global)\n")
-  cat("   • Fig 2.3: Tendencia hacia ALS > Control (miRNAs individuales)\n")
+  cat("   • Fig 2.3: Trend toward ALS > Control (individual miRNAs)\n")
   cat("\n")
-  cat("   POSIBLES EXPLICACIONES:\n")
-  cat("   • Control tiene POCOS miRNAs pero con VAF MUY ALTO\n")
-  cat("   • ALS tiene MUCHOS miRNAs con VAF bajo/moderado\n")
-  cat("   • Los outliers de Control dominan el burden global\n")
-  cat("   • Necesitamos investigar distribución de expresión\n")
+  cat("   POSSIBLE EXPLANATIONS:\n")
+  cat("   • Control has FEW miRNAs but with VERY HIGH VAF\n")
+  cat("   • ALS has MANY miRNAs with low/moderate VAF\n")
+  cat("   • Control outliers dominate the global burden\n")
+  cat("   • We need to investigate expression distribution\n")
   cat("\n")
 }
 
 # ============================================================================
-# RECOMENDACIONES
+# RECOMMENDATIONS
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("💡 RECOMENDACIONES:\n")
+cat("💡 RECOMMENDATIONS:\n")
 cat("\n")
 
-cat("1. Revisar los TOP miRNAs significativos (arriba)\n")
-cat("2. Verificar si algunos miRNAs dominan el burden global\n")
-cat("3. Considerar análisis de:\n")
-cat("   • Número de miRNAs expresados por grupo\n")
-cat("   • Contribución relativa de cada miRNA al burden total\n")
-cat("   • Distribución de expresión basal por grupo\n")
+cat("1. Review the TOP significant miRNAs (above)\n")
+cat("2. Verify if some miRNAs dominate the global burden\n")
+cat("3. Consider analysis of:\n")
+cat("   • Number of expressed miRNAs per group\n")
+cat("   • Relative contribution of each miRNA to total burden\n")
+cat("   • Baseline expression distribution per group\n")
 cat("\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("✅ FIGURA CORREGIDA GENERADA:\n")
+cat("✅ CORRECTED FIGURE GENERATED:\n")
 cat("   • FIG_2.3_VOLCANO_CORRECTED.png\n")
-cat("   • Control en gris oscuro (no azul)\n")
-cat("   • Análisis de consistencia completo\n")
+cat("   • Control in dark gray (not blue)\n")
+cat("   • Complete consistency analysis\n")
 cat("\n")
-

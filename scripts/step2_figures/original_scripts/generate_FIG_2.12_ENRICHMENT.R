@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ==============================================================================
-# FIGURE 2.12: ENRICHMENT ANALYSIS (FINAL PASO 2)
+# FIGURE 2.12: ENRICHMENT ANALYSIS (FINAL STEP 2)
 # ==============================================================================
 # Date: 2025-10-27
 # Purpose: Identify which miRNAs and families are most affected by G>T
@@ -35,7 +35,7 @@ suppressPackageStartupMessages({
 
 input_file <- "final_processed_data_CLEAN.csv"
 metadata_file <- "metadata.csv"
-output_dir <- "figures_paso2_CLEAN"
+output_dir <- "figures_step2_CLEAN"
 
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -63,7 +63,7 @@ theme_professional <- theme_minimal(base_size = 12) +
 
 cat("\n")
 cat(paste(rep("=", 80), collapse = ""), "\n")
-cat("📊 FIGURE 2.12: ENRICHMENT ANALYSIS (FINAL PASO 2)\n")
+cat("📊 FIGURE 2.12: ENRICHMENT ANALYSIS (FINAL STEP 2)\n")
 cat(paste(rep("=", 80), collapse = ""), "\n\n")
 
 # ============================================================================
@@ -468,7 +468,7 @@ cat("✅ All statistical results saved\n\n")
 
 cat("\n")
 cat(paste(rep("=", 80), collapse = ""), "\n")
-cat("📊 FIGURE 2.12 GENERATION COMPLETE - PASO 2 FINALIZADO!\n")
+cat("📊 FIGURE 2.12 GENERATION COMPLETE - STEP 2 FINALIZED!\n")
 cat(paste(rep("=", 80), collapse = ""), "\n\n")
 
 cat("✅ Generated figures:\n")
@@ -505,15 +505,15 @@ cat("   ✅ Focus on positional hotspots\n")
 cat("   ✅ Cross-reference with differential analysis (Fig 2.5)\n\n")
 
 cat(paste(rep("=", 80), collapse = ""), "\n")
-cat("🎉 PASO 2 COMPLETE! ALL 12 FIGURES GENERATED!\n")
+cat("🎉 STEP 2 COMPLETE! ALL 12 FIGURES GENERATED!\n")
 cat(paste(rep("=", 80), collapse = ""), "\n\n")
 
-cat("📊 PASO 2 SUMMARY:\n")
-cat("   12/12 figuras completadas (100%)\n")
-cat("   18 figuras individuales\n")
-cat("   60+ tablas estadísticas\n")
-cat("   Todas las preguntas respondidas\n")
-cat("   Lógica validada y documentada\n\n")
+cat("📊 STEP 2 SUMMARY:\n")
+cat("   12/12 figures completed (100%)\n")
+cat("   18 individual figures\n")
+cat("   60+ statistical tables\n")
+cat("   All questions answered\n")
+cat("   Logic validated and documented\n\n")
 
-cat("🚀 NEXT: Consolidar Paso 2 completo y generar HTML viewer final\n\n")
+cat("🚀 NEXT: Consolidate Step 2 complete and generate final HTML viewer\n\n")
 

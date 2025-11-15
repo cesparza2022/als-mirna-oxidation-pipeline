@@ -31,8 +31,8 @@ cat("\n")
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 cat("✅ Output directory created:", output_dir, "\n")
 
-# Create figures subdirectory (equivalent to figures_paso2_CLEAN)
-figures_dir <- file.path(output_dir, "figures_paso2_CLEAN")
+# Create figures subdirectory (equivalent to figures_step2_CLEAN)
+figures_dir <- file.path(output_dir, "figures_step2_CLEAN")
 dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 cat("✅ Figures directory created:", figures_dir, "\n")
 

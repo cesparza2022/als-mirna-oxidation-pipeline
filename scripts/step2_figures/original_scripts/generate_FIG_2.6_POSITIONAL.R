@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.6 - POSITIONAL ANALYSIS (Line Plots with CI)
+# FIGURE 2.6 - POSITIONAL ANALYSIS (Line Plots with CI)
 # Mean VAF by position for ALS vs Control with confidence intervals
 # ============================================================================
 
@@ -10,7 +10,7 @@ library(tidyr)
 library(readr)
 library(stringr)
 
-# Colores profesionales
+# Professional colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#2E86AB"
 COLOR_SEED <- "#e3f2fd"
@@ -197,7 +197,7 @@ if (nrow(position_tests) > 0) {
   cat("      • Total positions tested:", nrow(position_tests), "\n\n")
   
   # Export complete table
-  output_dir <- "figures_paso2_CLEAN"
+  output_dir <- "figures_step2_CLEAN"
   dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   
   write_csv(position_tests, 
@@ -281,7 +281,7 @@ fig_2_6 <- ggplot(positional_stats, aes(x = position, y = Mean_VAF,
   ) +
   theme_prof
 
-ggsave("figures_paso2_CLEAN/FIG_2.6_POSITIONAL_ANALYSIS.png", 
+ggsave("figures_step2_CLEAN/FIG_2.6_POSITIONAL_ANALYSIS.png", 
        fig_2_6, width = 14, height = 8, dpi = 300, bg = "white")
 
 cat("   ✅ Figure saved: FIG_2.6_POSITIONAL_ANALYSIS.png\n\n")

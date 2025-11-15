@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURAS 2.13-2.15 - DENSITY HEATMAPS (ComplexHeatmap format)
+# FIGURES 2.13-2.15 - DENSITY HEATMAPS (ComplexHeatmap format)
 # ============================================================================
 
 suppressPackageStartupMessages({
@@ -114,13 +114,13 @@ save_heatmap_png <- function(ht, file, width = 16, height = 12) {
 cat("🎨 Generating Figure 2.13 (ALS)...\n")
 df_ranked_als <- prepare_ranked("ALS")
 ht_als <- create_heatmap(df_ranked_als, "Positional G>T in ALS data")
-save_heatmap_png(ht_als, "figures_paso2_CLEAN/FIG_2.13_DENSITY_HEATMAP_ALS.png")
+save_heatmap_png(ht_als, "figures_step2_CLEAN/FIG_2.13_DENSITY_HEATMAP_ALS.png")
 cat("   ✅ Saved FIG_2.13_DENSITY_HEATMAP_ALS.png\n\n")
 
 cat("🎨 Generating Figure 2.14 (Control)...\n")
 df_ranked_ctrl <- prepare_ranked("Control")
 ht_ctrl <- create_heatmap(df_ranked_ctrl, "Positional G>T in control data")
-save_heatmap_png(ht_ctrl, "figures_paso2_CLEAN/FIG_2.14_DENSITY_HEATMAP_CONTROL.png")
+save_heatmap_png(ht_ctrl, "figures_step2_CLEAN/FIG_2.14_DENSITY_HEATMAP_CONTROL.png")
 cat("   ✅ Saved FIG_2.14_DENSITY_HEATMAP_CONTROL.png\n\n")
 
 cat("🎨 Generating Figure 2.15 (Combined)...\n")
@@ -128,7 +128,7 @@ cat("🎨 Generating Figure 2.15 (Combined)...\n")
 # Use %v% operator to stack them vertically (ComplexHeatmap >= 2.0)
 tryCatch({
   ht_combined <- ht_als %v% ht_ctrl
-  png("figures_paso2_CLEAN/FIG_2.15_DENSITY_COMBINED.png",
+  png("figures_step2_CLEAN/FIG_2.15_DENSITY_COMBINED.png",
       width = 16, height = 20, units = "in", res = 300, bg = "white")
   draw(ht_combined, heatmap_legend_side = "bottom", 
        annotation_legend_side = "right", merge_legend = TRUE)
@@ -138,7 +138,7 @@ tryCatch({
   cat("   ⚠️  Error combining heatmaps:", conditionMessage(e), "\n")
   cat("   ⚠️  Creating side-by-side layout instead...\n")
   # Fallback: Create a simple side-by-side layout using grid
-  png("figures_paso2_CLEAN/FIG_2.15_DENSITY_COMBINED.png",
+  png("figures_step2_CLEAN/FIG_2.15_DENSITY_COMBINED.png",
       width = 20, height = 12, units = "in", res = 300, bg = "white")
   grid.newpage()
   pushViewport(viewport(layout = grid.layout(nrow = 1, ncol = 2, 

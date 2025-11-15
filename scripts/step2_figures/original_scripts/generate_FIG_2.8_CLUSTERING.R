@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.8 - HIERARCHICAL CLUSTERING HEATMAP
+# FIGURE 2.8 - HIERARCHICAL CLUSTERING HEATMAP
 # Clustering of samples by G>T mutational profile
 # Uses biological filtering (expressed miRNAs with good G>T) instead of arbitrary "top N"
 # ============================================================================
@@ -15,7 +15,7 @@ library(pheatmap)
 library(viridis)
 library(yaml)
 
-# Colores profesionales
+# Professional colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#2E86AB"
 
@@ -421,7 +421,7 @@ cat("   ✅ Annotations ready\n\n")
 cat("🎨 Generating clustering heatmap...\n")
 
 # Save as PNG
-png("figures_paso2_CLEAN/FIG_2.8_CLUSTERING.png", 
+png("figures_step2_CLEAN/FIG_2.8_CLUSTERING.png", 
     width = 14, height = 10, units = "in", res = 300)
 
 pheatmap(

@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.2 SIMPLIFICADA - SOLO DENSITY PLOT
-# Comparación LINEAR vs LOG scale
+# FIGURE 2.2 SIMPLIFIED - DENSITY PLOT ONLY
+# Comparison LINEAR vs LOG scale
 # ============================================================================
 
 library(ggplot2)
@@ -10,13 +10,13 @@ library(tidyr)
 library(readr)
 library(stringr)
 
-# Colores
+# Colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#666666"
 
 cat("\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
-cat("  FIGURA 2.2 - DENSITY PLOT DE G>T VAF\n")
+cat("  FIGURE 2.2 - G>T VAF DENSITY PLOT\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
 cat("\n")
 
@@ -24,79 +24,79 @@ cat("\n")
 # LOAD DATA
 # ============================================================================
 
-cat("📂 Cargando datos...\n")
+cat("📂 Loading data...\n")
 data <- read_csv("final_processed_data_CLEAN.csv", show_col_types = FALSE)
 metadata <- read_csv("metadata.csv", show_col_types = FALSE)
 sample_cols <- metadata$Sample_ID
 
-# Filtrar solo G>T
+# Filter only G>T
 vaf_gt_all <- data %>%
   filter(str_detect(pos.mut, ":GT$")) %>%
   select(all_of(c("miRNA_name", "pos.mut", sample_cols))) %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
   left_join(metadata, by = "Sample_ID")
 
-# Total G>T VAF por muestra
+# Total G>T VAF per sample
 vaf_summary <- vaf_gt_all %>%
   group_by(Sample_ID, Group) %>%
   summarise(Total_GT_VAF = sum(VAF, na.rm = TRUE), .groups = "drop")
 
-cat("   ✅ Datos cargados y procesados\n")
-cat("   ✅ Muestras ALS:", sum(vaf_summary$Group == "ALS"), "\n")
-cat("   ✅ Muestras Control:", sum(vaf_summary$Group == "Control"), "\n\n")
+cat("   ✅ Data loaded and processed\n")
+cat("   ✅ ALS samples:", sum(vaf_summary$Group == "ALS"), "\n")
+cat("   ✅ Control samples:", sum(vaf_summary$Group == "Control"), "\n\n")
 
 # ============================================================================
-# ¿QUÉ NOS DICE ESTA GRÁFICA?
+# WHAT DOES THIS PLOT TELL US?
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("💡 ¿QUÉ NOS DICE EL DENSITY PLOT?\n")
+cat("💡 WHAT DOES THE DENSITY PLOT TELL US?\n")
 cat("\n")
-cat("INFORMACIÓN QUE APORTA:\n")
+cat("INFORMATION IT PROVIDES:\n")
 cat("\n")
-cat("1. FORMA DE LA DISTRIBUCIÓN:\n")
-cat("   • ¿Es normal (campana)?\n")
-cat("   • ¿Es sesgada (skewed)?\n")
-cat("   • ¿Tiene múltiples picos (bimodal)?\n")
-cat("   • Ejemplo: Si Control es bimodal → Puede haber subgrupos\n")
+cat("1. DISTRIBUTION SHAPE:\n")
+cat("   • Is it normal (bell-shaped)?\n")
+cat("   • Is it skewed?\n")
+cat("   • Does it have multiple peaks (bimodal)?\n")
+cat("   • Example: If Control is bimodal → May have subgroups\n")
 cat("\n")
-cat("2. POSICIÓN DE LOS PICOS:\n")
-cat("   • ¿Dónde está el pico de cada grupo?\n")
-cat("   • ¿ALS tiene pico más alto o bajo que Control?\n")
-cat("   • Ejemplo: Pico de ALS a la izquierda → Valores menores\n")
+cat("2. PEAK POSITION:\n")
+cat("   • Where is the peak for each group?\n")
+cat("   • Does ALS have a higher or lower peak than Control?\n")
+cat("   • Example: ALS peak to the left → Lower values\n")
 cat("\n")
-cat("3. DISPERSIÓN (SPREAD):\n")
-cat("   • ¿Qué grupo tiene distribución más ancha?\n")
-cat("   • Mayor spread → Mayor variabilidad entre muestras\n")
-cat("   • Ejemplo: Control más ancho → Control más heterogéneo\n")
+cat("3. SPREAD:\n")
+cat("   • Which group has a wider distribution?\n")
+cat("   • Greater spread → Greater variability between samples\n")
+cat("   • Example: Control wider → Control more heterogeneous\n")
 cat("\n")
-cat("4. SUPERPOSICIÓN:\n")
-cat("   • ¿Cuánto se superponen las dos distribuciones?\n")
-cat("   • Mucha superposición → Grupos similares\n")
-cat("   • Poca superposición → Grupos bien separados\n")
-cat("   • Ejemplo: 50% overlap → Cierta separación pero no total\n")
+cat("4. OVERLAP:\n")
+cat("   • How much do the two distributions overlap?\n")
+cat("   • High overlap → Similar groups\n")
+cat("   • Low overlap → Well-separated groups\n")
+cat("   • Example: 50% overlap → Some separation but not total\n")
 cat("\n")
-cat("DIFERENCIA CON BOXPLOT (Fig 2.1 Panel B):\n")
-cat("   • Boxplot: Muestra mediana, cuartiles, outliers\n")
-cat("   • Density: Muestra TODA la forma de la distribución\n")
-cat("   • Density detecta: bimodalidad, asimetría, colas\n")
-cat("   • Boxplot es más simple, Density es más informativa\n")
+cat("DIFFERENCE WITH BOXPLOT (Fig 2.1 Panel B):\n")
+cat("   • Boxplot: Shows median, quartiles, outliers\n")
+cat("   • Density: Shows the ENTIRE shape of the distribution\n")
+cat("   • Density detects: bimodality, asymmetry, tails\n")
+cat("   • Boxplot is simpler, Density is more informative\n")
 cat("\n")
-cat("PREGUNTA QUE RESPONDE:\n")
-cat("   '¿Las distribuciones de G>T VAF son DIFERENTES entre ALS y Control?'\n")
-cat("   '¿Y en qué aspectos difieren: posición, forma, o dispersión?'\n")
+cat("QUESTION IT ANSWERS:\n")
+cat("   'Are the G>T VAF distributions DIFFERENT between ALS and Control?'\n")
+cat("   'And in what aspects do they differ: position, shape, or spread?'\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
 # ============================================================================
-# ESTADÍSTICAS
+# STATISTICS
 # ============================================================================
 
-cat("📊 ESTADÍSTICAS:\n\n")
+cat("📊 STATISTICS:\n\n")
 
-# Por grupo
+# By group
 stats_by_group <- vaf_summary %>%
   group_by(Group) %>%
   summarise(
@@ -117,7 +117,7 @@ cat("\n")
 test_result <- wilcox.test(Total_GT_VAF ~ Group, data = vaf_summary)
 cat("📊 Wilcoxon test: p =", format.pval(test_result$p.value, digits = 3), "\n\n")
 
-# Calcular overlap (aproximado)
+# Calculate overlap (approximate)
 als_vals <- vaf_summary %>% filter(Group == "ALS") %>% pull(Total_GT_VAF)
 ctrl_vals <- vaf_summary %>% filter(Group == "Control") %>% pull(Total_GT_VAF)
 
@@ -125,10 +125,10 @@ overlap_min <- max(min(als_vals), min(ctrl_vals))
 overlap_max <- min(max(als_vals), max(ctrl_vals))
 overlap_prop <- (overlap_max - overlap_min) / (max(max(als_vals), max(ctrl_vals)) - min(min(als_vals), min(ctrl_vals)))
 
-cat("📊 Superposición aproximada:", round(overlap_prop * 100, 1), "%\n\n")
+cat("📊 Approximate overlap:", round(overlap_prop * 100, 1), "%\n\n")
 
 # ============================================================================
-# TEMA PROFESIONAL
+# PROFESSIONAL THEME
 # ============================================================================
 
 theme_prof <- theme_classic(base_size = 14) +
@@ -148,7 +148,7 @@ theme_prof <- theme_classic(base_size = 14) +
 # VERSION 1: LINEAR SCALE
 # ============================================================================
 
-cat("🎨 Generando versión LINEAR...\n")
+cat("🎨 Generating LINEAR version...\n")
 
 fig_linear <- ggplot(vaf_summary, aes(x = Total_GT_VAF, fill = Group, color = Group)) +
   geom_density(alpha = 0.4, linewidth = 1) +
@@ -168,15 +168,15 @@ fig_linear <- ggplot(vaf_summary, aes(x = Total_GT_VAF, fill = Group, color = Gr
            label = paste0("Overlap: ~", round(overlap_prop * 100, 0), "%"),
            size = 4, color = "gray30")
 
-ggsave("figures_paso2_CLEAN/FIG_2.2_DENSITY_LINEAR.png", fig_linear, 
+ggsave("figures_step2_CLEAN/FIG_2.2_DENSITY_LINEAR.png", fig_linear, 
        width = 10, height = 6, dpi = 300, bg = "white")
-cat("   ✅ Versión LINEAR guardada\n\n")
+cat("   ✅ LINEAR version saved\n\n")
 
 # ============================================================================
 # VERSION 2: LOG SCALE
 # ============================================================================
 
-cat("🎨 Generando versión LOG...\n")
+cat("🎨 Generating LOG version...\n")
 
 fig_log <- ggplot(vaf_summary, aes(x = Total_GT_VAF, fill = Group, color = Group)) +
   geom_density(alpha = 0.4, linewidth = 1) +
@@ -197,80 +197,79 @@ fig_log <- ggplot(vaf_summary, aes(x = Total_GT_VAF, fill = Group, color = Group
            label = paste0("Overlap: ~", round(overlap_prop * 100, 0), "%"),
            size = 4, color = "gray30")
 
-ggsave("figures_paso2_CLEAN/FIG_2.2_DENSITY_LOG.png", fig_log, 
+ggsave("figures_step2_CLEAN/FIG_2.2_DENSITY_LOG.png", fig_log, 
        width = 10, height = 6, dpi = 300, bg = "white")
-cat("   ✅ Versión LOG guardada\n\n")
+cat("   ✅ LOG version saved\n\n")
 
 # ============================================================================
-# ANÁLISIS DE FORMA
+# SHAPE ANALYSIS
 # ============================================================================
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("📊 ANÁLISIS DE FORMA DE LAS DISTRIBUCIONES:\n\n")
+cat("📊 DISTRIBUTION SHAPE ANALYSIS:\n\n")
 
-# Skewness (asimetría)
+# Skewness (asymmetry)
 library(e1071)
 
 skew_als <- skewness(als_vals)
 skew_ctrl <- skewness(ctrl_vals)
 
-cat("ASIMETRÍA (Skewness):\n")
-cat("   ALS:", round(skew_als, 3), ifelse(skew_als > 0, "(sesgada a la derecha)", "(sesgada a la izquierda)"), "\n")
-cat("   Control:", round(skew_ctrl, 3), ifelse(skew_ctrl > 0, "(sesgada a la derecha)", "(sesgada a la izquierda)"), "\n")
-cat("   Interpretación: >0 = cola larga derecha, <0 = cola larga izquierda\n\n")
+cat("SKEWNESS:\n")
+cat("   ALS:", round(skew_als, 3), ifelse(skew_als > 0, "(right-skewed)", "(left-skewed)"), "\n")
+cat("   Control:", round(skew_ctrl, 3), ifelse(skew_ctrl > 0, "(right-skewed)", "(left-skewed)"), "\n")
+cat("   Interpretation: >0 = long right tail, <0 = long left tail\n\n")
 
-# Kurtosis (forma del pico)
+# Kurtosis (peak shape)
 kurt_als <- kurtosis(als_vals)
 kurt_ctrl <- kurtosis(ctrl_vals)
 
-cat("CURTOSIS (Kurtosis):\n")
+cat("KURTOSIS:\n")
 cat("   ALS:", round(kurt_als, 3), "\n")
 cat("   Control:", round(kurt_ctrl, 3), "\n")
-cat("   Interpretación: >0 = picos agudos, <0 = picos planos\n\n")
+cat("   Interpretation: >0 = sharp peaks, <0 = flat peaks\n\n")
 
-# Coeficiente de variación
+# Coefficient of variation
 cv_als <- sd(als_vals) / mean(als_vals) * 100
 cv_ctrl <- sd(ctrl_vals) / mean(ctrl_vals) * 100
 
-cat("COEFICIENTE DE VARIACIÓN:\n")
+cat("COEFFICIENT OF VARIATION:\n")
 cat("   ALS:", round(cv_als, 1), "%\n")
 cat("   Control:", round(cv_ctrl, 1), "%\n")
-cat("   Interpretación: Mayor % = más variabilidad relativa\n\n")
+cat("   Interpretation: Higher % = greater relative variability\n\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
 # ============================================================================
-# COMPARACIÓN Y RECOMENDACIÓN
+# COMPARISON AND RECOMMENDATION
 # ============================================================================
 
-cat("📊 COMPARACIÓN LINEAR vs LOG:\n\n")
+cat("📊 LINEAR vs LOG COMPARISON:\n\n")
 
 range_vals <- range(vaf_summary$Total_GT_VAF)
 fold_diff <- range_vals[2] / range_vals[1]
 
-cat("RANGO:", sprintf("%.3f a %.2f", range_vals[1], range_vals[2]), "\n")
+cat("RANGE:", sprintf("%.3f to %.2f", range_vals[1], range_vals[2]), "\n")
 cat("Fold difference:", sprintf("%.0f-fold", fold_diff), "\n\n")
 
 if (fold_diff > 100) {
-  cat("✅ RECOMENDACIÓN: LOG SCALE\n")
-  cat("   Razón: Rango muy amplio (>100-fold)\n")
+  cat("✅ RECOMMENDATION: LOG SCALE\n")
+  cat("   Reason: Very wide range (>100-fold)\n")
 } else if (fold_diff > 10) {
-  cat("⚠️  LOG SCALE probablemente mejor\n")
-  cat("   Razón: Rango moderado (10-100 fold)\n")
+  cat("⚠️  LOG SCALE probably better\n")
+  cat("   Reason: Moderate range (10-100 fold)\n")
 } else {
-  cat("✅ RECOMENDACIÓN: LINEAR SCALE\n")
-  cat("   Razón: Rango pequeño (<10-fold)\n")
+  cat("✅ RECOMMENDATION: LINEAR SCALE\n")
+  cat("   Reason: Small range (<10-fold)\n")
 }
 
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("✅ DOS VERSIONES GENERADAS:\n")
+cat("✅ TWO VERSIONS GENERATED:\n")
 cat("   1. FIG_2.2_DENSITY_LINEAR.png\n")
 cat("   2. FIG_2.2_DENSITY_LOG.png\n")
 cat("\n")
-cat("📊 Compara ambas y decide!\n")
+cat("📊 Compare both and decide!\n")
 cat("\n")
-

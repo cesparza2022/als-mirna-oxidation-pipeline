@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.1 - COMPARACIÓN LOG vs LINEAR SCALE
-# También: Clarificar diferencias entre Panel B y Panel C
+# FIGURE 2.1 - COMPARISON LOG vs LINEAR SCALE
+# Also: Clarify differences between Panel B and Panel C
 # ============================================================================
 
 library(ggplot2)
@@ -11,13 +11,13 @@ library(stringr)
 library(patchwork)
 library(readr)
 
-# Colores
+# Colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#666666"
 
 cat("\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
-cat("  FIGURA 2.1 - CLARIFICACIÓN Y COMPARACIÓN\n")
+cat("  FIGURE 2.1 - CLARIFICATION AND COMPARISON\n")
 cat("═══════════════════════════════════════════════════════════════════\n")
 cat("\n")
 
@@ -25,24 +25,24 @@ cat("\n")
 # LOAD DATA
 # ============================================================================
 
-cat("📂 Cargando datos...\n")
+cat("📂 Loading data...\n")
 data <- read_csv("final_processed_data_CLEAN.csv", show_col_types = FALSE)
 metadata <- read_csv("metadata.csv", show_col_types = FALSE)
 
 sample_cols <- metadata$Sample_ID
 
-cat("   ✅ Datos cargados\n")
-cat("   ✅ Muestras ALS:", sum(metadata$Group == "ALS"), "\n")
-cat("   ✅ Muestras Control:", sum(metadata$Group == "Control"), "\n\n")
+cat("   ✅ Data loaded\n")
+cat("   ✅ ALS samples:", sum(metadata$Group == "ALS"), "\n")
+cat("   ✅ Control samples:", sum(metadata$Group == "Control"), "\n\n")
 
 # ============================================================================
 # CALCULATE METRICS
 # ============================================================================
 
-cat("🔢 Calculando métricas...\n\n")
+cat("🔢 Calculating metrics...\n\n")
 
-# Total VAF por muestra (TODAS las mutaciones)
-cat("   PANEL A: Total VAF (suma de TODOS los VAF)\n")
+# Total VAF per sample (ALL mutations)
+cat("   PANEL A: Total VAF (sum of ALL VAFs)\n")
 vaf_total <- data %>%
   select(all_of(c("miRNA_name", "pos.mut", sample_cols))) %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
@@ -50,24 +50,24 @@ vaf_total <- data %>%
   summarise(Total_VAF = sum(VAF, na.rm = TRUE), .groups = "drop") %>%
   left_join(metadata, by = "Sample_ID")
 
-cat("   ✅ Total VAF calculado\n")
-cat("      Ejemplo: Si una muestra tiene 100 SNVs con VAF promedio 0.01\n")
+cat("   ✅ Total VAF calculated\n")
+cat("      Example: If a sample has 100 SNVs with average VAF 0.01\n")
 cat("               Total_VAF = 100 × 0.01 = 1.0\n\n")
 
-# G>T VAF por muestra
-cat("   PANEL B: G>T VAF (suma de VAF solo de mutaciones G>T)\n")
+# G>T VAF per sample
+cat("   PANEL B: G>T VAF (sum of VAF only from G>T mutations)\n")
 vaf_gt <- data %>%
-  filter(str_detect(pos.mut, ":GT$")) %>%  # SOLO G>T
+  filter(str_detect(pos.mut, ":GT$")) %>%  # ONLY G>T
   select(all_of(c("miRNA_name", "pos.mut", sample_cols))) %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
   group_by(Sample_ID) %>%
   summarise(GT_VAF = sum(VAF, na.rm = TRUE), .groups = "drop")
 
-cat("   ✅ G>T VAF calculado\n")
-cat("      Ejemplo: Si una muestra tiene 50 SNVs G>T con VAF promedio 0.01\n")
+cat("   ✅ G>T VAF calculated\n")
+cat("      Example: If a sample has 50 G>T SNVs with average VAF 0.01\n")
 cat("               GT_VAF = 50 × 0.01 = 0.5\n\n")
 
-# Combinar
+# Combine
 combined_data <- vaf_total %>%
   left_join(vaf_gt, by = "Sample_ID") %>%
   replace_na(list(GT_VAF = 0)) %>%
@@ -77,8 +77,8 @@ combined_data <- vaf_total %>%
   )
 
 cat("   PANEL C: G>T Ratio (G>T_VAF / Total_VAF)\n")
-cat("   ✅ Ratio calculado\n")
-cat("      Ejemplo: Si Total_VAF = 1.0 y GT_VAF = 0.5\n")
+cat("   ✅ Ratio calculated\n")
+cat("      Example: If Total_VAF = 1.0 and GT_VAF = 0.5\n")
 cat("               GT_Ratio = 0.5 / 1.0 = 0.5 (50%)\n\n")
 
 # ============================================================================
@@ -87,28 +87,28 @@ cat("               GT_Ratio = 0.5 / 1.0 = 0.5 (50%)\n\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("💡 CLARIFICACIÓN DE MÉTRICAS:\n")
+cat("💡 METRIC CLARIFICATION:\n")
 cat("\n")
-cat("PANEL A: Total_VAF = Suma de TODOS los VAF\n")
-cat("   • Incluye: GT, GC, GA, CT, CA, TA, etc. (12 tipos)\n")
-cat("   • Unidad: Suma de proporciones (NO es un porcentaje del 0-100%)\n")
-cat("   • Rango típico: 0.1 a 10+ (depende de cuántos SNVs)\n")
-cat("   • Interpretación: Burden TOTAL de mutaciones en la muestra\n")
+cat("PANEL A: Total_VAF = Sum of ALL VAFs\n")
+cat("   • Includes: GT, GC, GA, CT, CA, TA, etc. (12 types)\n")
+cat("   • Unit: Sum of proportions (NOT a percentage from 0-100%)\n")
+cat("   • Typical range: 0.1 to 10+ (depends on how many SNVs)\n")
+cat("   • Interpretation: TOTAL burden of mutations in the sample\n")
 cat("\n")
-cat("PANEL B: GT_VAF = Suma de VAF solo de G>T\n")
-cat("   • Incluye: SOLO mutaciones G>T\n")
-cat("   • Unidad: Suma de proporciones\n")
-cat("   • Rango típico: 0.05 a 5+ (subset del Panel A)\n")
-cat("   • Interpretación: Burden específico de OXIDACIÓN\n")
-cat("   • Relación: GT_VAF ≤ Total_VAF (siempre)\n")
+cat("PANEL B: GT_VAF = Sum of VAF only from G>T\n")
+cat("   • Includes: ONLY G>T mutations\n")
+cat("   • Unit: Sum of proportions\n")
+cat("   • Typical range: 0.05 to 5+ (subset of Panel A)\n")
+cat("   • Interpretation: Specific OXIDATION burden\n")
+cat("   • Relationship: GT_VAF ≤ Total_VAF (always)\n")
 cat("\n")
 cat("PANEL C: GT_Ratio = GT_VAF / Total_VAF\n")
-cat("   • Cálculo: Proporción de G>T relativo al total\n")
-cat("   • Unidad: Fracción (0 a 1, o 0% a 100%)\n")
-cat("   • Rango típico: 0.3 a 0.9 (30% a 90%)\n")
-cat("   • Interpretación: ESPECIFICIDAD de oxidación\n")
-cat("   • Diferencia con VAF individual: Esto NO es el VAF de un SNV,\n")
-cat("     es la SUMA de VAFs de G>T dividido por SUMA total de VAFs\n")
+cat("   • Calculation: Proportion of G>T relative to total\n")
+cat("   • Unit: Fraction (0 to 1, or 0% to 100%)\n")
+cat("   • Typical range: 0.3 to 0.9 (30% to 90%)\n")
+cat("   • Interpretation: OXIDATION specificity\n")
+cat("   • Difference with individual VAF: This is NOT the VAF of a single SNV,\n")
+cat("     it is the SUM of G>T VAFs divided by TOTAL sum of VAFs\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
@@ -117,36 +117,36 @@ cat("\n")
 # CLARIFICATION 2: Panel B vs Panel C
 # ============================================================================
 
-cat("🤔 DIFERENCIA PANEL B vs PANEL C:\n")
+cat("🤔 DIFFERENCE BETWEEN PANEL B vs PANEL C:\n")
 cat("\n")
-cat("PANEL B: GT_VAF (valor absoluto)\n")
-cat("   • Pregunta: ¿Cuánto G>T hay en la muestra? (suma)\n")
-cat("   • Unidad: Suma de VAF (puede ser 0.5, 1.0, 5.0, etc.)\n")
-cat("   • Depende de: Número de SNVs G>T Y sus frecuencias\n")
-cat("   • Ejemplo: Muestra con 100 SNVs G>T (VAF=0.01 cada uno) → GT_VAF = 1.0\n")
+cat("PANEL B: GT_VAF (absolute value)\n")
+cat("   • Question: How much G>T is there in the sample? (sum)\n")
+cat("   • Unit: Sum of VAF (can be 0.5, 1.0, 5.0, etc.)\n")
+cat("   • Depends on: Number of G>T SNVs AND their frequencies\n")
+cat("   • Example: Sample with 100 G>T SNVs (VAF=0.01 each) → GT_VAF = 1.0\n")
 cat("\n")
-cat("PANEL C: GT_Ratio (valor relativo)\n")
-cat("   • Pregunta: ¿Qué PROPORCIÓN del total de mutaciones es G>T?\n")
-cat("   • Unidad: Fracción (0-1 o 0%-100%)\n")
-cat("   • Independiente de: Número total de SNVs\n")
-cat("   • Ejemplo: Muestra con GT_VAF=1.0 y Total_VAF=2.0 → GT_Ratio = 0.5 (50%)\n")
+cat("PANEL C: GT_Ratio (relative value)\n")
+cat("   • Question: What PROPORTION of total mutations is G>T?\n")
+cat("   • Unit: Fraction (0-1 or 0%-100%)\n")
+cat("   • Independent of: Total number of SNVs\n")
+cat("   • Example: Sample with GT_VAF=1.0 and Total_VAF=2.0 → GT_Ratio = 0.5 (50%)\n")
 cat("\n")
-cat("POR QUÉ SON DIFERENTES:\n")
-cat("   • Panel B puede ser ALTO simplemente porque hay muchos SNVs\n")
-cat("   • Panel C normaliza por el total → Muestra SELECTIVIDAD\n")
+cat("WHY THEY ARE DIFFERENT:\n")
+cat("   • Panel B can be HIGH simply because there are many SNVs\n")
+cat("   • Panel C normalizes by total → Shows SELECTIVITY\n")
 cat("\n")
-cat("EJEMPLO CONCRETO:\n")
-cat("   Muestra A: Total_VAF=10, GT_VAF=8  → GT_Ratio=0.8 (80% es G>T)\n")
-cat("   Muestra B: Total_VAF=2,  GT_VAF=1.5 → GT_Ratio=0.75 (75% es G>T)\n")
+cat("CONCRETE EXAMPLE:\n")
+cat("   Sample A: Total_VAF=10, GT_VAF=8  → GT_Ratio=0.8 (80% is G>T)\n")
+cat("   Sample B: Total_VAF=2,  GT_VAF=1.5 → GT_Ratio=0.75 (75% is G>T)\n")
 cat("\n")
-cat("   • Muestra A tiene MÁS G>T absoluto (Panel B: 8 vs 1.5)\n")
-cat("   • Pero Muestra A también tiene MAYOR especificidad (Panel C: 80% vs 75%)\n")
+cat("   • Sample A has MORE absolute G>T (Panel B: 8 vs 1.5)\n")
+cat("   • But Sample A also has GREATER specificity (Panel C: 80% vs 75%)\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
 # Stats
-cat("📊 ESTADÍSTICAS POR GRUPO:\n\n")
+cat("📊 STATISTICS BY GROUP:\n\n")
 stats_summary <- combined_data %>%
   group_by(Group) %>%
   summarise(
@@ -176,7 +176,7 @@ cat("   Panel C (G>T Ratio): p =", format.pval(test_ratio$p.value, digits = 3), 
 # VERSION 1: LINEAR SCALE
 # ============================================================================
 
-cat("🎨 Versión 1: LINEAR SCALE...\n")
+cat("🎨 Version 1: LINEAR SCALE...\n")
 
 theme_prof <- theme_classic(base_size = 14) +
   theme(
@@ -239,14 +239,14 @@ panel_c_linear <- ggplot(combined_data, aes(x = Group, y = GT_Ratio, fill = Grou
 
 # Combine
 fig_linear <- (panel_a_linear | panel_b_linear | panel_c_linear)
-ggsave("figures_paso2_CLEAN/FIG_2.1_LINEAR_SCALE.png", fig_linear, width = 15, height = 5, dpi = 300, bg = "white")
-cat("   ✅ Versión LINEAR guardada\n\n")
+ggsave("figures_step2_CLEAN/FIG_2.1_LINEAR_SCALE.png", fig_linear, width = 15, height = 5, dpi = 300, bg = "white")
+cat("   ✅ LINEAR version saved\n\n")
 
 # ============================================================================
 # VERSION 2: LOG SCALE
 # ============================================================================
 
-cat("🎨 Versión 2: LOG SCALE...\n")
+cat("🎨 Version 2: LOG SCALE...\n")
 
 # Panel A - Log
 panel_a_log <- ggplot(combined_data, aes(x = Group, y = Total_VAF, fill = Group)) +
@@ -287,8 +287,8 @@ panel_c_log <- panel_c_linear
 
 # Combine
 fig_log <- (panel_a_log | panel_b_log | panel_c_log)
-ggsave("figures_paso2_CLEAN/FIG_2.1_LOG_SCALE.png", fig_log, width = 15, height = 5, dpi = 300, bg = "white")
-cat("   ✅ Versión LOG guardada\n\n")
+ggsave("figures_step2_CLEAN/FIG_2.1_LOG_SCALE.png", fig_log, width = 15, height = 5, dpi = 300, bg = "white")
+cat("   ✅ LOG version saved\n\n")
 
 # ============================================================================
 # COMPARISON AND RECOMMENDATION
@@ -296,7 +296,7 @@ cat("   ✅ Versión LOG guardada\n\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("📊 COMPARACIÓN LOG vs LINEAR:\n")
+cat("📊 LOG vs LINEAR COMPARISON:\n")
 cat("\n")
 
 # Calculate value ranges
@@ -305,35 +305,34 @@ range_gt <- range(combined_data$GT_VAF, na.rm = TRUE)
 fold_diff_total <- range_total[2] / range_total[1]
 fold_diff_gt <- range_gt[2] / range_gt[1]
 
-cat("RANGO DE VALORES:\n")
-cat("   Panel A (Total VAF):", sprintf("%.4f a %.2f", range_total[1], range_total[2]), "\n")
-cat("   Panel B (G>T VAF):", sprintf("%.4f a %.2f", range_gt[1], range_gt[2]), "\n")
+cat("VALUE RANGES:\n")
+cat("   Panel A (Total VAF):", sprintf("%.4f to %.2f", range_total[1], range_total[2]), "\n")
+cat("   Panel B (G>T VAF):", sprintf("%.4f to %.2f", range_gt[1], range_gt[2]), "\n")
 cat("   Fold difference Total:", sprintf("%.0f-fold", fold_diff_total), "\n")
 cat("   Fold difference G>T:", sprintf("%.0f-fold", fold_diff_gt), "\n")
 cat("\n")
 
-cat("RECOMENDACIÓN:\n")
+cat("RECOMMENDATION:\n")
 if (fold_diff_total > 100 | fold_diff_gt > 100) {
-  cat("   ✅ USAR LOG SCALE\n")
-  cat("   Razón: Rango de valores > 100-fold\n")
-  cat("   Con linear scale, valores bajos no serían visibles\n")
+  cat("   ✅ USE LOG SCALE\n")
+  cat("   Reason: Value range > 100-fold\n")
+  cat("   With linear scale, low values would not be visible\n")
 } else if (fold_diff_total > 10 | fold_diff_gt > 10) {
-  cat("   ⚠️  LOG SCALE RECOMENDADA pero no esencial\n")
-  cat("   Razón: Rango 10-100 fold\n")
-  cat("   Linear funcionaría pero log es más claro\n")
+  cat("   ⚠️  LOG SCALE RECOMMENDED but not essential\n")
+  cat("   Reason: Range 10-100 fold\n")
+  cat("   Linear would work but log is clearer\n")
 } else {
-  cat("   ✅ USAR LINEAR SCALE\n")
-  cat("   Razón: Rango de valores < 10-fold\n")
-  cat("   Linear scale es más intuitiva\n")
+  cat("   ✅ USE LINEAR SCALE\n")
+  cat("   Reason: Value range < 10-fold\n")
+  cat("   Linear scale is more intuitive\n")
 }
 cat("\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("✅ DOS VERSIONES GENERADAS:\n")
-cat("   1. FIG_2.1_LINEAR_SCALE.png (escala linear)\n")
-cat("   2. FIG_2.1_LOG_SCALE.png (escala log)\n")
+cat("✅ TWO VERSIONS GENERATED:\n")
+cat("   1. FIG_2.1_LINEAR_SCALE.png (linear scale)\n")
+cat("   2. FIG_2.1_LOG_SCALE.png (log scale)\n")
 cat("\n")
-cat("📊 Compara ambas y decide cuál comunica mejor!\n")
+cat("📊 Compare both and decide which communicates better!\n")
 cat("\n")
-

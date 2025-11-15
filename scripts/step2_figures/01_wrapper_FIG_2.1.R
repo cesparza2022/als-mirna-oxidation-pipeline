@@ -57,7 +57,7 @@ cat("📜 Sourcing original script:", original_script, "\n")
 source(original_script, local = TRUE)
 
 # Find the generated figure and copy to final location
-figures_dir <- file.path(work_dir, "figures_paso2_CLEAN")
+figures_dir <- file.path(work_dir, "figures_step2_CLEAN")
 generated_fig <- file.path(figures_dir, "FIG_2.1_LINEAR_SCALE.png")
 
 if (file.exists(generated_fig)) {

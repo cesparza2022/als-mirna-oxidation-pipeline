@@ -171,7 +171,7 @@ rule all_step2_figures:
         OUTPUT_FIGURES + "/FIG_2.13_DENSITY_HEATMAP_ALS.png",
         OUTPUT_FIGURES + "/FIG_2.14_DENSITY_HEATMAP_CONTROL.png",
         OUTPUT_FIGURES + "/FIG_2.15_DENSITY_COMBINED.png",
-        # NEW: Hierarchical clustering analyses (guía para el análisis)
+        # NEW: Hierarchical clustering analyses (guide for analysis)
         OUTPUT_FIGURES + "/FIG_2.16_CLUSTERING_ALL_GT.png",
         OUTPUT_TABLES + "/S2_clustering_all_gt_assignments.csv",
         OUTPUT_TABLES + "/S2_clustering_all_gt_summary.csv",

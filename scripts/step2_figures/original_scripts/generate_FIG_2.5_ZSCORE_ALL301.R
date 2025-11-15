@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.5 - Z-SCORE HEATMAP (ALL 301 miRNAs, ALL positions)
+# FIGURE 2.5 - Z-SCORE HEATMAP (ALL 301 miRNAs, ALL positions)
 # Z-score normalization per miRNA to identify positional outliers
 # Uses ALL miRNAs with G>T in seed (301) but shows ALL their positions
 # ============================================================================
@@ -13,7 +13,7 @@ library(stringr)
 library(tibble)
 library(viridis)
 
-# Colores profesionales
+# Professional colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#2E86AB"
 
@@ -66,7 +66,7 @@ vaf_gt_all <- data %>%
 cat("   ✅ Total observations:", nrow(vaf_gt_all), "\n")
 cat("   ✅ Positions covered:", paste(sort(unique(vaf_gt_all$position)), collapse = ", "), "\n\n")
 
-# Calcular VAF promedio por miRNA-position
+# Calculate average VAF per miRNA-position
 vaf_summary <- vaf_gt_all %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
   left_join(metadata %>% select(Sample_ID, Group), by = "Sample_ID") %>%
@@ -90,7 +90,7 @@ zscore_data <- vaf_summary %>%
 cat("   ✅ Z-scores calculated\n")
 cat("   ✅ Total data points:", nrow(zscore_data), "\n\n")
 
-# Estadísticas de Z-scores
+# Z-score statistics
 zscore_stats <- zscore_data %>%
   summarise(
     Mean_Z = mean(Z_score, na.rm = TRUE),
@@ -158,7 +158,7 @@ fig_2_5 <- ggplot(heatmap_data, aes(x = position, y = miRNA_name, fill = Z_score
   ) +
   theme_prof
 
-ggsave("figures_paso2_CLEAN/FIG_2.5_ZSCORE_ALL301_PROFESSIONAL.png", 
+ggsave("figures_step2_CLEAN/FIG_2.5_ZSCORE_ALL301_PROFESSIONAL.png", 
        fig_2_5, width = 16, height = 18, dpi = 300, bg = "white")
 
 cat("   ✅ Figure saved: FIG_2.5_ZSCORE_ALL301_PROFESSIONAL.png\n\n")

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.4 - HEATMAP RAW VAF (Configurable thresholds, not "top 50")
+# FIGURE 2.4 - HEATMAP RAW VAF (Configurable thresholds, not "top 50")
 # Raw VAF values with hierarchical clustering
 # Uses configurable thresholds instead of arbitrary "top 50"
 # ============================================================================
@@ -14,7 +14,7 @@ library(tibble)
 library(viridis)
 library(yaml)
 
-# Colores profesionales
+# Professional colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#2E86AB"
 
@@ -274,7 +274,7 @@ vaf_gt_all <- data %>%
 
 cat("   ✅ Total observations:", nrow(vaf_gt_all), "\n\n")
 
-# Calcular VAF promedio por miRNA-position-group
+# Calculate average VAF per miRNA-position-group
 vaf_summary <- vaf_gt_all %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
   left_join(metadata %>% select(Sample_ID, Group), by = "Sample_ID") %>%
@@ -363,7 +363,7 @@ fig_2_4 <- ggplot(heatmap_data, aes(x = position, y = miRNA_name, fill = Mean_VA
   ) +
   theme_prof
 
-ggsave("figures_paso2_CLEAN/FIG_2.4_HEATMAP_TOP50_CLEAN.png", 
+ggsave("figures_step2_CLEAN/FIG_2.4_HEATMAP_TOP50_CLEAN.png", 
        fig_2_4, width = 16, height = max(10, min(18, 8 + n_mirnas * 0.05)), dpi = 300, bg = "white")
 
 cat("   ✅ Figure saved: FIG_2.4_HEATMAP_TOP50_CLEAN.png\n\n")

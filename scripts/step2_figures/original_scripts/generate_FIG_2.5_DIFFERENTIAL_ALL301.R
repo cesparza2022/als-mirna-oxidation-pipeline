@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 # ============================================================================
-# FIGURA 2.5 - DIFFERENTIAL HEATMAP (ALL 301 miRNAs)
-# Diferencia directa: VAF_ALS - VAF_Control
-# Usa TODOS los miRNAs con G>T en seed (no solo top 50)
+# FIGURE 2.5 - DIFFERENTIAL HEATMAP (ALL 301 miRNAs)
+# Direct difference: VAF_ALS - VAF_Control
+# Uses ALL miRNAs with G>T in seed (not only top 50)
 # ============================================================================
 
 library(ggplot2)
@@ -12,7 +12,7 @@ library(readr)
 library(stringr)
 library(tibble)
 
-# Colores profesionales
+# Professional colors
 COLOR_ALS <- "#D62728"
 COLOR_CONTROL <- "#2E86AB"
 COLOR_NEUTRAL <- "gray95"
@@ -32,7 +32,7 @@ data <- read_csv("final_processed_data_CLEAN.csv", show_col_types = FALSE)
 metadata <- read_csv("metadata.csv", show_col_types = FALSE)
 sample_cols <- metadata$Sample_ID
 
-# Ranking de miRNAs
+# miRNA ranking
 seed_gt_data <- data %>%
   filter(str_detect(pos.mut, ":GT$")) %>%
   mutate(position = as.numeric(str_extract(pos.mut, "^[0-9]+"))) %>%
@@ -45,7 +45,7 @@ seed_gt_summary <- seed_gt_data %>%
   summarise(Total_VAF = sum(VAF, na.rm = TRUE), .groups = "drop") %>%
   arrange(desc(Total_VAF))
 
-all_mirnas <- seed_gt_summary$miRNA_name  # TODOS los 301
+all_mirnas <- seed_gt_summary$miRNA_name  # ALL 301
 
 cat("   ✅ Data loaded\n")
 cat("   ✅ Total miRNAs with G>T in seed:", length(all_mirnas), "\n\n")
@@ -65,7 +65,7 @@ vaf_gt_all <- data %>%
   pivot_longer(cols = all_of(sample_cols), names_to = "Sample_ID", values_to = "VAF") %>%
   left_join(metadata, by = "Sample_ID")
 
-# Calcular promedio por miRNA, posición, y grupo
+# Calculate average per miRNA, position, and group
 vaf_summary <- vaf_gt_all %>%
   group_by(miRNA_name, position, Group) %>%
   summarise(Mean_VAF = mean(VAF, na.rm = TRUE), .groups = "drop")
@@ -78,7 +78,7 @@ cat("   ✅ Data summarized\n\n")
 
 cat("🔢 Calculating differential (ALS - Control)...\n")
 
-# Separar ALS y Control
+# Separate ALS and Control
 vaf_als <- vaf_summary %>%
   filter(Group == "ALS") %>%
   select(miRNA_name, position, Mean_VAF) %>%
@@ -89,19 +89,19 @@ vaf_ctrl <- vaf_summary %>%
   select(miRNA_name, position, Mean_VAF) %>%
   rename(VAF_Control = Mean_VAF)
 
-# Combinar y calcular diferencia
+# Combine and calculate difference
 differential <- vaf_als %>%
   full_join(vaf_ctrl, by = c("miRNA_name", "position")) %>%
   replace_na(list(VAF_ALS = 0, VAF_Control = 0)) %>%
   mutate(
     Differential = VAF_ALS - VAF_Control,
     position = factor(position, levels = 1:22),
-    miRNA_name = factor(miRNA_name, levels = all_mirnas)  # Mantener ranking
+    miRNA_name = factor(miRNA_name, levels = all_mirnas)  # Maintain ranking
   )
 
 cat("   ✅ Differential calculated\n\n")
 
-# Estadísticas
+# Statistics
 cat("📊 DIFFERENTIAL STATISTICS:\n\n")
 
 diff_stats <- differential %>%
@@ -155,9 +155,9 @@ theme_prof <- theme_classic(base_size = 13) +
     panel.border = element_rect(color = "gray70", fill = NA, linewidth = 0.8)
   )
 
-# Calcular límites simétricos para la escala
+# Calculate symmetric limits for the scale
 max_abs_diff <- max(abs(differential$Differential), na.rm = TRUE)
-scale_limit <- ceiling(max_abs_diff * 1000) / 1000  # Redondear
+scale_limit <- ceiling(max_abs_diff * 1000) / 1000  # Round
 
 fig_2_5 <- ggplot(differential, aes(x = position, y = miRNA_name, fill = Differential)) +
   geom_tile(color = NA) +
@@ -185,7 +185,7 @@ fig_2_5 <- ggplot(differential, aes(x = position, y = miRNA_name, fill = Differe
   ) +
   theme_prof
 
-ggsave("figures_paso2_CLEAN/FIG_2.5_DIFFERENTIAL_ALL301_PROFESSIONAL.png", 
+ggsave("figures_step2_CLEAN/FIG_2.5_DIFFERENTIAL_ALL301_PROFESSIONAL.png", 
        fig_2_5, width = 14, height = 16, dpi = 300, bg = "white")
 
 cat("   ✅ Figure saved: FIG_2.5_DIFFERENTIAL_ALL301_PROFESSIONAL.png\n\n")

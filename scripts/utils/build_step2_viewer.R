@@ -333,23 +333,23 @@ html_content <- paste0('<!DOCTYPE html>
         
         <h2>🌳 Hierarchical Clustering Analyses (Guide for Analysis)</h2>
         <p style="color: #666; font-size: 0.95em; margin-bottom: 20px;">
-            <strong>Propósito:</strong> Clustering jerárquico de MUESTRAS usando VAFs de SNVs G>T para entender 
-            cómo se agrupan las muestras (ALS vs Control). Esto sirve como guía para 
-            el análisis y puede revelar patrones de agrupación que informan las comparaciones estadísticas.
+            <strong>Purpose:</strong> Hierarchical clustering of SAMPLES using G>T SNV VAFs to understand 
+            how samples group together (ALS vs Control). This serves as a guide for 
+            analysis and can reveal grouping patterns that inform statistical comparisons.
         </p>
         
         <div class="figure-container">
             <div class="figure-title">Figure 2.16: Hierarchical Clustering - ALL G>T SNVs</div>
             <div class="figure-description">
-                Clustering jerárquico de muestras usando TODOS los SNVs G>T (n = ',
+                Hierarchical clustering of samples using ALL G>T SNVs (n = ',
                 if (!is.null(clustering_all_info) && "Total_SNVs" %in% names(clustering_all_info)) {
                   format(clustering_all_info$Total_SNVs[1], big.mark = ",")
                 } else {
                   "~5,000"
-                }, ' SNVs). Muestras anotadas por grupo (ALS en rojo, Control en gris). 
-                El dendrograma muestra cómo se agrupan las muestras basándose en sus 
-                perfiles de oxidación G>T completos. Las muestras con patrones similares 
-                de oxidación se agrupan juntas.
+                }, ' SNVs). Samples annotated by group (ALS in red, Control in gray). 
+                The dendrogram shows how samples group together based on their 
+                complete G>T oxidation profiles. Samples with similar oxidation 
+                patterns cluster together.
             </div>
             ', if (!is.null(clustering_all_info) && nrow(clustering_all_info) > 0) {
               paste0('<div class="clustering-info">',
@@ -369,16 +369,16 @@ html_content <- paste0('<!DOCTYPE html>
         <div class="figure-container">
             <div class="figure-title">Figure 2.17: Hierarchical Clustering - SEED REGION G>T SNVs ONLY</div>
             <div class="figure-description">
-                Clustering jerárquico de muestras usando SOLO los SNVs G>T en la seed region 
-                (posiciones 2-8, n = ',
+                Hierarchical clustering of samples using ONLY G>T SNVs in the seed region 
+                (positions 2-8, n = ',
                 if (!is.null(clustering_seed_info) && "Total_SNVs" %in% names(clustering_seed_info)) {
                   format(clustering_seed_info$Total_SNVs[1], big.mark = ",")
                 } else {
                   "~1,000"
-                }, ' SNVs). Este análisis se enfoca en los patrones de oxidación en la 
-                región más crítica para el reconocimiento de targets. Comparar con el 
-                clustering de todos los SNVs puede revelar si los patrones en seed region 
-                son más discriminativos entre grupos.
+                }, ' SNVs). This analysis focuses on oxidation patterns in the 
+                most critical region for target recognition. Comparing with the 
+                clustering of all SNVs can reveal if patterns in the seed region 
+                are more discriminative between groups.
             </div>
             ', if (!is.null(clustering_seed_info) && nrow(clustering_seed_info) > 0) {
               paste0('<div class="clustering-info">',

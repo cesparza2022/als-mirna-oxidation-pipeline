@@ -2,8 +2,8 @@
 # ============================================================================
 # STEP 2.7: Hierarchical Clustering - SEED REGION G>T SNVs ONLY
 # ============================================================================
-# Purpose: Clustering jerárquico de muestras usando SOLO SNVs G>T en seed region
-#          Para entender agrupación específica de muestras por patrones en seed
+# Purpose: Hierarchical clustering of samples using ONLY G>T SNVs in seed region
+#          To understand specific sample grouping by patterns in seed
 # ============================================================================
 
 # Get Snakemake parameters
@@ -49,7 +49,7 @@ color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$c
 log_info("═══════════════════════════════════════════════════════════════════")
 log_info("STEP 2.7: Hierarchical Clustering - SEED REGION G>T SNVs ONLY")
 log_info("═══════════════════════════════════════════════════════════════════")
-log_info(paste("Purpose: Clustering jerárquico de MUESTRAS usando SOLO SNVs G>T en seed region (pos", 
+log_info(paste("Purpose: Hierarchical clustering of SAMPLES using ONLY G>T SNVs in seed region (pos", 
                seed_start, "-", seed_end, ")"))
 log_info("")
 

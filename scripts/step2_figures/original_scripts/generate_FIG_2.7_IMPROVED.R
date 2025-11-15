@@ -26,7 +26,7 @@ suppressPackageStartupMessages({
 input_file <- "final_processed_data_CLEAN.csv"
 metadata_file <- "metadata.csv"
 ranking_file <- "SEED_GT_miRNAs_CLEAN_RANKING.csv"
-output_dir <- "figures_paso2_CLEAN"
+output_dir <- "figures_step2_CLEAN"
 
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 

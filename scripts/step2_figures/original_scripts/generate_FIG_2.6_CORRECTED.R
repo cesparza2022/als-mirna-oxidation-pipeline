@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 # ============================================================================
 
 input_file <- "final_processed_data_CLEAN.csv"
-output_dir <- "figures_paso2_CLEAN"
+output_dir <- "figures_step2_CLEAN"
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
 # Colors

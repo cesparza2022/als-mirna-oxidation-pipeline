@@ -2,8 +2,8 @@
 # ============================================================================
 # STEP 2.6: Hierarchical Clustering - ALL G>T SNVs
 # ============================================================================
-# Purpose: Clustering jerárquico de muestras usando TODOS los SNVs G>T
-#          Para guiar análisis y entender agrupación de muestras (ALS vs Control)
+# Purpose: Hierarchical clustering of samples using ALL G>T SNVs
+#          To guide analysis and understand sample grouping (ALS vs Control)
 # ============================================================================
 
 # Get Snakemake parameters
@@ -49,7 +49,7 @@ color_control <- if (!is.null(config$analysis$colors$control)) config$analysis$c
 log_info("═══════════════════════════════════════════════════════════════════")
 log_info("STEP 2.6: Hierarchical Clustering - ALL G>T SNVs")
 log_info("═══════════════════════════════════════════════════════════════════")
-log_info("Purpose: Clustering jerárquico de MUESTRAS usando TODOS los SNVs G>T")
+log_info("Purpose: Hierarchical clustering of SAMPLES using ALL G>T SNVs")
 log_info("")
 
 # ============================================================================
