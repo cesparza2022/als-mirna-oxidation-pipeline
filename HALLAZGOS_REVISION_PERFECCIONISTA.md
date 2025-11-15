@@ -362,10 +362,3 @@
 
 **Próximo paso:** FASE 2.4 - Revisar calidad técnica de gráficas
 
-**Total FASE 2.3 (hasta ahora):**
-- 9 scripts actualizados para mejorar claridad científica en captions
-- Métodos estadísticos ahora explícitamente documentados en captions
-- Tipos de datos (SNVs vs read counts) claramente diferenciados
-
-**Próximo paso:** Continuar FASE 2.3 - Revisar títulos, subtítulos y leyendas para claridad científica o pasar a FASE 2.4
-
