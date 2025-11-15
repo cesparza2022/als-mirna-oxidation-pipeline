@@ -114,7 +114,7 @@ p <- ggplot(spec_tbl, aes(x = category, y = percentage, fill = category)) +
   scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.02))) +
   labs(title = "G>T Specificity (Overall)",
        subtitle = "Percentage of G mutation reads that are G>T vs other G transversions",
-       x = NULL, y = "Percentage (%)",
+       x = "Mutation Type", y = "Percentage (%)",
        caption = "Based on sequencing read counts (not number of unique SNVs). Combined analysis (ALS + Control, no VAF filtering)") +
   theme_professional +
   theme(legend.position = "none")

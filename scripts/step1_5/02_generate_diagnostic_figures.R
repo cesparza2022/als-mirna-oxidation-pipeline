@@ -153,7 +153,7 @@ qc_fig1 <- ggplot(filter_report, aes(x = VAF)) +
            fill = color_gt, alpha = 0.15) +
   annotate("text", x = 0.75, y = Inf, label = "FILTERED\n(Artifacts)", 
            vjust = 1.5, fontface = "bold", size = 5, color = color_gt) +
-  scale_x_continuous(labels = percent) +
+  scale_x_continuous(labels = scales::percent) +
   theme_professional +
   theme(
     legend.position = "none"
@@ -379,7 +379,7 @@ fig4 <- ggplot(g_only, aes(x = factor(Position), y = Total_Counts, fill = Mutati
     labels = c("GT" = "G>T (Oxidation)", "GA" = "G>A", "GC" = "G>C"),
     name = "Mutation Type"
   ) +
-  scale_y_continuous(labels = comma) +
+  scale_y_continuous(labels = scales::comma) +
   theme_professional +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
@@ -425,8 +425,8 @@ fig5 <- ggplot(bubble_data, aes(x = Mean_SNVs, y = Mean_Counts,
     name = "Category"
   ) +
   scale_shape_manual(values = c("TRUE" = 18, "FALSE" = 16), guide = "none") +
-  scale_x_continuous(labels = comma) +
-  scale_y_continuous(labels = comma) +
+  scale_x_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma) +
   theme_professional +
   theme(
     legend.position = "bottom",
@@ -484,7 +484,7 @@ p_viol_counts <- ggplot(sample_top8, aes(x = Mutation_Type, y = Total_Counts, fi
     values = c("G>T (Oxidation)" = color_gt, "Other G transv." = "#FF7F0E", "Other mutations" = "gray60"),
     name = ""
   ) +
-  scale_y_log10(labels = comma) +
+  scale_y_log10(labels = scales::comma) +
   coord_flip() +
   theme_professional +
   theme(

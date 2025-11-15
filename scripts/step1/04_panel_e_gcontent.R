@@ -150,7 +150,7 @@ panel_e <- ggplot(panel_e_final, aes(x = Position, y = total_G_copies)) +
             size = 3, fontface = "bold", color = "white") +
   scale_x_continuous(breaks = 1:23, minor_breaks = NULL) +
   scale_y_continuous(
-    labels = comma,
+    labels = scales::comma,
     trans = "log10",
     breaks = c(0.1, 1, 10, 100, 1000)
   ) +
@@ -163,13 +163,13 @@ panel_e <- ggplot(panel_e_final, aes(x = Position, y = total_G_copies)) +
     low = COLORS_SEQUENTIAL_LOW_PINK,
     high = COLORS_SEQUENTIAL_HIGH_DARK,
     name = "G>T SNV Counts\nat Position",
-    labels = comma,
+    labels = scales::comma,
     trans = "log10"
   ) +
   labs(
     title = "E. G-Content Landscape: Substrate, Diversity, and Oxidation Burden",
     subtitle = "Y-axis: Total read counts for G mutations at position | Bubble size: Unique miRNAs | Bubble color: G>T mutation counts",
-    x = "Position in miRNA (1-23)",
+    x = "Position in miRNA",
     y = "Total read counts for G mutations at position (log scale)",
     caption = "Each bubble represents a position. Y-position = total read counts for G mutations at that SPECIFIC position (not all reads from miRNAs with G).\nBubble size = miRNA diversity (how many different miRNAs have G at that position). Bubble color intensity = G>T oxidation burden (darker red = more G>T).\nSeed region (2-8) highlighted in yellow. Log scale for better visualization of wide value ranges."
   ) +

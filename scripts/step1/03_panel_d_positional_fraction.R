@@ -101,6 +101,7 @@ panel_d <- ggplot(pos_frac, aes(x = position_label, y = fraction)) +
   geom_col(aes(fill = region), alpha = 0.8, width = 0.7) +
   # Use standardized colors from colors.R (loaded via functions_common.R)
   scale_fill_manual(values = c("Seed" = COLOR_SEED, "Non-Seed" = COLOR_NONSEED), name = "Region") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   geom_text(aes(label = sprintf("%.1f%%", fraction)), 
             vjust = -0.3, size = 3.5, fontface = "bold") +
   labs(
