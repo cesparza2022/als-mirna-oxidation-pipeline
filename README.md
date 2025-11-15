@@ -392,13 +392,18 @@ This pipeline was developed by the **CHAIM Lab** at the **University of Californ
 
 ### CHAIM Lab, UCSD
 
-The **Chaim Lab** is dedicated to exploring the molecular basis of DNA and RNA damage and its role in neurodegeneration and cancer onset and treatment. We strive to be at the forefront of scientific discovery while providing an exciting and rigorous training environment where all are welcome. We believe that diversity in all forms is what makes our community thrive.
+The **Chaim Lab** at the University of California San Diego (UCSD) investigates the molecular mechanisms underlying DNA and RNA damage and their implications in neurodegeneration, cancer onset, and treatment. The lab is committed to pioneering scientific discoveries while fostering an inclusive and rigorous training environment that values diversity in all its forms.
+
+The lab's philosophy emphasizes creating a safe space where individuals can be their authentic selves, striving for excellence both individually and collectively. Each member's unique experiences and skills are considered invaluable to the community's strength. The principal investigator aims for collective success through exciting, groundbreaking, and rigorous science, while ensuring that each member achieves their personal and professional goals.
 
 **Location:**
 - University of California San Diego
 - School of Biological Sciences
 - Department of Cell & Developmental Biology
-- Bonner Hall (Wet Lab 3113, Dry Lab 3110, Office 3122)
+- Bonner Hall
+  - Wet Lab (Room 3113)
+  - Dry Lab (Room 3110)
+  - Office (Room 3122)
 
 For more information, please visit: **[chaimlab.com](https://chaimlab.com/)**
 
