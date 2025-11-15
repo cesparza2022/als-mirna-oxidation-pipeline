@@ -147,7 +147,7 @@ cat("\n")
 
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
-cat("💡 RECONCILIANDO LOS HALLAZGOS:\n")
+cat("💡 RECONCILING FINDINGS:\n")
 cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
@@ -348,7 +348,7 @@ cat("\n")
 cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 cat("\n")
 
-cat("RECONCILIANDO LOS HALLAZGOS:\n")
+cat("RECONCILING FINDINGS:\n")
 cat("\n")
 
 if (median_log2fc_all < 0 & count_sig_control >= count_sig_als) {
