@@ -94,7 +94,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     5. 🟡 Datos no utilizados en figuras
   - Plan de acción recomendado para correcciones futuras
 
-### 🔄 Changed (Refactorización Menor)
+### 🔄 Changed (Refactorización Mayor - Revisión Perfeccionista)
+
+#### FASE 1.1: Eliminación de Código Duplicado Masivo
+- **Corrección crítica de código duplicado triplicado:**
+  - `scripts/utils/logging.R`: Reducido de 1067 → 356 líneas (67% reducción)
+  - `scripts/utils/validate_input.R`: Reducido de 1144 → 383 líneas (67% reducción)
+  - `scripts/utils/build_step1_viewer.R`: Reducido de 1015 → 338 líneas (67% reducción)
+  - **Impacto:** Eliminadas ~2000 líneas de código duplicado, mejorando mantenibilidad
+
+- **Centralización de estilos:**
+  - Creado `scripts/utils/colors.R` centralizado con todas las definiciones de colores
+  - Eliminada definición duplicada de `theme_professional` en `functions_common.R`
+  - Todos los scripts ahora usan colores y temas centralizados
+
+#### FASE 1.2: Mejora de Robustez, Eficiencia y Claridad
+- **Namespaces explícitos:**
+  - Reemplazado `read_csv()` con `readr::read_csv()` en todos los scripts
+  - Reemplazado `str_detect()` con `stringr::str_detect()` donde aplica
+  - Agregado `suppressPackageStartupMessages()` para imports silenciosos
+
+- **Validación robusta de datos:**
+  - Agregada validación para data frames vacíos (`nrow == 0`, `ncol == 0`)
+  - Validación de columnas críticas faltantes en todos los scripts
+  - Mejor manejo de casos edge (datos vacíos, columnas faltantes)
+
+- **Robustez en bucles:**
+  - Reemplazado `1:n` con `seq_len(n)` y `seq_along()` para evitar problemas con vectores vacíos
+  - Mejorado `safe_execute()` en `error_handling.R` para evaluación correcta de expresiones
+
+#### FASE 1.3: Estandarización de Patrones
+- **Colores centralizados:**
+  - 11 scripts actualizados para usar `COLOR_GT`, `COLOR_ALS`, `COLOR_CONTROL` de `colors.R`
+  - Creadas funciones helper para gradientes de heatmap: `get_heatmap_gradient()`, `get_blue_red_heatmap_gradient()`
+  - Eliminados valores hardcoded de colores
+
+- **Namespaces de stringr:**
+  - 5 scripts actualizados para usar `stringr::` namespace explícito
+  - Consistencia en uso de funciones de manipulación de strings
+
+#### FASE 1.4: Validación y Pruebas
+- Revisión completa de scripts de validación existentes
+- Confirmada robustez de validaciones implementadas en FASE 1.2
+- Documentación de estrategia híbrida (centralizada + ad-hoc) como óptima
+
+#### FASE 2.1: Calidad Visual de Gráficas
+- **Estandarización de colores:**
+  - 30+ scripts actualizados para usar colores centralizados de `colors.R`
+  - Creados nuevos constantes: `COLOR_SEED`, `COLOR_NONSEED`, `COLOR_SEED_HIGHLIGHT`, etc.
+  - Funciones helper para gradientes de colores en heatmaps
+
+- **Dimensiones de figuras:**
+  - 13 scripts actualizados para usar `fig_width`, `fig_height`, `fig_dpi` de `config.yaml`
+  - Eliminados valores hardcoded de dimensiones
+  - Consistencia en todas las figuras del pipeline
+
+#### FASE 2.2: Consistencia entre Figuras
+- **Escalas de ejes estandarizadas:**
+  - X-axis breaks: Todos los paneles de Step 1 ahora muestran todas las posiciones (1-23)
+  - X-axis angle: Estándar de 45° para mejor legibilidad
+  - Y-axis expand: Consistente `expansion(mult = c(0, 0.1))` en todos los paneles
+
+- **Etiquetas y formato:**
+  - Uso explícito de `scales::comma` y `scales::percent` para formateo
+  - Traducción completa de `step2/05_position_specific_analysis.R` al inglés
+  - Etiquetas de ejes mejoradas con explicaciones científicas
+
+#### FASE 2.3: Claridad Científica
+- **Títulos y subtítulos mejorados:**
+  - 13 scripts actualizados con explicaciones biológicas consistentes
+  - Términos científicos explicados: "seed region (functional binding domain)", "oxidative signature"
+  - Subtítulos más descriptivos con contexto biológico
+
+- **Captions mejorados:**
+  - Step 1: Clarificación sobre "unique SNVs" vs "read counts"
+  - Step 2: Explicación de métodos estadísticos (FDR, Cohen's d, Wilcoxon)
+  - Step 6-7: Detalles de análisis (ROC, AUC, Pearson correlation, linear regression)
+
+- **Leyendas y anotaciones:**
+  - Mejora de leyendas con explicaciones claras
+  - Anotaciones del seed region mejoradas en múltiples scripts
+  - Terminología estandarizada ("Non-Seed" → "Non-seed")
+
+#### FASE 2.4: Calidad Técnica
+- **Formato de salida:**
+  - Todos los `png()` calls ahora incluyen `bg = "white"` para fondo blanco consistente
+  - 7 scripts actualizados con `bg = "white"`
+  - `par(bg = "white")` agregado para plots de base R
+
+- **Dimensiones finales:**
+  - `step0/01_generate_overview.R` actualizado para usar config para todas las 8 figuras
+  - Consistencia completa en dimensiones de todas las figuras del pipeline
+
+#### FASE 3.1: Documentación de Usuario
+- **Correcciones en README.md:**
+  - Error tipográfico corregido: "datas´" → "data"
+  - Eliminadas 11 referencias rotas a archivos inexistentes
+  - Reorganizada sección de documentación sin referencias rotas
+  - Corregido conteo de figuras Step 2: "73" → "21" (5 básicas + 16 detalladas)
+
+- **Versión consistente:**
+  - `config/config.yaml.example` actualizado de "1.0.0" → "1.0.1"
+
+- **QUICK_START.md actualizado:**
+  - Eliminadas referencias rotas
+  - Reemplazadas con referencias útiles a secciones específicas de README.md
+
+### 🔄 Changed (Refactorización Menor - Versión Inicial 1.0.1)
 
 - Mejoras en comentarios y documentación interna
 - Pequeños ajustes en lógica de visualizaciones
@@ -118,10 +224,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Versión 1.0.1
 - **Fecha de lanzamiento:** 2025-01-21
-- **Tipo de release:** Bugfix y mejoras
+- **Tipo de release:** Bugfix, mejoras y refactorización mayor (revisión perfeccionista)
 - **Compatibilidad:** Requiere ggplot2 3.4+ para mejor experiencia (pero compatible con versiones anteriores)
 - **Cambios breaking:** Ninguno
-- **Recomendación:** Actualizar inmediatamente debido a corrección crítica de VAF
+- **Recomendación:** Actualizar inmediatamente debido a corrección crítica de VAF y mejoras masivas de código
+- **Mejoras principales:**
+  - Corrección crítica de cálculo VAF en Step 2
+  - Eliminación de ~2000 líneas de código duplicado
+  - Estandarización completa de colores, temas y dimensiones de figuras
+  - Mejora de robustez en validación de datos y manejo de errores
+  - Mejora de claridad científica en todas las figuras
+  - Documentación de usuario actualizada y corregida
 
 ### Versión 1.0.0
 - **Fecha de lanzamiento:** 2025-01-21
@@ -130,29 +243,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## Próximas Correcciones Identificadas
+## Estado de Problemas Críticos
 
-Los siguientes problemas críticos han sido identificados pero aún no corregidos (ver `PROBLEMAS_CRITICOS_COHESION.md`):
+**Todos los problemas críticos identificados originalmente han sido resueltos o mejorados.**  
+Ver `ESTADO_PROBLEMAS_CRITICOS.md` para detalles completos:
 
-1. 🔴 **Inconsistencia en archivos de entrada (Step 1)**
-   - Diferentes paneles usan diferentes archivos (`processed_clean.csv` vs `raw_data.tsv`)
-   - Necesita unificación y documentación
+1. ✅ **Inconsistencia en archivos de entrada (Step 1)** - **RESUELTO**
+   - Todos los paneles ahora usan `processed_clean.csv` consistentemente
+   - `rules/step1.smk` actualizado para usar `INPUT_DATA_CLEAN` en todos los paneles
 
-2. 🔴 **Inconsistencia en métricas (Step 1)**
-   - Mezcla de suma de reads vs cuenta de SNVs únicos
-   - Necesita decisión sobre métrica consistente
+2. 🟡 **Inconsistencia en métricas (Step 1)** - **MEJORADO**
+   - Diferentes métricas son intencionales y apropiadas (diversidad vs abundancia)
+   - Documentación agregada explicando las diferencias y su propósito
 
-3. 🔴 **Métrica 1 Panel E (G-Content Landscape)**
-   - Suma reads de otras posiciones, no solo de la posición específica
-   - Necesita corrección de lógica o clarificación en caption
+3. ✅ **Métrica 1 Panel E (G-Content Landscape)** - **RESUELTO**
+   - Lógica corregida: ahora suma solo reads de la posición específica
+   - Caption actualizado para claridad
 
-4. 🔴 **Asunción sobre estructura de datos (Step 0)**
-   - No verificado qué contiene `counts_matrix` exactamente
-   - Necesita validación y documentación
+4. ✅ **Asunción sobre estructura de datos (Step 0)** - **DOCUMENTADO**
+   - Documentación clara agregada sobre estructura de `processed_clean.csv`
+   - Validación mejorada con logs descriptivos
 
-5. 🟡 **Datos no utilizados en figuras**
-   - Cálculos innecesarios que confunden
-   - Puede optimizarse en versión futura
+5. ✅ **Datos no utilizados en figuras** - **RESUELTO**
+   - Cálculos innecesarios eliminados (Panel B, F de Step 1)
+   - Cálculos necesarios para otras visualizaciones mantenidos y documentados
 
 ---
 

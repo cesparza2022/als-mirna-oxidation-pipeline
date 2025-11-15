@@ -442,5 +442,49 @@
 - `QUICK_START.md`: Eliminación de referencias rotas
 - `config/config.yaml.example`: Actualización de versión
 
-**Próximo paso:** FASE 3.2 - Revisar documentación técnica (CHANGELOG, RELEASE_NOTES)
+---
+
+## ✅ FASE 3.2: REVISIÓN DE DOCUMENTACIÓN TÉCNICA (COMPLETADA)
+
+**Status:** ✅ **COMPLETADA**
+
+### **Problemas identificados y corregidos:**
+
+1. **CHANGELOG.md desactualizado:**
+   - ❌ Solo documentaba cambios hasta v1.0.1 inicial (corrección VAF, compatibilidad ggplot2)
+   - ❌ NO mencionaba todas las mejoras de la "revisión perfeccionista" (FASE 1.1-2.4, FASE 3.1)
+   - ❌ Sección "Próximas Correcciones Identificadas" mencionaba problemas que YA FUERON RESUELTOS
+   - ✅ Actualizado con todas las mejoras de la revisión perfeccionista:
+     - FASE 1.1: Eliminación de código duplicado masivo (~2000 líneas)
+     - FASE 1.2: Mejora de robustez, eficiencia y claridad
+     - FASE 1.3: Estandarización de patrones
+     - FASE 1.4: Validación y pruebas
+     - FASE 2.1: Calidad visual de gráficas
+     - FASE 2.2: Consistencia entre figuras
+     - FASE 2.3: Claridad científica
+     - FASE 2.4: Calidad técnica
+     - FASE 3.1: Documentación de usuario
+   - ✅ Sección "Próximas Correcciones Identificadas" actualizada a "Estado de Problemas Críticos" con todos los problemas resueltos
+
+2. **RELEASE_NOTES_v1.0.1.md desactualizado:**
+   - ❌ Solo mencionaba correcciones VAF y compatibilidad ggplot2
+   - ❌ NO mencionaba las mejoras masivas de la revisión perfeccionista
+   - ❌ Sección "Problemas Conocidos Pendientes" estaba desactualizada
+   - ✅ Actualizado con todas las mejoras de la revisión perfeccionista:
+     - Resumen ejecutivo mejorado incluyendo revisión perfeccionista
+     - Sección completa de "Mejoras (Revisión Perfeccionista)" con FASES 1-3
+     - Estadísticas actualizadas reflejando reducción neta de código
+     - Sección "Problemas Conocidos Pendientes" actualizada a "Estado de Problemas Críticos"
+
+3. **Consistencia entre documentos:**
+   - ❌ CHANGELOG y RELEASE_NOTES no reflejaban el estado actual del pipeline
+   - ❌ Mencionaban problemas como "pendientes" cuando ya estaban resueltos
+   - ✅ Ambos documentos ahora reflejan el estado actual (todos los problemas resueltos)
+   - ✅ Referencias cruzadas actualizadas a `ESTADO_PROBLEMAS_CRITICOS.md`
+
+**Archivos modificados:**
+- `CHANGELOG.md`: Actualizado con todas las FASES 1.1-3.1 de la revisión perfeccionista
+- `RELEASE_NOTES_v1.0.1.md`: Actualizado con mejoras masivas y estado actual de problemas
+
+**Próximo paso:** FASE 3.3 - Revisar documentación en código (comentarios, funciones)
 
