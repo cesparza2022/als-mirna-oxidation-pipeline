@@ -86,6 +86,24 @@ COLOR_SIGNIFICANT_LOW_FC <- "#F77F00"  # Orange for significant but low FC
 COLOR_CLUSTER_1 <- "#FF6B6B"  # Coral red for cluster 1
 COLOR_CLUSTER_2 <- "#4ECDC4"  # Turquoise for cluster 2
 
+# Pathway/Functional analysis colors
+COLOR_GO <- "#2E86AB"  # Blue for GO Biological Process
+COLOR_KEGG <- "#A23B72"  # Purple for KEGG Pathway
+
+# Significance/AUC category colors
+COLOR_SIGNIFICANCE_HIGH <- COLOR_GT  # Red (same as G>T for consistency)
+COLOR_SIGNIFICANCE_MEDIUM <- COLORS_SEQUENTIAL_MID  # Orange
+COLOR_SIGNIFICANCE_LOW <- "#2CA02C"  # Green
+COLOR_SIGNIFICANCE_NONE <- "grey70"
+
+COLOR_AUC_EXCELLENT <- COLOR_GT  # Red
+COLOR_AUC_GOOD <- COLORS_SEQUENTIAL_MID  # Orange
+COLOR_AUC_FAIR <- COLOR_SIGNIFICANCE_LOW  # Green
+COLOR_AUC_POOR <- "grey70"
+
+# Gradient colors for heatmaps (alternative blue-to-red)
+COLOR_GRADIENT_LOW_BLUE <- COLOR_GO  # Blue for low values in blue-red gradients
+
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
@@ -151,6 +169,23 @@ get_heatmap_gradient <- function(n = 100) {
     "#FF6666",    # Medium pink-red
     "#FF3333",    # Bright red
     COLOR_GT      # Dark red (G>T color)
+  ))(n)
+}
+
+#' Get blue-to-red heatmap gradient colors for clustering/functional analysis
+#' 
+#' Generates a smooth gradient from blue (low) through white (medium) to red (high).
+#' Used for visualizing differential patterns in clustering and functional analysis.
+#' 
+#' @param n Number of colors in the gradient (default: 100)
+#' @return Vector of color codes for the gradient
+get_blue_red_heatmap_gradient <- function(n = 100) {
+  # Create smooth gradient from blue (low) through white (medium) to red (high)
+  # Use grDevices::colorRampPalette for consistency
+  grDevices::colorRampPalette(c(
+    COLOR_GRADIENT_LOW_BLUE,  # Blue for low values
+    "white",                  # White for medium/zero values
+    COLOR_GT                  # Red for high values (G>T color)
   ))(n)
 }
 

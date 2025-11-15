@@ -433,7 +433,6 @@ if (length(heatmap_matrix_list) > 0) {
     if ("Control" %in% unique_groups) {
       group_colors <- c(group_colors, "Control" = color_control)
     }
-    auc_colors <- colorRampPalette(c("white", color_gt))(100)
   
     # ============================================================================
     # GENERATE HEATMAP
@@ -448,9 +447,11 @@ if (length(heatmap_matrix_list) > 0) {
       n_group2 <- sum(sample_annotation$Group == group2_name)
       gap_pos <- if (n_group2 > 0 && n_group2 < nrow(sample_annotation)) n_group2 else NULL
       
+      # Colors are defined in colors.R (sourced via functions_common.R)
+      # Gradient function is defined in colors.R
       pheatmap(
         heatmap_matrix_norm,
-        color = colorRampPalette(c("#2E86AB", "white", color_gt))(100),
+        color = get_blue_red_heatmap_gradient(100),
         cluster_rows = TRUE,
         cluster_cols = TRUE,
         show_colnames = FALSE,
@@ -459,7 +460,12 @@ if (length(heatmap_matrix_list) > 0) {
         annotation_row = biomarker_annotation %>% select(AUC_category),
         annotation_colors = list(
           Group = group_colors,
-          AUC_category = c("Excellent" = "#D62728", "Good" = "#FF7F0E", "Fair" = "#2CA02C", "Poor" = "grey70")
+          AUC_category = c(
+            "Excellent" = COLOR_AUC_EXCELLENT,
+            "Good" = COLOR_AUC_GOOD,
+            "Fair" = COLOR_AUC_FAIR,
+            "Poor" = COLOR_AUC_POOR
+          )
         ),
         main = "Biomarker Signature Heatmap\nTop Performing miRNA Oxidation Patterns",
         fontsize = 10,

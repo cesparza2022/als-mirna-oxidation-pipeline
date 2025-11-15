@@ -280,7 +280,8 @@ if (nrow(als_genes_data) == 0) {
                                      size = n_als_genes,
                                      color = avg_position)) +
     geom_point(alpha = 0.8, stroke = 1.5) +
-    scale_color_gradient(low = "#2E86AB", high = color_gt, 
+    # Colors are defined in colors.R (sourced via functions_common.R)
+    scale_color_gradient(low = COLOR_GRADIENT_LOW_BLUE, high = COLOR_GT, 
                         name = "Avg\nPosition", guide = "legend") +
     scale_size_continuous(range = c(4, 12), name = "ALS\nGenes") +
     scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.1))) +
@@ -428,13 +429,13 @@ if (nrow(target_data) == 0) {
   panel_d <- ggplot(position_impact, aes(x = position, y = total_impact)) +
     annotate("rect", xmin = seed_start - 0.5, xmax = seed_end + 0.5, 
              ymin = -Inf, ymax = Inf, 
-             fill = "#e3f2fd", alpha = 0.5) +
+             fill = COLOR_SEED_HIGHLIGHT, alpha = 0.5) +
     annotate("text", x = (seed_start + seed_end) / 2, 
              y = max(position_impact$total_impact) * 0.95, 
              label = paste0("SEED REGION\n(positions ", seed_start, "-", seed_end, ")"), 
              color = "gray40", size = 4, fontface = "bold") +
-    geom_bar(stat = "identity", fill = color_gt, alpha = 0.85, width = 0.7) +
-    geom_point(aes(size = n_mutations), color = "white", fill = color_gt, 
+    geom_bar(stat = "identity", fill = COLOR_GT, alpha = 0.85, width = 0.7) +
+    geom_point(aes(size = n_mutations), color = "white", fill = COLOR_GT, 
               shape = 21, stroke = 1.5) +
     scale_size_continuous(range = c(3, 10), name = "Mutations") +
     scale_x_continuous(breaks = seq(1, 23, by = 2)) +

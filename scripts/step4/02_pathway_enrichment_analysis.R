@@ -239,9 +239,10 @@ pheatmap(
     select(Pathway, Category, p.adjust) %>%
     column_to_rownames("Pathway") %>%
     mutate(p.adjust_log = -log10(p.adjust)),
+  # Colors are defined in colors.R (sourced via functions_common.R)
   annotation_colors = list(
-    Category = c("GO Biological Process" = "#2E86AB", "KEGG Pathway" = "#A23B72"),
-    p.adjust_log = colorRampPalette(c("white", color_gt))(100)
+    Category = c("GO Biological Process" = COLOR_GO, "KEGG Pathway" = COLOR_KEGG),
+    p.adjust_log = get_heatmap_gradient(100)
   ),
   legend = TRUE,
   legend_breaks = c(min(heatmap_matrix), max(heatmap_matrix)),

@@ -284,16 +284,23 @@ png(output_figure_b, width = 14, height = 12, units = "in", res = 300)
 
 # ✅ NOTA: cluster_rows = TRUE y cluster_cols = TRUE reordenan los datos para descubrimiento de patrones
 # Si se necesita un orden específico (ej. por significancia), estos pueden desactivarse
+# Colors are defined in colors.R (sourced via functions_common.R)
+# Gradient function is defined in colors.R
 pheatmap(
   heatmap_matrix,
-  color = colorRampPalette(c("#2E86AB", "white", color_gt))(100),
+  color = get_blue_red_heatmap_gradient(100),
   cluster_rows = TRUE,  # Reordena familias por similitud
   cluster_cols = TRUE,  # Reordena muestras por similitud
   show_colnames = TRUE,
   show_rownames = TRUE,
   annotation_row = family_annotation %>% select(Significance_Category),
   annotation_colors = list(
-    Significance_Category = c("High" = "#D62728", "Medium" = "#FF7F0E", "Low" = "#2CA02C", "None" = "grey70")
+    Significance_Category = c(
+      "High" = COLOR_SIGNIFICANCE_HIGH,
+      "Medium" = COLOR_SIGNIFICANCE_MEDIUM,
+      "Low" = COLOR_SIGNIFICANCE_LOW,
+      "None" = COLOR_SIGNIFICANCE_NONE
+    )
   ),
   main = "miRNA Family Oxidation Patterns Heatmap\nTop 25 Families by Significance",
   fontsize = 10,

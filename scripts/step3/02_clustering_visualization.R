@@ -260,9 +260,11 @@ ensure_output_dir(dirname(output_figure_a))
 
 png(output_figure_a, width = 16, height = 14, units = "in", res = 300)
 
+# Colors are defined in colors.R (sourced via functions_common.R)
+# Gradient function is defined in colors.R
 pheatmap(
   heatmap_matrix_norm,
-  color = colorRampPalette(c("#2E86AB", "white", color_gt))(100),
+  color = get_blue_red_heatmap_gradient(100),
   cluster_rows = TRUE,
   cluster_cols = TRUE,
   show_colnames = FALSE,

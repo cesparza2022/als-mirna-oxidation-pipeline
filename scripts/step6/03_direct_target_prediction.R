@@ -233,7 +233,8 @@ p1 <- target_comparison %>%
   ggplot(aes(x = n_canonical_targets, y = n_oxidized_targets)) +
   geom_point(aes(color = functional_impact_score), size = 3, alpha = 0.7) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey50") +
-  scale_color_gradient(low = "blue", high = "#D62728", name = "Impact\nScore") +
+  # Colors are defined in colors.R (sourced via functions_common.R)
+  scale_color_gradient(low = COLOR_GRADIENT_LOW_BLUE, high = COLOR_GT, name = "Impact\nScore") +
   labs(
     title = "Canonical vs Oxidized Target Counts",
     subtitle = "Comparison of predicted targets for canonical vs oxidized miRNAs",
@@ -251,7 +252,7 @@ p1 <- target_comparison %>%
 # Panel B: Target change distribution
 p2 <- target_comparison %>%
   ggplot(aes(x = net_target_change)) +
-  geom_histogram(bins = 20, fill = "#D62728", alpha = 0.7) +
+  geom_histogram(bins = 20, fill = COLOR_GT, alpha = 0.7) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50", linewidth = 1) +
   labs(
     title = "Net Target Change Distribution",
@@ -270,7 +271,7 @@ p2 <- target_comparison %>%
 # Panel C: Loss vs Gain rates
 p3 <- target_comparison %>%
   ggplot(aes(x = target_loss_rate, y = target_gain_rate)) +
-  geom_point(aes(size = functional_impact_score), color = "#D62728", alpha = 0.7) +
+  geom_point(aes(size = functional_impact_score), color = COLOR_GT, alpha = 0.7) +
   labs(
     title = "Target Loss vs Gain Rates",
     subtitle = "Impact of oxidation on target binding",
